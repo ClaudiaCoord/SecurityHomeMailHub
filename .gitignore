@@ -1,0 +1,44 @@
+*.swp
+*.*~
+.vs/
+project.lock.json
+.DS_Store
+*.pyc
+nupkg/
+
+# Visual Studio Code
+.vscode
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.pfx
+
+# Build results
+Releases/
+[Dd]ebug/
+[Dd]ebug/
+[Pp]ublic/
+[Rr]elease/
+x64/
+x86/
+build/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+_DEVEL/
+_LIBS/
+packages/
+src/*.aip
+msbuild.log
+msbuild.err
+msbuild.wrn
+README.*.*
+*.vssbe
+
+/docs/*.txt
+/docs/*.ico
+/src/Security home Mail Hub x86-cache
+/src/Security home Mail Hub x64-cache
