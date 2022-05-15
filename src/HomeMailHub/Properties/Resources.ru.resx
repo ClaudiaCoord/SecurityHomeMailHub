@@ -1,0 +1,705 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BTN_ATTACH" xml:space="preserve">
+    <value>_Attach</value>
+  </data>
+  <data name="BTN_CHECK" xml:space="preserve">
+    <value>_Check</value>
+  </data>
+  <data name="BTN_CHECKALL" xml:space="preserve">
+    <value>Check _All</value>
+  </data>
+  <data name="BTN_CLEAR" xml:space="preserve">
+    <value>Cl_ear</value>
+  </data>
+  <data name="BTN_CLOSE" xml:space="preserve">
+    <value>_Close</value>
+  </data>
+  <data name="BTN_DELETE" xml:space="preserve">
+    <value>_Delete</value>
+  </data>
+  <data name="BTN_EXPORT" xml:space="preserve">
+    <value>_Export</value>
+  </data>
+  <data name="BTN_IMPORT" xml:space="preserve">
+    <value>_Import</value>
+  </data>
+  <data name="BTN_OPEN" xml:space="preserve">
+    <value>_Open</value>
+  </data>
+  <data name="BTN_PASTE" xml:space="preserve">
+    <value>_Paste</value>
+  </data>
+  <data name="BTN_RELOAD" xml:space="preserve">
+    <value>_Reload</value>
+  </data>
+  <data name="BTN_REPLAY" xml:space="preserve">
+    <value>_Reply</value>
+  </data>
+  <data name="BTN_SAVE" xml:space="preserve">
+    <value>_Save</value>
+  </data>
+  <data name="BTN_SEND" xml:space="preserve">
+    <value>_Send</value>
+  </data>
+  <data name="BTN_SORT" xml:space="preserve">
+    <value>_Sort</value>
+  </data>
+  <data name="BTN_START" xml:space="preserve">
+    <value>_Старт</value>
+  </data>
+  <data name="BTN_STOP" xml:space="preserve">
+    <value>_Стоп</value>
+  </data>
+  <data name="CHKBOX_CHECKFROM" xml:space="preserve">
+    <value>Проверить входящий адрес отправителя, спам фильтр</value>
+  </data>
+  <data name="CHKBOX_DELIVERYLOC" xml:space="preserve">
+    <value>Локальная доставка входящего сообщения, не отключать это!</value>
+  </data>
+  <data name="CHKBOX_DELIVERYMSGMOD" xml:space="preserve">
+    <value>Изменять сообщения, доставленные локально, анти-шпион</value>
+  </data>
+  <data name="CHKBOX_EXPIRE" xml:space="preserve">
+    <value>Бессрочный</value>
+  </data>
+  <data name="CHKBOX_IMAPPURGE" xml:space="preserve">
+    <value>Всегда очищать сообщения при получении (IMAP)</value>
+  </data>
+  <data name="CHKBOX_NEWMSGID" xml:space="preserve">
+    <value>Всегда создавать новый идентификатор сообщения</value>
+  </data>
+  <data name="CHKBOX_NEWMSGIMD" xml:space="preserve">
+    <value>Немедленно отправить принятое сообщение</value>
+  </data>
+  <data name="CHKBOX_NOWARN" xml:space="preserve">
+    <value>Без предупреждений</value>
+  </data>
+  <data name="CHKBOX_POP3DELALL" xml:space="preserve">
+    <value>Принудительно удалять все сообщения</value>
+  </data>
+  <data name="CHKBOX_POP3PGP" xml:space="preserve">
+    <value>Расшифровывать PGP сообщения, если доступно</value>
+  </data>
+  <data name="CHKBOX_RECEIVEONSEND" xml:space="preserve">
+    <value>Получать внешнюю почту только при отправке сообщений</value>
+  </data>
+  <data name="CHKBOX_SAVEATTACH" xml:space="preserve">
+    <value>Сохранять вложения</value>
+  </data>
+  <data name="CHKBOX_SESSIONLOG" xml:space="preserve">
+    <value>Записывать журнал сеансов</value>
+  </data>
+  <data name="CHKBOX_SHARINGSOCKET" xml:space="preserve">
+    <value>Позволить другим открывать используемый сокет</value>
+  </data>
+  <data name="CHKBOX_SMTPFAKEIP" xml:space="preserve">
+    <value>Всегда добавлять поддельный IP-адрес в заголовки (SMTP)</value>
+  </data>
+  <data name="CHKBOX_SMTPPGPCRYPT" xml:space="preserve">
+    <value>Зашифровать текст письма PGP, если доступно</value>
+  </data>
+  <data name="CHKBOX_SMTPPGPSIGN" xml:space="preserve">
+    <value>Заверять подпись письма PGP, если доступно</value>
+  </data>
+  <data name="E1" xml:space="preserve">
+    <value />
+  </data>
+  <data name="E2" xml:space="preserve">
+    <value />
+  </data>
+  <data name="E3" xml:space="preserve">
+    <value />
+  </data>
+  <data name="E4" xml:space="preserve">
+    <value />
+  </data>
+  <data name="E5" xml:space="preserve">
+    <value />
+  </data>
+  <data name="GUIACCOUNT_FMT1" xml:space="preserve">
+    <value>_{0} все {1} аккаунты</value>
+  </data>
+  <data name="GUIACCOUNT_FMT2" xml:space="preserve">
+    <value>Установить все в состояние : {0}</value>
+  </data>
+  <data name="GUIACCOUNT_FMT3" xml:space="preserve">
+    <value>Вы уверены, что хотите {0} все {1} аккаунты?</value>
+  </data>
+  <data name="GUIACCOUNT_FMT4" xml:space="preserve">
+    <value>{0} все {1} аккаунты?</value>
+  </data>
+  <data name="GUIACCOUNT_FMT5" xml:space="preserve">
+    <value>{0} '{1}' аккаунт</value>
+  </data>
+  <data name="GUIACCOUNT_FMT6" xml:space="preserve">
+    <value>{0} '{1}' аккаунт?</value>
+  </data>
+  <data name="GUIMAILREAD_TITLE1" xml:space="preserve">
+    <value>Чтение сообщения</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR1" xml:space="preserve">
+    <value>От: адрес в сообщении пуст</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR2" xml:space="preserve">
+    <value>Кому: адрес в сообщении пустой</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR3" xml:space="preserve">
+    <value>Тема сообщения пуста</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR4" xml:space="preserve">
+    <value>Тело сообщения пустое</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR5" xml:space="preserve">
+    <value>Аккаунт не найден по адресу отправителя</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR6" xml:space="preserve">
+    <value>не отправлено</value>
+  </data>
+  <data name="GUIMAILWRITE_FMT1" xml:space="preserve">
+    <value>Ответить на сообщение от: {0}</value>
+  </data>
+  <data name="GUIMAILWRITE_TEXT1" xml:space="preserve">
+    <value>Добавить вложения</value>
+  </data>
+  <data name="GUIMAILWRITE_TEXT2" xml:space="preserve">
+    <value>Новое сообщение</value>
+  </data>
+  <data name="GUIMAILWRITE_TITLE1" xml:space="preserve">
+    <value>Написать сообщение</value>
+  </data>
+  <data name="GUIMAIL_TITLE1" xml:space="preserve">
+    <value>Почтовые аккаунты</value>
+  </data>
+  <data name="GUIMESSAGE_FMT1" xml:space="preserve">
+    <value>{0} сообщений</value>
+  </data>
+  <data name="GUIMESSAGE_FMT2" xml:space="preserve">
+    <value>Вы уверены, что хотите {0} это сообщение?</value>
+  </data>
+  <data name="GUIMESSAGE_FMT3" xml:space="preserve">
+    <value>{0} - сообщений : {1}</value>
+  </data>
+  <data name="GUIMESSAGE_TITLE1" xml:space="preserve">
+    <value>Почтовые сообщения</value>
+  </data>
+  <data name="GUIPROXY_FMT1" xml:space="preserve">
+    <value>Загружен список {0} прокси серверов, всего {1} серверов</value>
+  </data>
+  <data name="GUIPROXY_FMT2" xml:space="preserve">
+    <value>В список прокси серверов добавлено {0} новых</value>
+  </data>
+  <data name="GUIPROXY_MENU1" xml:space="preserve">
+    <value>_Скачать список прокси серверов всех типов</value>
+  </data>
+  <data name="GUIPROXY_MENU2" xml:space="preserve">
+    <value>Скачать список _HTTP,HTTPS прокси серверов</value>
+  </data>
+  <data name="GUIPROXY_MENU3" xml:space="preserve">
+    <value>Скачать список _SOCK5 прокси серверов</value>
+  </data>
+  <data name="GUIPROXY_TITLE1" xml:space="preserve">
+    <value>Список прокси серверов</value>
+  </data>
+  <data name="GUIPROXY_TITLE2" xml:space="preserve">
+    <value>Тип прокси</value>
+  </data>
+  <data name="GUIPROXY_TITLE3" xml:space="preserve">
+    <value>Прокси сервер</value>
+  </data>
+  <data name="GUIPROXY_TITLE4" xml:space="preserve">
+    <value>Проверка прокси серверов</value>
+  </data>
+  <data name="GUIPROXY_TITLE5" xml:space="preserve">
+    <value>Проверка прокси сервера</value>
+  </data>
+  <data name="GUIPROXY_TXT1" xml:space="preserve">
+    <value>Процесс проверки прокси уже запущен, пожалуйста, подождите..</value>
+  </data>
+  <data name="GUIPROXY_TXT10" xml:space="preserve">
+    <value>Буфера обмена пуст, возможные форматы прокси серверов не найдены</value>
+  </data>
+  <data name="GUIPROXY_TXT11" xml:space="preserve">
+    <value>неверное значение порта прокси сервера</value>
+  </data>
+  <data name="GUIPROXY_TXT12" xml:space="preserve">
+    <value>Удалить прокси сервер</value>
+  </data>
+  <data name="GUIPROXY_TXT13" xml:space="preserve">
+    <value>Вы уверены, что хотите удалить прокси сервер?</value>
+  </data>
+  <data name="GUIPROXY_TXT14" xml:space="preserve">
+    <value>Список прокси серверов пуст</value>
+  </data>
+  <data name="GUIPROXY_TXT15" xml:space="preserve">
+    <value>Скачанный список прокси серверов пуст</value>
+  </data>
+  <data name="GUIPROXY_TXT16" xml:space="preserve">
+    <value>Сохранить список прокси серверов</value>
+  </data>
+  <data name="GUIPROXY_TXT17" xml:space="preserve">
+    <value>Сохранить этот список прокси серверов в файл?</value>
+  </data>
+  <data name="GUIPROXY_TXT18" xml:space="preserve">
+    <value>Список прокси серверов сохранен в файле по умолчанию</value>
+  </data>
+  <data name="GUIPROXY_TXT19" xml:space="preserve">
+    <value>Скопируйте список прокси серверов со страницы 'hidemy.name' и вставьте его</value>
+  </data>
+  <data name="GUIPROXY_TXT2" xml:space="preserve">
+    <value>Не выбран тип списка прокси, процесс проверки не может быть запущен..</value>
+  </data>
+  <data name="GUIPROXY_TXT3" xml:space="preserve">
+    <value>Список прокси пуст,  процесс проверки не может быть запущен..</value>
+  </data>
+  <data name="GUIPROXY_TXT4" xml:space="preserve">
+    <value>Выполняется другой процесс записи/проверки..</value>
+  </data>
+  <data name="GUIPROXY_TXT5" xml:space="preserve">
+    <value>Идет процесс проверки прокси серверов..</value>
+  </data>
+  <data name="GUIPROXY_TXT6" xml:space="preserve">
+    <value>Прокси сервер не выбран, прервано..</value>
+  </data>
+  <data name="GUIPROXY_TXT7" xml:space="preserve">
+    <value>Начать проверку прокси сервера</value>
+  </data>
+  <data name="GUIPROXY_TXT8" xml:space="preserve">
+    <value>Список прокси серверов очищен</value>
+  </data>
+  <data name="GUIPROXY_TXT9" xml:space="preserve">
+    <value>Очистить текущий список прокси серверов</value>
+  </data>
+  <data name="GUISSH_TITLE1" xml:space="preserve">
+    <value>SSH Учетные записи</value>
+  </data>
+  <data name="GUIVPN_TITLE1" xml:space="preserve">
+    <value>VPN Учетные записи</value>
+  </data>
+  <data name="GUIVPN_TITLE2" xml:space="preserve">
+    <value>wireguard VPN</value>
+  </data>
+  <data name="MENU_ACCBACKUP" xml:space="preserve">
+    <value>_Резервное копирование аккаунтов</value>
+  </data>
+  <data name="MENU_ACCESSRELOAD" xml:space="preserve">
+    <value>_Перезагрузить список доступа - IP, NET, страны</value>
+  </data>
+  <data name="MENU_ACCLOAD" xml:space="preserve">
+    <value>Восстановление копий аккаунтов</value>
+  </data>
+  <data name="MENU_ACCRESTORE" xml:space="preserve">
+    <value>_Восстановление аккаунтов из резервной копии</value>
+  </data>
+  <data name="MENU_ACCSAVE" xml:space="preserve">
+    <value>Сохранение копий аккаунтов</value>
+  </data>
+  <data name="MENU_ACTION" xml:space="preserve">
+    <value>_Операции</value>
+  </data>
+  <data name="MENU_CLOSE" xml:space="preserve">
+    <value>_Закрыть</value>
+  </data>
+  <data name="MENU_DELETE" xml:space="preserve">
+    <value>_Удалить</value>
+  </data>
+  <data name="MENU_LIGHTTEXT" xml:space="preserve">
+    <value>_Более яркий текст в формах</value>
+  </data>
+  <data name="MENU_LOG" xml:space="preserve">
+    <value>_Журнал</value>
+  </data>
+  <data name="MENU_LOGCACHE" xml:space="preserve">
+    <value>Просмотр сообщений о использовании _кэша сообщений</value>
+  </data>
+  <data name="MENU_LOGCLEAR" xml:space="preserve">
+    <value>_Очистить окно журнала</value>
+  </data>
+  <data name="MENU_LOGEVENT" xml:space="preserve">
+    <value>Просмотр _событий</value>
+  </data>
+  <data name="MENU_LOGVIEW" xml:space="preserve">
+    <value>Просмотр _журнала</value>
+  </data>
+  <data name="MENU_LOGVPN" xml:space="preserve">
+    <value>Просмотр сообщений от _VPN сервиса</value>
+  </data>
+  <data name="MENU_LOGWRITE" xml:space="preserve">
+    <value>_Записывать лог в файл</value>
+  </data>
+  <data name="MENU_MAIL" xml:space="preserve">
+    <value>_Почта</value>
+  </data>
+  <data name="MENU_MAILACCOUNT" xml:space="preserve">
+    <value>_Учетные записи почты</value>
+  </data>
+  <data name="MENU_MAILBOX" xml:space="preserve">
+    <value>_Почтовые ящики</value>
+  </data>
+  <data name="MENU_MAILCHCEK" xml:space="preserve">
+    <value>_Проверить почту</value>
+  </data>
+  <data name="MENU_MAILNEW" xml:space="preserve">
+    <value>_Новое сообщение</value>
+  </data>
+  <data name="MENU_MENU" xml:space="preserve">
+    <value>_Меню</value>
+  </data>
+  <data name="MENU_PROXYCHECK" xml:space="preserve">
+    <value>Проверка прокси серверов запущена</value>
+  </data>
+  <data name="MENU_PROXYLIST" xml:space="preserve">
+    <value>_Списки прокси серверов</value>
+  </data>
+  <data name="MENU_PROXYREPACK" xml:space="preserve">
+    <value>Удалять не ответившие _прокси сервера после отправки</value>
+  </data>
+  <data name="MENU_PROXYSELECT" xml:space="preserve">
+    <value>Тип прокси сервера выбран</value>
+  </data>
+  <data name="MENU_PROXYTYPE" xml:space="preserve">
+    <value>Выбрать _тип прокси сервера</value>
+  </data>
+  <data name="MENU_QUIT" xml:space="preserve">
+    <value>_Выход</value>
+  </data>
+  <data name="MENU_REFRESH" xml:space="preserve">
+    <value>_Обновить данные в меню</value>
+  </data>
+  <data name="MENU_RELOAD" xml:space="preserve">
+    <value>_Перезагрузить</value>
+  </data>
+  <data name="MENU_SAVE" xml:space="preserve">
+    <value>_Сохранить</value>
+  </data>
+  <data name="MENU_SAVEALL" xml:space="preserve">
+    <value>_Сохранить все настройки</value>
+  </data>
+  <data name="MENU_SEND" xml:space="preserve">
+    <value>_Отправить</value>
+  </data>
+  <data name="MENU_SERVICES" xml:space="preserve">
+    <value>_Сервисы</value>
+  </data>
+  <data name="MENU_SERVSET" xml:space="preserve">
+    <value>_Настройки почтовых служб</value>
+  </data>
+  <data name="MENU_SETTINGS" xml:space="preserve">
+    <value>_Настройки</value>
+  </data>
+  <data name="MENU_SSHACCOUNT" xml:space="preserve">
+    <value>Выбрать _SSH аккаунт</value>
+  </data>
+  <data name="MENU_SSHSELECT" xml:space="preserve">
+    <value>SSH аккаунт выбран</value>
+  </data>
+  <data name="MENU_VPNACCOUNT" xml:space="preserve">
+    <value>Выбрать _VPN аккаунт</value>
+  </data>
+  <data name="MENU_VPNBEGIN" xml:space="preserve">
+    <value>Активация VPN туннеля начата</value>
+  </data>
+  <data name="MENU_VPNENABLE" xml:space="preserve">
+    <value>_VPN сервис может быть активирован</value>
+  </data>
+  <data name="MENU_VPNRANDOM" xml:space="preserve">
+    <value>Всегда выбирать случайный VPN аккаунт из доступных</value>
+  </data>
+  <data name="MENU_VPNREADY" xml:space="preserve">
+    <value>VPN туннель готов, ожидание</value>
+  </data>
+  <data name="MENU_VPNSELECT" xml:space="preserve">
+    <value>VPN аккаунт выбран</value>
+  </data>
+  <data name="MENU_VPNTUNRUN" xml:space="preserve">
+    <value>VPN туннель работает</value>
+  </data>
+  <data name="TAG_ACCOUNT" xml:space="preserve">
+    <value>Учетная запись</value>
+  </data>
+  <data name="TAG_ACCOUNTS" xml:space="preserve">
+    <value>Учетные записи</value>
+  </data>
+  <data name="TAG_ALLOWED" xml:space="preserve">
+    <value>Разрешён</value>
+  </data>
+  <data name="TAG_ATTACH" xml:space="preserve">
+    <value>Вложения:</value>
+  </data>
+  <data name="TAG_BANNEDIPLIST" xml:space="preserve">
+    <value>Правила доступа для IP, NET или кодов стран</value>
+  </data>
+  <data name="TAG_BODY" xml:space="preserve">
+    <value>Сообщение</value>
+  </data>
+  <data name="TAG_CLIENTS" xml:space="preserve">
+    <value>Почтовые клиенты</value>
+  </data>
+  <data name="TAG_CLIENTSMAILPERIOD" xml:space="preserve">
+    <value>Период проверки почты в минутах</value>
+  </data>
+  <data name="TAG_CLIENTSTIMEOUT" xml:space="preserve">
+    <value>Максимальное время ожидания почтовых клиентов</value>
+  </data>
+  <data name="TAG_DATE" xml:space="preserve">
+    <value>Дата:</value>
+  </data>
+  <data name="TAG_DELETE" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="TAG_DISABLE" xml:space="preserve">
+    <value>Отключено</value>
+  </data>
+  <data name="TAG_ENABLE" xml:space="preserve">
+    <value>Включено</value>
+  </data>
+  <data name="TAG_EXPIRE" xml:space="preserve">
+    <value>Истекает:</value>
+  </data>
+  <data name="TAG_FMT_ACCESSRELOAD" xml:space="preserve">
+    <value>Список доступа перезагружен, всего {0} записей</value>
+  </data>
+  <data name="TAG_FMT_VERSION" xml:space="preserve">
+    <value>Версия: {0}</value>
+  </data>
+  <data name="TAG_FOLDER" xml:space="preserve">
+    <value>Папка:</value>
+  </data>
+  <data name="TAG_FORBIDDEN" xml:space="preserve">
+    <value>Запрещен</value>
+  </data>
+  <data name="TAG_FROM" xml:space="preserve">
+    <value>От:</value>
+  </data>
+  <data name="TAG_HOST" xml:space="preserve">
+    <value>IP:</value>
+  </data>
+  <data name="TAG_IDLE" xml:space="preserve">
+    <value>Ждать:</value>
+  </data>
+  <data name="TAG_LOGIN" xml:space="preserve">
+    <value>Логин:</value>
+  </data>
+  <data name="TAG_MAIL" xml:space="preserve">
+    <value>почты</value>
+  </data>
+  <data name="TAG_MESSAGE" xml:space="preserve">
+    <value>Сообщение</value>
+  </data>
+  <data name="TAG_NAME" xml:space="preserve">
+    <value>Имя:</value>
+  </data>
+  <data name="TAG_NETWORK" xml:space="preserve">
+    <value>Сеть</value>
+  </data>
+  <data name="TAG_NO" xml:space="preserve">
+    <value>Нет</value>
+  </data>
+  <data name="TAG_NOMAILCHECK" xml:space="preserve">
+    <value>не проверять почту</value>
+  </data>
+  <data name="TAG_NOTELEMENTS" xml:space="preserve">
+    <value>список пуст</value>
+  </data>
+  <data name="TAG_OFF" xml:space="preserve">
+    <value>Отключить</value>
+  </data>
+  <data name="TAG_OK" xml:space="preserve">
+    <value>Ok</value>
+  </data>
+  <data name="TAG_ON" xml:space="preserve">
+    <value>Включить</value>
+  </data>
+  <data name="TAG_OPEN_IMPORT" xml:space="preserve">
+    <value>Открыть/Импортировать</value>
+  </data>
+  <data name="TAG_OPTION" xml:space="preserve">
+    <value>Опции</value>
+  </data>
+  <data name="TAG_PASSWORD" xml:space="preserve">
+    <value>Пароль:</value>
+  </data>
+  <data name="TAG_PORT" xml:space="preserve">
+    <value>Порт:</value>
+  </data>
+  <data name="TAG_PROXY" xml:space="preserve">
+    <value>прокси</value>
+  </data>
+  <data name="TAG_PROXYALL" xml:space="preserve">
+    <value>Все типы прокси</value>
+  </data>
+  <data name="TAG_SAVE" xml:space="preserve">
+    <value>Конфигурация сохранена, некоторые опции будут доступны после перезапуска</value>
+  </data>
+  <data name="TAG_SAVE_EXPORT" xml:space="preserve">
+    <value>Сохранить/Экспортировать</value>
+  </data>
+  <data name="TAG_SECURITY" xml:space="preserve">
+    <value>Безопасность</value>
+  </data>
+  <data name="TAG_SEND" xml:space="preserve">
+    <value>Отправить</value>
+  </data>
+  <data name="TAG_SERVICE" xml:space="preserve">
+    <value>служба</value>
+  </data>
+  <data name="TAG_SIZE" xml:space="preserve">
+    <value>Размер:</value>
+  </data>
+  <data name="TAG_SOURCE" xml:space="preserve">
+    <value>Источник</value>
+  </data>
+  <data name="TAG_SPAMCOUNT" xml:space="preserve">
+    <value>Количество срабатываний спам счетчика</value>
+  </data>
+  <data name="TAG_SPAMTIMEOUT" xml:space="preserve">
+    <value>Время перерыва в минутах при срабатывании спам правила</value>
+  </data>
+  <data name="TAG_STOPROUTELIST" xml:space="preserve">
+    <value>Запрещённые IP в роутинге</value>
+  </data>
+  <data name="TAG_SUBJECT" xml:space="preserve">
+    <value>Тема:</value>
+  </data>
+  <data name="TAG_TO" xml:space="preserve">
+    <value>Кому:</value>
+  </data>
+  <data name="TAG_TYPE" xml:space="preserve">
+    <value>Тип:</value>
+  </data>
+  <data name="TAG_YES" xml:space="preserve">
+    <value>Да</value>
+  </data>
+  <data name="UTILS_ABORT" xml:space="preserve">
+    <value>загрузка прервана</value>
+  </data>
+  <data name="UTILS_TXT1" xml:space="preserve">
+    <value>Имя файла сообщения не определено</value>
+  </data>
+  <data name="UTILS_TXT2" xml:space="preserve">
+    <value>Файл сообщения не найден</value>
+  </data>
+  <data name="UTILS_TXT3" xml:space="preserve">
+    <value>Длина файла сообщения равна нулю</value>
+  </data>
+  <data name="UTILS_TXT4" xml:space="preserve">
+    <value>Ошибка загрузки сообщения</value>
+  </data>
+</root>

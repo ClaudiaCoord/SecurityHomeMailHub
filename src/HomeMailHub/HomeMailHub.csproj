@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6527E541-3B84-44C6-A5BE-33D2BC3565AC}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>HomeMailHub</RootNamespace>
+    <AssemblyName>HomeMailHub</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <LangVersion>9.0</LangVersion>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <StartupObject>HomeMailHub.Server</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>9.0</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>9.0</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>9.0</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>..\bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>9.0</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>HomeMailHub.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CmdLine\CmdOption.cs" />
+    <Compile Include="CmdLine\CmdOptionAttribute.cs" />
+    <Compile Include="CmdLine\CmdOptionException.cs" />
+    <Compile Include="ConfigurationLoad.cs" />
+    <Compile Include="ConfigurationSave.cs" />
+    <Compile Include="Gui\GuiProxyListWindow.cs" />
+    <Compile Include="Gui\GuiRootMenuBar.cs" />
+    <Compile Include="Gui\GuiRunOnce.cs" />
+    <Compile Include="Gui\GuiServicesSettingsWindow.cs" />
+    <Compile Include="Gui\GuiWriteMessageWindow.cs" />
+    <Compile Include="Gui\Dialogs\GuiOpenDialog.cs" />
+    <Compile Include="Gui\Dialogs\GuiSaveDialog.cs" />
+    <Compile Include="Gui\Dialogs\IFileDialog.cs" />
+    <Compile Include="Gui\GuiApp.cs" />
+    <Compile Include="Gui\GuiExtensions.cs" />
+    <Compile Include="Gui\GuiMailAccountWindow.cs" />
+    <Compile Include="Gui\GuiMailMessagesWindow.cs" />
+    <Compile Include="Gui\GuiReadMessageWindow.cs" />
+    <Compile Include="Gui\GuiRootStatusBar.cs" />
+    <Compile Include="Gui\GuiRootWindow.cs" />
+    <Compile Include="Gui\GuiSshAccountWindow.cs" />
+    <Compile Include="Gui\GuiUtils.cs" />
+    <Compile Include="Gui\GuiVpnAccountWindow.cs" />
+    <Compile Include="Gui\IGuiLogWindow.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.ru.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.ru.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Server.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ContentWithTargetPath Include="Install\proxy\ProxyHttp.in">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\Proxy\ProxyHttp.in</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\proxy\ProxyHttps.in">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\Proxy\ProxyHttps.in</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\proxy\ProxySock4.in">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\Proxy\ProxySock4.in</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\proxy\ProxySock5.in">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\Proxy\ProxySock5.in</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+  <ItemGroup>
+    <ContentWithTargetPath Include="Install\GeoLite2-Country.mmdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>GeoLite2-Country.mmdb</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+  <ItemGroup>
+    <ContentWithTargetPath Include="Install\GuiSshAccountWindow.urls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\GuiSshAccountWindow.urls</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\GuiVpnAccountWindow.urls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\GuiVpnAccountWindow.urls</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\GuiProxyListWindow.urls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\GuiProxyListWindow.urls</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\GuiServicesSettingsWindow.urls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\GuiServicesSettingsWindow.urls</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\config\AddressesBook.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\AddressesBook.conf</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\config\SshAccounts.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\SshAccounts.conf</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\config\UserAccounts.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\UserAccounts.conf</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\config\VpnAccounts.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\VpnAccounts.conf</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="app.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SecyrityMail\SecyrityMail.csproj">
+      <Project>{F4BA699C-C783-48A9-84EF-856072DF3EE2}</Project>
+      <Name>SecyrityMail</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Terminal.Gui\Terminal.Gui.csproj">
+      <Project>{83576343-4ba3-401b-823f-caa7c81907e6}</Project>
+      <Name>Terminal.Gui</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.ru.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.ru.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MailKit">
+      <Version>3.2.0</Version>
+    </PackageReference>
+    <PackageReference Include="NStack.Core">
+      <Version>0.16.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="HomeMailHub.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

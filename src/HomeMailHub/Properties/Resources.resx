@@ -1,0 +1,705 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BTN_ADD" xml:space="preserve">
+    <value>_Add</value>
+  </data>
+  <data name="BTN_ATTACH" xml:space="preserve">
+    <value>_Attach</value>
+  </data>
+  <data name="BTN_CHECK" xml:space="preserve">
+    <value>_Check</value>
+  </data>
+  <data name="BTN_CHECKALL" xml:space="preserve">
+    <value>Check _All</value>
+  </data>
+  <data name="BTN_CLEAR" xml:space="preserve">
+    <value>_Clear</value>
+  </data>
+  <data name="BTN_CLOSE" xml:space="preserve">
+    <value>_Close</value>
+  </data>
+  <data name="BTN_DELETE" xml:space="preserve">
+    <value>_Delete</value>
+  </data>
+  <data name="BTN_EXPORT" xml:space="preserve">
+    <value>_Export</value>
+  </data>
+  <data name="BTN_IMPORT" xml:space="preserve">
+    <value>_Import</value>
+  </data>
+  <data name="BTN_OPEN" xml:space="preserve">
+    <value>_Open</value>
+  </data>
+  <data name="BTN_PASTE" xml:space="preserve">
+    <value>_Paste</value>
+  </data>
+  <data name="BTN_RELOAD" xml:space="preserve">
+    <value>_Reload</value>
+  </data>
+  <data name="BTN_REPLAY" xml:space="preserve">
+    <value>_Reply</value>
+  </data>
+  <data name="BTN_SAVE" xml:space="preserve">
+    <value>_Save</value>
+  </data>
+  <data name="BTN_SEND" xml:space="preserve">
+    <value>_Send</value>
+  </data>
+  <data name="BTN_SORT" xml:space="preserve">
+    <value>_Sort</value>
+  </data>
+  <data name="BTN_START" xml:space="preserve">
+    <value>_Start</value>
+  </data>
+  <data name="BTN_STOP" xml:space="preserve">
+    <value>_Stop</value>
+  </data>
+  <data name="CHKBOX_CHECKFROM" xml:space="preserve">
+    <value>Check incoming From address, anti-SPAM filter</value>
+  </data>
+  <data name="CHKBOX_DELIVERYLOC" xml:space="preserve">
+    <value>Delivery local incoming message (not disabled this!)</value>
+  </data>
+  <data name="CHKBOX_DELIVERYMSGMOD" xml:space="preserve">
+    <value>Modify message delivered local, anti-spy</value>
+  </data>
+  <data name="CHKBOX_EXPIRE" xml:space="preserve">
+    <value>Not expire</value>
+  </data>
+  <data name="CHKBOX_IMAPPURGE" xml:space="preserve">
+    <value>Always flush messages when received (IMAP)</value>
+  </data>
+  <data name="CHKBOX_NEWMSGID" xml:space="preserve">
+    <value>Always new message Id, anti-spy</value>
+  </data>
+  <data name="CHKBOX_NEWMSGIMD" xml:space="preserve">
+    <value>New message send Immediately</value>
+  </data>
+  <data name="CHKBOX_NOWARN" xml:space="preserve">
+    <value>No warnings</value>
+  </data>
+  <data name="CHKBOX_POP3DELALL" xml:space="preserve">
+    <value>Delete all messages</value>
+  </data>
+  <data name="CHKBOX_POP3PGP" xml:space="preserve">
+    <value>PGP decrypt</value>
+  </data>
+  <data name="CHKBOX_RECEIVEONSEND" xml:space="preserve">
+    <value>Receive external mail only when sending messages</value>
+  </data>
+  <data name="CHKBOX_SAVEATTACH" xml:space="preserve">
+    <value>Save Attachments</value>
+  </data>
+  <data name="CHKBOX_SESSIONLOG" xml:space="preserve">
+    <value>Write session log</value>
+  </data>
+  <data name="CHKBOX_SHARINGSOCKET" xml:space="preserve">
+    <value>Allow others to open this socket on the specified port</value>
+  </data>
+  <data name="CHKBOX_SMTPFAKEIP" xml:space="preserve">
+    <value>Always add fake IP address to headers (SMTP)</value>
+  </data>
+  <data name="CHKBOX_SMTPPGPCRYPT" xml:space="preserve">
+    <value>Encrypt PGP email text if available</value>
+  </data>
+  <data name="CHKBOX_SMTPPGPSIGN" xml:space="preserve">
+    <value>Certify PGP email signature if available</value>
+  </data>
+  <data name="E1" xml:space="preserve">
+    <value />
+  </data>
+  <data name="E2" xml:space="preserve">
+    <value />
+  </data>
+  <data name="E3" xml:space="preserve">
+    <value />
+  </data>
+  <data name="E4" xml:space="preserve">
+    <value />
+  </data>
+  <data name="E5" xml:space="preserve">
+    <value />
+  </data>
+  <data name="GUIACCOUNT_FMT1" xml:space="preserve">
+    <value>_{0} all {1} accounts</value>
+  </data>
+  <data name="GUIACCOUNT_FMT2" xml:space="preserve">
+    <value>Set All {0}</value>
+  </data>
+  <data name="GUIACCOUNT_FMT3" xml:space="preserve">
+    <value>Are you sure you want to {0} all {1} account?</value>
+  </data>
+  <data name="GUIACCOUNT_FMT4" xml:space="preserve">
+    <value>{0} {1} account configuration file</value>
+  </data>
+  <data name="GUIACCOUNT_FMT5" xml:space="preserve">
+    <value>{0} '{1}' account</value>
+  </data>
+  <data name="GUIACCOUNT_FMT6" xml:space="preserve">
+    <value>{0} '{1}' account?</value>
+  </data>
+  <data name="GUIMAILREAD_TITLE1" xml:space="preserve">
+    <value>Read Message</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR1" xml:space="preserve">
+    <value>From: address in message empty</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR2" xml:space="preserve">
+    <value>To: address in message empty</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR3" xml:space="preserve">
+    <value>Subject in message empty</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR4" xml:space="preserve">
+    <value>Body in message empty</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR5" xml:space="preserve">
+    <value>Account not found based on sender address</value>
+  </data>
+  <data name="GUIMAILWRITE_ERR6" xml:space="preserve">
+    <value>not send</value>
+  </data>
+  <data name="GUIMAILWRITE_FMT1" xml:space="preserve">
+    <value>Replay Message from: {0}</value>
+  </data>
+  <data name="GUIMAILWRITE_TEXT1" xml:space="preserve">
+    <value>Add Attachments</value>
+  </data>
+  <data name="GUIMAILWRITE_TEXT2" xml:space="preserve">
+    <value>New Message</value>
+  </data>
+  <data name="GUIMAILWRITE_TITLE1" xml:space="preserve">
+    <value>Write Message</value>
+  </data>
+  <data name="GUIMAIL_TITLE1" xml:space="preserve">
+    <value>Mail Accounts</value>
+  </data>
+  <data name="GUIMESSAGE_FMT1" xml:space="preserve">
+    <value>{0} message</value>
+  </data>
+  <data name="GUIMESSAGE_FMT2" xml:space="preserve">
+    <value>Are you sure you want to {0} this message?</value>
+  </data>
+  <data name="GUIMESSAGE_FMT3" xml:space="preserve">
+    <value>{0} - Messages : {1}</value>
+  </data>
+  <data name="GUIMESSAGE_TITLE1" xml:space="preserve">
+    <value>Mail Messages</value>
+  </data>
+  <data name="GUIPROXY_FMT1" xml:space="preserve">
+    <value>Proxy list {0} downloaded {1} hosts</value>
+  </data>
+  <data name="GUIPROXY_FMT2" xml:space="preserve">
+    <value>Proxy list added {0} new hosts</value>
+  </data>
+  <data name="GUIPROXY_MENU1" xml:space="preserve">
+    <value>_Download all type proxy</value>
+  </data>
+  <data name="GUIPROXY_MENU2" xml:space="preserve">
+    <value>_Download HTTP,HTTPS proxy</value>
+  </data>
+  <data name="GUIPROXY_MENU3" xml:space="preserve">
+    <value>_Download SOCK5 proxy</value>
+  </data>
+  <data name="GUIPROXY_TITLE1" xml:space="preserve">
+    <value>Proxy List</value>
+  </data>
+  <data name="GUIPROXY_TITLE2" xml:space="preserve">
+    <value>Proxy Type</value>
+  </data>
+  <data name="GUIPROXY_TITLE3" xml:space="preserve">
+    <value>Proxy Host</value>
+  </data>
+  <data name="GUIPROXY_TITLE4" xml:space="preserve">
+    <value>Check proxyes</value>
+  </data>
+  <data name="GUIPROXY_TITLE5" xml:space="preserve">
+    <value>Check proxy</value>
+  </data>
+  <data name="GUIPROXY_TXT1" xml:space="preserve">
+    <value>Proxy verification process is already running, please wait..</value>
+  </data>
+  <data name="GUIPROXY_TXT10" xml:space="preserve">
+    <value>Clipboard proxy list empty</value>
+  </data>
+  <data name="GUIPROXY_TXT11" xml:space="preserve">
+    <value>bad proxy port value</value>
+  </data>
+  <data name="GUIPROXY_TXT12" xml:space="preserve">
+    <value>Delete proxy host</value>
+  </data>
+  <data name="GUIPROXY_TXT13" xml:space="preserve">
+    <value>Are you sure you want to delete proxy</value>
+  </data>
+  <data name="GUIPROXY_TXT14" xml:space="preserve">
+    <value>Proxy list empty</value>
+  </data>
+  <data name="GUIPROXY_TXT15" xml:space="preserve">
+    <value>Download proxy list empty</value>
+  </data>
+  <data name="GUIPROXY_TXT16" xml:space="preserve">
+    <value>Save proxy list</value>
+  </data>
+  <data name="GUIPROXY_TXT17" xml:space="preserve">
+    <value>Save this proxy list to file?</value>
+  </data>
+  <data name="GUIPROXY_TXT18" xml:space="preserve">
+    <value>Proxy list saved to default file</value>
+  </data>
+  <data name="GUIPROXY_TXT19" xml:space="preserve">
+    <value>Copy proxy list from 'hidemy.name' and paste it</value>
+  </data>
+  <data name="GUIPROXY_TXT2" xml:space="preserve">
+    <value>Proxy list type not selected, not verification process running..</value>
+  </data>
+  <data name="GUIPROXY_TXT3" xml:space="preserve">
+    <value>Proxy list is empty, not verification process running..</value>
+  </data>
+  <data name="GUIPROXY_TXT4" xml:space="preserve">
+    <value>Another building/verification process running..</value>
+  </data>
+  <data name="GUIPROXY_TXT5" xml:space="preserve">
+    <value>Proxy verification process running..</value>
+  </data>
+  <data name="GUIPROXY_TXT6" xml:space="preserve">
+    <value>Proxy host not selected, abort..</value>
+  </data>
+  <data name="GUIPROXY_TXT7" xml:space="preserve">
+    <value>Begin check proxy host</value>
+  </data>
+  <data name="GUIPROXY_TXT8" xml:space="preserve">
+    <value>Proxy list clear</value>
+  </data>
+  <data name="GUIPROXY_TXT9" xml:space="preserve">
+    <value>Clear this proxy list</value>
+  </data>
+  <data name="GUISSH_TITLE1" xml:space="preserve">
+    <value>SSH Accounts</value>
+  </data>
+  <data name="GUIVPN_TITLE1" xml:space="preserve">
+    <value>VPN Accounts</value>
+  </data>
+  <data name="GUIVPN_TITLE2" xml:space="preserve">
+    <value>wireguard VPN</value>
+  </data>
+  <data name="MENU_ACCBACKUP" xml:space="preserve">
+    <value>Accounts _backup</value>
+  </data>
+  <data name="MENU_ACCESSRELOAD" xml:space="preserve">
+    <value>Reload _access list - IP, NET, countries</value>
+  </data>
+  <data name="MENU_ACCLOAD" xml:space="preserve">
+    <value>Restoring copies of accounts</value>
+  </data>
+  <data name="MENU_ACCRESTORE" xml:space="preserve">
+    <value>_Restoring accounts from a backup</value>
+  </data>
+  <data name="MENU_ACCSAVE" xml:space="preserve">
+    <value>Saving copies of accounts</value>
+  </data>
+  <data name="MENU_ACTION" xml:space="preserve">
+    <value>_Action</value>
+  </data>
+  <data name="MENU_CLOSE" xml:space="preserve">
+    <value>_Close</value>
+  </data>
+  <data name="MENU_DELETE" xml:space="preserve">
+    <value>D_elete</value>
+  </data>
+  <data name="MENU_LIGHTTEXT" xml:space="preserve">
+    <value>Brighter text in shapes</value>
+  </data>
+  <data name="MENU_LOG" xml:space="preserve">
+    <value>_Log</value>
+  </data>
+  <data name="MENU_LOGCACHE" xml:space="preserve">
+    <value>Show usage _messages cache</value>
+  </data>
+  <data name="MENU_LOGCLEAR" xml:space="preserve">
+    <value>_Clear Log</value>
+  </data>
+  <data name="MENU_LOGEVENT" xml:space="preserve">
+    <value>_Event view</value>
+  </data>
+  <data name="MENU_LOGVIEW" xml:space="preserve">
+    <value>_Log view</value>
+  </data>
+  <data name="MENU_LOGVPN" xml:space="preserve">
+    <value>Show messages from _VPN service</value>
+  </data>
+  <data name="MENU_LOGWRITE" xml:space="preserve">
+    <value>_Write log to file</value>
+  </data>
+  <data name="MENU_MAIL" xml:space="preserve">
+    <value>_Mail</value>
+  </data>
+  <data name="MENU_MAILACCOUNT" xml:space="preserve">
+    <value>_Mail accounts</value>
+  </data>
+  <data name="MENU_MAILBOX" xml:space="preserve">
+    <value>_Mail Boxes</value>
+  </data>
+  <data name="MENU_MAILCHCEK" xml:space="preserve">
+    <value>_Check Mail</value>
+  </data>
+  <data name="MENU_MAILNEW" xml:space="preserve">
+    <value>_New Message</value>
+  </data>
+  <data name="MENU_MENU" xml:space="preserve">
+    <value>_Menu</value>
+  </data>
+  <data name="MENU_PROXYCHECK" xml:space="preserve">
+    <value>Proxy check started</value>
+  </data>
+  <data name="MENU_PROXYLIST" xml:space="preserve">
+    <value>_Proxy lists</value>
+  </data>
+  <data name="MENU_PROXYREPACK" xml:space="preserve">
+    <value>Delete non-responding _proxy servers after sending</value>
+  </data>
+  <data name="MENU_PROXYSELECT" xml:space="preserve">
+    <value>Proxy type selected</value>
+  </data>
+  <data name="MENU_PROXYTYPE" xml:space="preserve">
+    <value>Select _Type of proxy server</value>
+  </data>
+  <data name="MENU_QUIT" xml:space="preserve">
+    <value>_Quit</value>
+  </data>
+  <data name="MENU_REFRESH" xml:space="preserve">
+    <value>_Refresh menu data</value>
+  </data>
+  <data name="MENU_RELOAD" xml:space="preserve">
+    <value>_Reload</value>
+  </data>
+  <data name="MENU_SAVE" xml:space="preserve">
+    <value>_Save</value>
+  </data>
+  <data name="MENU_SAVEALL" xml:space="preserve">
+    <value>_Save all settings</value>
+  </data>
+  <data name="MENU_SEND" xml:space="preserve">
+    <value>_Send</value>
+  </data>
+  <data name="MENU_SERVICES" xml:space="preserve">
+    <value>Ser_vices</value>
+  </data>
+  <data name="MENU_SERVSET" xml:space="preserve">
+    <value>Services _Settings</value>
+  </data>
+  <data name="MENU_SETTINGS" xml:space="preserve">
+    <value>_Settings</value>
+  </data>
+  <data name="MENU_SSHACCOUNT" xml:space="preserve">
+    <value>Select _SSH account</value>
+  </data>
+  <data name="MENU_SSHSELECT" xml:space="preserve">
+    <value>SSH account selected</value>
+  </data>
+  <data name="MENU_VPNACCOUNT" xml:space="preserve">
+    <value>Select _VPN account</value>
+  </data>
+  <data name="MENU_VPNBEGIN" xml:space="preserve">
+    <value>VPN tunnel activation started</value>
+  </data>
+  <data name="MENU_VPNENABLE" xml:space="preserve">
+    <value>_VPN service can be activated</value>
+  </data>
+  <data name="MENU_VPNRANDOM" xml:space="preserve">
+    <value>Always choose a random VPN account from the available ones</value>
+  </data>
+  <data name="MENU_VPNREADY" xml:space="preserve">
+    <value>VPN tunnel ready, waiting</value>
+  </data>
+  <data name="MENU_VPNSELECT" xml:space="preserve">
+    <value>VPN account selected</value>
+  </data>
+  <data name="MENU_VPNTUNRUN" xml:space="preserve">
+    <value>VPN tunnel is working</value>
+  </data>
+  <data name="TAG_ACCOUNT" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="TAG_ACCOUNTS" xml:space="preserve">
+    <value>Accounts</value>
+  </data>
+  <data name="TAG_ALLOWED" xml:space="preserve">
+    <value>Allowed</value>
+  </data>
+  <data name="TAG_ATTACH" xml:space="preserve">
+    <value>Attach:</value>
+  </data>
+  <data name="TAG_BANNEDIPLIST" xml:space="preserve">
+    <value>Access rules for IP, NET or country codes</value>
+  </data>
+  <data name="TAG_BODY" xml:space="preserve">
+    <value>Body</value>
+  </data>
+  <data name="TAG_CLIENTS" xml:space="preserve">
+    <value>Email clients</value>
+  </data>
+  <data name="TAG_CLIENTSMAILPERIOD" xml:space="preserve">
+    <value>Mail check period in minutes</value>
+  </data>
+  <data name="TAG_CLIENTSTIMEOUT" xml:space="preserve">
+    <value>Maximum waiting time for mail clients</value>
+  </data>
+  <data name="TAG_DATE" xml:space="preserve">
+    <value>Date:</value>
+  </data>
+  <data name="TAG_DELETE" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="TAG_DISABLE" xml:space="preserve">
+    <value>Disable</value>
+  </data>
+  <data name="TAG_ENABLE" xml:space="preserve">
+    <value>Enable</value>
+  </data>
+  <data name="TAG_EXPIRE" xml:space="preserve">
+    <value>Expire:</value>
+  </data>
+  <data name="TAG_FMT_ACCESSRELOAD" xml:space="preserve">
+    <value>Access list reloaded, total {0} entries</value>
+  </data>
+  <data name="TAG_FMT_VERSION" xml:space="preserve">
+    <value>Version: {0}</value>
+  </data>
+  <data name="TAG_FOLDER" xml:space="preserve">
+    <value>Folder:</value>
+  </data>
+  <data name="TAG_FORBIDDEN" xml:space="preserve">
+    <value>Forbidden</value>
+  </data>
+  <data name="TAG_FROM" xml:space="preserve">
+    <value>From:</value>
+  </data>
+  <data name="TAG_HOST" xml:space="preserve">
+    <value>Host:</value>
+  </data>
+  <data name="TAG_IDLE" xml:space="preserve">
+    <value>Idle:</value>
+  </data>
+  <data name="TAG_LOGIN" xml:space="preserve">
+    <value>Login:</value>
+  </data>
+  <data name="TAG_MESSAGE" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="TAG_NAME" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="TAG_NETWORK" xml:space="preserve">
+    <value>Network</value>
+  </data>
+  <data name="TAG_NO" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="TAG_NOMAILCHECK" xml:space="preserve">
+    <value>don't check email</value>
+  </data>
+  <data name="TAG_NOTELEMENTS" xml:space="preserve">
+    <value>the list is empty</value>
+  </data>
+  <data name="TAG_OFF" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="TAG_OK" xml:space="preserve">
+    <value>Ok</value>
+  </data>
+  <data name="TAG_ON" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="TAG_OPEN_IMPORT" xml:space="preserve">
+    <value>Open/Import</value>
+  </data>
+  <data name="TAG_OPTION" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="TAG_PASSWORD" xml:space="preserve">
+    <value>Password:</value>
+  </data>
+  <data name="TAG_PORT" xml:space="preserve">
+    <value>Port:</value>
+  </data>
+  <data name="TAG_PROXY" xml:space="preserve">
+    <value>proxy</value>
+  </data>
+  <data name="TAG_PROXYALL" xml:space="preserve">
+    <value>All type proxy</value>
+  </data>
+  <data name="TAG_SAVE" xml:space="preserve">
+    <value>Configuration saved, some options will be available after restart</value>
+  </data>
+  <data name="TAG_SAVE_EXPORT" xml:space="preserve">
+    <value>Save/Export</value>
+  </data>
+  <data name="TAG_SECURITY" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="TAG_SEND" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="TAG_SERVICE" xml:space="preserve">
+    <value>service</value>
+  </data>
+  <data name="TAG_SIZE" xml:space="preserve">
+    <value>Size:</value>
+  </data>
+  <data name="TAG_SOURCE" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="TAG_SPAMCOUNT" xml:space="preserve">
+    <value>Number of spam counter hits</value>
+  </data>
+  <data name="TAG_SPAMTIMEOUT" xml:space="preserve">
+    <value>Break time in minutes when a spam rule is triggered</value>
+  </data>
+  <data name="TAG_STOPROUTELIST" xml:space="preserve">
+    <value>Forbidden IPs in routing</value>
+  </data>
+  <data name="TAG_SUBJECT" xml:space="preserve">
+    <value>Subject:</value>
+  </data>
+  <data name="TAG_TO" xml:space="preserve">
+    <value>To:</value>
+  </data>
+  <data name="TAG_TYPE" xml:space="preserve">
+    <value>Type:</value>
+  </data>
+  <data name="TAG_YES" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="UTILS_ABORT" xml:space="preserve">
+    <value>abort loading</value>
+  </data>
+  <data name="UTILS_TXT1" xml:space="preserve">
+    <value>Message file name is empty</value>
+  </data>
+  <data name="UTILS_TXT2" xml:space="preserve">
+    <value>Message file not found</value>
+  </data>
+  <data name="UTILS_TXT3" xml:space="preserve">
+    <value>Message file length is zero</value>
+  </data>
+  <data name="UTILS_TXT4" xml:space="preserve">
+    <value>Eroor load message</value>
+  </data>
+</root>
