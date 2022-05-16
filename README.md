@@ -67,4 +67,6 @@ Allows you to use local accounts not tied to a specific domain, the exchange of 
 
 ![Home security mail fetch hub 1](docs/img/ss7.png)  
 
+![Home security mail fetch hub 1](docs/img/ss3.png)  
+
 Home security mail fetch hub
