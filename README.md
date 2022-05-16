@@ -36,8 +36,8 @@ Secure, anonymous, domestic home mail hub MTA / MUA
 
 ### Interfaces:
 
- - parsing a list of proxy servers from hide.me,
- - automatic download and parsing of a list of proxy servers from the site,
+ - parsing a list of proxy servers from hidemy.name,
+ - automatic download and parsing of a list of proxy servers from the site spys.me,
  - interface for automatic/manual checking and editing the list of proxy servers,
  - editing / parsing interface when adding SSH accounts by pasting copied text from the registration site
  - interface for editing and importing Wireguard VPN configurations,
