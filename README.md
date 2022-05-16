@@ -6,19 +6,19 @@
 [![Download x86](https://img.shields.io/badge/Download-x86-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x86-1.0.8170.msi)
 
 # HomeMailHub
-Secure, anonymous, domestic home mail hub MTA / MUA
+Secure, anonymous, domestic home mail hub `MTA` / `MUA`
 
  Hub of mail between accounts in different e-mail systems,
  used to route e-mail, also works as your own mail server.
 
- To receive and send mail from a mail client using POP3, SMTP, enabled STARTSSL encryption.
- Collecting mail from external servers is carried out via the POP3, IMAP, SMTP, supports SSL / TLS encryption, STARTSSL.
+ To receive and send mail from a mail client using `POP3`, `SMTP`, enabled `STARTSSL` encryption.
+ Collecting mail from external servers is carried out via the `POP3`, `IMAP`, `SMTP`, supports `SSL` / `TLS` encryption, `STARTSSL`.
 
  Supports anonymous mode consisting of a set of measures to determine the difficulty sender / recipient when sending and receiving mail from external servers.
  
 ### Built-in encryption is:
- - VPN client Wireguard,
- - SSH tunnel, implements the interface SOCK5, also using other applications,
+ - `VPN` client Wireguard,
+ - `SSH` tunnel, implements the interface `SOCK5`, also using other applications,
  - support for `HTTP`, `HTTPS`, `SOCK4`, `SOCK5` proxy server,
  - automatic enumeration of proxies in search of the first workable,
  - `PGP` / `GPG` encryption of messages
