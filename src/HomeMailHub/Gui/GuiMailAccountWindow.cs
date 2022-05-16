@@ -32,7 +32,8 @@ namespace HomeMailHub.Gui
 
 		private Toplevel GuiToplevel { get; set; } = default;
 		private MenuBar  GuiMenu { get; set; } = default;
-		private ListView listView { get; set; } = default;
+        private MenuBarItem urlmenu { get; set; } = default;
+        private ListView listView { get; set; } = default;
 
 		private Button buttonSave { get; set; } = default;
 		private Button buttonClear { get; set; } = default;
@@ -351,7 +352,8 @@ namespace HomeMailHub.Gui
 					} catch (Exception ex) { ex.StatusBarError(); }
 				}
 			};
-			GuiMenu = new MenuBar (new MenuBarItem [] {
+            urlmenu = new MenuBarItem("_Url", new MenuItem[0]);
+            GuiMenu = new MenuBar (new MenuBarItem [] {
 				new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
 					new MenuItem (RES.MENU_RELOAD, "", async () => {
 						_ = await Global.Instance.Accounts.Load().ConfigureAwait(false);
@@ -393,8 +395,9 @@ namespace HomeMailHub.Gui
 							} catch (Exception ex) { ex.StatusBarError(); }
 						}
 					})
-				})
-			});
+				}),
+                urlmenu
+            });
 			GuiToplevel.Add (GuiMenu, this);
 			return this;
 		}
@@ -411,7 +414,12 @@ namespace HomeMailHub.Gui
 					frameList.Title = selectedName.GetListTitle(data.Count);
 					Clean();
 				} catch (Exception ex) { ex.StatusBarError(); }
-				return true;
+                try {
+                    MenuItem[] mitems = await nameof(GuiMailAccountWindow).LoadMenuUrls().ConfigureAwait(false);
+                    Application.MainLoop.Invoke(() => urlmenu.Children = mitems);
+                }
+                catch { }
+                return true;
 			});
 
 		private void MailType_SelectedItemChanged (SelectedItemChangedArgs obj) {

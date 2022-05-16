@@ -214,17 +214,22 @@ namespace HomeMailHub.Gui
                         return false;
                     }
                     MimeKit.MimeMessage mmsg = rdata.Message;
-                    messageBody[1] = File.ReadAllText(rdata.Info.FullName);
-                    messageBody[0] =
-                        (mmsg.TextBody != null) ?
-                            mmsg.TextBody : ((mmsg.HtmlBody != null) ? mmsg.HtmlBody : mmsg.ToString());
-                    msgText.Text = messageBody[0];
                     subjText.Text = mmsg.Subject;
                     dateText.Text = mmsg.Date.ToString("dddd, dd MMMM yyyy");
                     sizeText.Text = rdata.Info.Length.Humanize();
                     msgIdText.Text = mmsg.MessageId;
                     fromText.Text = mmsg.From.ToString();
                     frameHeader.Title = $"{RES.TAG_TO} {mmsg.To}";
+
+                    if (!string.IsNullOrWhiteSpace(mmsg.TextBody))
+                        messageBody[0] = mmsg.TextBody;
+                    else if (!string.IsNullOrWhiteSpace(mmsg.HtmlBody))
+                        messageBody[0] = new ConverterHtmlToHtml().ConvertT(mmsg.HtmlBody);
+                    else
+                        messageBody[0] = mmsg.ToString();
+
+                    messageBody[1] = File.ReadAllText(rdata.Info.FullName);
+                    msgText.Text = messageBody[0];
 
                     try {
                         if ((mmsg.Attachments != null) && (mmsg.Attachments.Count() > 0)) {

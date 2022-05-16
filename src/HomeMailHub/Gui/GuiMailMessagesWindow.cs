@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NStack;
 using SecyrityMail;
@@ -40,12 +41,14 @@ namespace HomeMailHub.Gui
         private FrameView frameList { get; set; } = default;
         private FrameView frameMsg { get; set; } = default;
         private RadioGroup sortTitle { get; set; } = default;
+        private ProgressBar waitLoadProgress { get; set; } = default;
 
         private bool isSortDirections { get; set; } = true;
         private string selectedName { get; set; } = string.Empty;
         private string selectedPath { get; set; } = string.Empty;
         private List<string> data = new();
         private MailMessages msgs { get; set; } = default;
+        private Timer systemTimer { get; set; } = default;
 
         public Toplevel GetTop => GuiToplevel;
 
@@ -56,6 +59,9 @@ namespace HomeMailHub.Gui
             Width = Dim.Fill();
             Height = Dim.Fill() - 1;
             GuiToplevel = GuiExtensions.CreteTop();
+            systemTimer = new Timer((a) => {
+                Application.MainLoop?.Invoke(() => waitLoadProgress.Pulse());
+            }, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         }
         ~GuiMailMessagesWindow() => Dispose();
 
@@ -90,6 +96,15 @@ namespace HomeMailHub.Gui
                 NoSymbol = true,
                 DisplayMode = DisplayModeLayout.Horizontal,
                 SelectedItem = 1
+            });
+            frameList.Add(waitLoadProgress = new ProgressBar()
+            {
+                X = 1,
+                Y = 0,
+                Width = 32,
+                Height = 1,
+                Visible = false,
+                ColorScheme = Colors.Base
             });
             listView = new ListView(data)
             {
@@ -256,6 +271,7 @@ namespace HomeMailHub.Gui
 
         private async Task<bool> Load_() =>
             await Task.Run(async () => {
+                WaitStart();
                 DataClear();
                 try {
                     if (msgs != default)
@@ -272,8 +288,18 @@ namespace HomeMailHub.Gui
                     frameList.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, data.Count);
                     Clean();
                 } catch (Exception ex) { ex.StatusBarError(); }
+                finally { WaitStop(); }
                 return true;
             });
+
+        private void WaitStart() {
+            Application.MainLoop?.Invoke(() => waitLoadProgress.Visible = true);
+            systemTimer.Change(TimeSpan.FromMilliseconds(1), TimeSpan.FromMilliseconds(150));
+        }
+        private void WaitStop() {
+            systemTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            Application.MainLoop?.Invoke(() => waitLoadProgress.Visible = false);
+        }
 
         private void DataClear() {
             data.Clear();
