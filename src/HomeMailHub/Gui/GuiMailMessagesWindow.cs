@@ -216,8 +216,8 @@ namespace HomeMailHub.Gui
                 if ((msgs == null) || string.IsNullOrEmpty(s))
                     return;
                 if (MessageBox.Query(50, 7,
-                    string.Format(RES.GUIMESSAGE_FMT1, RES.BTN_DELETE),
-                    string.Format(RES.GUIMESSAGE_FMT2, RES.BTN_DELETE), RES.TAG_YES, RES.TAG_NO) == 0) {
+                    string.Format(RES.GUIMESSAGE_FMT1, RES.TAG_DELETE),
+                    string.Format(RES.GUIMESSAGE_FMT2, RES.TAG_DELETE), RES.TAG_YES, RES.TAG_NO) == 0) {
                     try {
                         _ = await msgs.DeleteMessage(s).ConfigureAwait(false);
                         _ = await Load_().ConfigureAwait(false);

@@ -133,6 +133,9 @@ namespace SecyrityMail.Clients
                     isproxysshrun = Global.Instance.Config.IsSshRunning;
                     isproxylist = !isproxyssh && isproxylist;
 
+                    if (!isvpn && Global.Instance.Config.IsVpnAlways)
+                        throw new Exception($"Not selected compatible VPN account, abort");
+
                     if (isproxyssh && !isproxysshrun) {
                         if (Global.Instance.Proxy.SshProxy.IsEmpty)
                             throw new Exception($"SSH proxyes Accounts is empty, abort");
@@ -149,14 +152,13 @@ namespace SecyrityMail.Clients
 
                     } else if (isproxylist) {
 
+                        bool isnotupdate = false;
                         ProxyListConverter plc = new();
                         if (Global.Instance.Config.IsProxyListRepack) {
-                            bool isupdate = await plc.CheckBuild(Global.Instance.Config.ProxyType).ConfigureAwait(false);
-                            if (!isupdate)
-                                _ = await plc.AllBuild().ConfigureAwait(false);
-                        } else {
-                            _ = await plc.AllBuild().ConfigureAwait(false);
+                            isnotupdate = await plc.CheckBuild(Global.Instance.Config.ProxyType).ConfigureAwait(false);
                         }
+                        if (!isnotupdate)
+                            _ = await plc.AllBuild().ConfigureAwait(false);
                         Global.Instance.ProxyList.Clear();
                     }
 

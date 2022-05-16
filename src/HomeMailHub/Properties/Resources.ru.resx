@@ -513,6 +513,9 @@
   <data name="MENU_VPNACCOUNT" xml:space="preserve">
     <value>Выбрать _VPN аккаунт</value>
   </data>
+  <data name="MENU_VPNALWAYS" xml:space="preserve">
+    <value>Всегда _использовать VPN, если недоступен, разрывать связь</value>
+  </data>
   <data name="MENU_VPNBEGIN" xml:space="preserve">
     <value>Активация VPN туннеля начата</value>
   </data>
@@ -520,7 +523,7 @@
     <value>_VPN сервис может быть активирован</value>
   </data>
   <data name="MENU_VPNRANDOM" xml:space="preserve">
-    <value>Всегда выбирать случайный VPN аккаунт из доступных</value>
+    <value>Всегда _выбирать случайный VPN аккаунт из доступных</value>
   </data>
   <data name="MENU_VPNREADY" xml:space="preserve">
     <value>VPN туннель готов, ожидание</value>

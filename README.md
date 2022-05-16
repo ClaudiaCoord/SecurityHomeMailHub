@@ -1,3 +1,13 @@
+
+[![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg)
+[![GitHub version](https://badge.fury.io/gh/ClaudiaCoord/SecurityHomeMailHub.svg)](https://github.com/ClaudiaCoord/SecurityHomeMailHub)
+[![Download x64](https://img.shields.io/badge/Download-x64-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x64-1.0.8170.msi)
+[![Download x86](https://img.shields.io/badge/Download-x86-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x86-1.0.8170.msi)
+[![Only 32 Kb](https://badge-size.herokuapp.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x64-1.0.8170.msi)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x64-1.0.8170.msi)
+[![GitHub license](https://img.shields.io/github/license/ClaudiaCoord/SecurityHomeMailHub.svg)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/ClaudiaCoord/SecurityHomeMailHub.svg)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/)
+
+
 # HomeMailHub
 Secure, anonymous, domestic home mail hub MTA / MUA
 
@@ -12,7 +22,8 @@ Secure, anonymous, domestic home mail hub MTA / MUA
 ### Built-in encryption is:
  - VPN client Wireguard,
  - SSH tunnel, implements the interface SOCK5, also using other applications,
- - Support for HTTP proxy server, HTTPS, SOCK4, SOCK5,
+ - support for HTTP proxy server, HTTPS, SOCK4, SOCK5,
+ - automatic enumeration of proxies in search of the first workable,
  - PGP / GPG encryption of messages
 
  In establishing the connection may use a serial tunneling, VPN Wireguard -> SSH tunnel -> HTTP proxy server, HTTPS, SOCK4, SOCK5.
@@ -50,6 +61,10 @@ Secure, anonymous, domestic home mail hub MTA / MUA
  - immediate call via interface
 
 
- Allows you to use local accounts not tied to a specific domain, the exchange of mail messages between such accounts is possible only directly, through a running HomeMailHub server.
+Allows you to use local accounts not tied to a specific domain, the exchange of mail messages between such accounts is possible only directly, through a running HomeMailHub server.
+
+### Interfaces screens:
+
+![Home security mail fetch hub 1](docs/img/ss7.png)  
 
 Home security mail fetch hub

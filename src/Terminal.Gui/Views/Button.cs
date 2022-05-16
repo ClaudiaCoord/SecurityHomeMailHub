@@ -44,19 +44,19 @@ namespace Terminal.Gui {
 		/// </remarks>
 		public Button () : this (text: string.Empty, is_default: false) { }
 
-		/// <summary>
-		///   Initializes a new instance of <see cref="Button"/> using <see cref="LayoutStyle.Computed"/> layout.
-		/// </summary>
-		/// <remarks>
-		///   The width of the <see cref="Button"/> is computed based on the
-		///   text length. The height will always be 1.
-		/// </remarks>
-		/// <param name="text">The button's text</param>
-		/// <param name="is_default">
-		///   If <c>true</c>, a special decoration is used, and the user pressing the enter key 
-		///   in a <see cref="Dialog"/> will implicitly activate this button.
-		/// </param>
-		public Button (ustring text, bool is_default = false) : base (text)
+        /// <summary>
+        ///   Initializes a new instance of <see cref="Button"/> using <see cref="LayoutStyle.Computed"/> layout.
+        /// </summary>
+        /// <remarks>
+        ///   The width of the <see cref="Button"/> is computed based on the
+        ///   text length. The height will always be 1.
+        /// </remarks>
+        /// <param name="text">The button's text</param>
+        /// <param name="is_default">
+        ///   If <c>true</c>, a special decoration is used, and the user pressing the enter key 
+        ///   in a <see cref="Dialog"/> will implicitly activate this button.
+        /// </param>
+        public Button (ustring text, bool is_default = false) : base (text)
 		{
 			Initialize (text, is_default);
 		}
@@ -193,12 +193,15 @@ namespace Terminal.Gui {
 
 		internal void Update ()
 		{
+            /*
 			if (IsDefault)
 				textFormatter.Text = ustring.Make (_leftBracket) + ustring.Make (_leftDefault) + " " + text + " " + ustring.Make (_rightDefault) + ustring.Make (_rightBracket);
 			else
 				textFormatter.Text = ustring.Make (_leftBracket) + " " + text + " " + ustring.Make (_rightBracket);
+			*/
+            textFormatter.Text = ustring.Make(_leftBracket) + " " + text + " " + ustring.Make(_rightBracket);
 
-			int w = textFormatter.Text.RuneCount - (textFormatter.Text.Contains (HotKeySpecifier) ? 1 : 0);
+            int w = textFormatter.Text.RuneCount - (textFormatter.Text.Contains (HotKeySpecifier) ? 1 : 0);
 			GetCurrentWidth (out int cWidth);
 			var canSetWidth = SetWidth (w, out int rWidth);
 			if (canSetWidth && (cWidth < rWidth || AutoSize)) {

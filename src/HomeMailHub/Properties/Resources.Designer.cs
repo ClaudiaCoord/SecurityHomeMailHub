@@ -1258,6 +1258,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Always _use VPN, if unavailable, disconnect.
+        /// </summary>
+        internal static string MENU_VPNALWAYS {
+            get {
+                return ResourceManager.GetString("MENU_VPNALWAYS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на VPN tunnel activation started.
         /// </summary>
         internal static string MENU_VPNBEGIN {
@@ -1276,7 +1285,7 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Always choose a random VPN account from the available ones.
+        ///   Ищет локализованную строку, похожую на Always choose a _random VPN account from the available ones.
         /// </summary>
         internal static string MENU_VPNRANDOM {
             get {

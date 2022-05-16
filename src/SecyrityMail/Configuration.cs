@@ -64,31 +64,30 @@ namespace SecyrityMail
         public List<string> ForbidenRouteList { get; set; } = new();
         public List<string> ForbidenEntryList { get; set; } = new();
 
-        public bool IsCacheMessagesLog
-        {
+        public bool IsCacheMessagesLog {
             get => Global.Instance.MessagesManager.IsCacheMessagesLog;
             set { Global.Instance.MessagesManager.IsCacheMessagesLog = value; OnPropertyChanged(); }
         }
 
         private ProxyType proxyType = ProxyType.None;
-        public ProxyType ProxyType
-        {
+        public ProxyType ProxyType {
             get => proxyType;
             set { Global.Instance.ProxyList.ProxyType = proxyType = value; OnPropertyChanged(); }
         }
 
-        public bool IsVpnEnable
-        {
+        public bool IsVpnAlways {
+            get => _isVpnEnable;
+            set { _isVpnEnable = value; OnPropertyChanged(); }
+        }
+        public bool IsVpnEnable {
             get => Global.Instance.VpnAccounts.IsAccountSelected && _isVpnEnable;
             set { _isVpnEnable = value; OnPropertyChanged(); }
         }
-        public bool IsVpnRandom
-        {
+        public bool IsVpnRandom {
             get => Global.Instance.Vpn.IsVpnRandom;
             set { Global.Instance.Vpn.IsVpnRandom = value; OnPropertyChanged(); }
         }
-        public bool IsEnableLogVpn
-        {
+        public bool IsEnableLogVpn {
             get => Global.Instance.Vpn.IsEnableLogVpn;
             set { Global.Instance.Vpn.IsEnableLogVpn = value; OnPropertyChanged(); }
         }
@@ -141,6 +140,7 @@ namespace SecyrityMail
             IsSmtpLog = cfg.IsSmtpLog;
             IsSmtpSecure = cfg.IsSmtpSecure;
             IsSmtpEnable = cfg.IsSmtpEnable;
+            IsVpnAlways = cfg.IsVpnAlways;
             IsVpnEnable = cfg.IsVpnEnable;
             IsVpnRandom = cfg.IsVpnRandom;
             IsProxyListRepack = cfg.IsProxyListRepack;

@@ -75,6 +75,8 @@ namespace SecyrityMail
 
             Pop3Service = new(Config.Pop3ServicePort, ipa, cancellationPop3);
             SmtpService = new(Config.SmtpServicePort, ipa, cancellationSmtp);
+            Pop3Service.EventCb += ToMainEvent;
+            SmtpService.EventCb += ToMainEvent;
             Vpn.Token = ct;
             Tasks.Token = ct;
             if (Config.IsProxyListRepack && (ProxyList.ProxyType != ProxyType.None))
@@ -97,7 +99,10 @@ namespace SecyrityMail
             OnProxyEvent(obj, args);
         #endregion
 
+        #region DeInit
         public void DeInit() {
+            Pop3Service.EventCb -= ToMainEvent;
+            SmtpService.EventCb -= ToMainEvent;
             cancellationPop3.Cancel();
             cancellationPop3.Dispose();
             cancellationSmtp.Cancel();
@@ -105,6 +110,7 @@ namespace SecyrityMail
             IpAddressInfo.Dispose();
             FindAutoDispose();
         }
+        #endregion
 
         public void Start() {
             if (Config.IsPop3Enable) Pop3Service.Start();
@@ -187,25 +193,32 @@ namespace SecyrityMail
         #endregion
 
         #region all Accounts backup/restore
-        public async Task<bool> AccountBackup() =>
+        public async Task<bool> AccountsSave() => await AccountsSave_(false).ConfigureAwait(false);
+        public async Task<bool> AccountsBackup() => await AccountsSave_(true).ConfigureAwait(false);
+        public async Task<bool> AccountsLoad() => await AccountsLoad_(false).ConfigureAwait(false);
+        public async Task<bool> AccountsRestore() => await AccountsLoad_(true).ConfigureAwait(false);
+
+        private async Task<bool> AccountsSave_(bool b) =>
             await Task.Run(async () => {
                 try {
-                    _ = await Accounts.Save(true).ConfigureAwait(false);
-                    _ = await SshProxy.Save(true).ConfigureAwait(false);
-                    _ = await VpnAccounts.Save(true).ConfigureAwait(false);
+                    _ = await Accounts.Save(b).ConfigureAwait(false);
+                    _ = await SshProxy.Save(b).ConfigureAwait(false);
+                    _ = await VpnAccounts.Save(b).ConfigureAwait(false);
                 }
-                catch (Exception ex) { Log.Add(nameof(AccountBackup), ex); }
+                catch (Exception ex) { Log.Add(nameof(AccountsBackup), ex); }
                 return true;
             });
 
-        public async Task<bool> AccountRestore() =>
+        private async Task<bool> AccountsLoad_(bool b) =>
             await Task.Run(async () => {
                 try {
-                    _ = await Accounts.Load(true).ConfigureAwait(false);
-                    _ = await SshProxy.Load(true).ConfigureAwait(false);
-                    _ = await VpnAccounts.Load(true).ConfigureAwait(false);
+                    _ = await Accounts.Load(b).ConfigureAwait(false);
+                    _ = await SshProxy.Load(b).ConfigureAwait(false);
+                    _ = await SshProxy.RandomSelect().ConfigureAwait(false);
+                    _ = await VpnAccounts.Load(b).ConfigureAwait(false);
+                    _ = await VpnAccounts.RandomSelect().ConfigureAwait(false);
                 }
-                catch (Exception ex) { Log.Add(nameof(AccountBackup), ex); }
+                catch (Exception ex) { Log.Add(nameof(AccountsRestore), ex); }
                 return true;
             });
 

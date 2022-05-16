@@ -13,7 +13,7 @@ namespace HomeMailHub
             if (cfg == null)
                 throw new ArgumentNullException(nameof(IConfiguration));
 
-            return await Task.Run(() => {
+            return await Task.Run(async () => {
 
                 Properties.Settings.Default.CheckMailPeriod = cfg.CheckMailPeriod.TotalMinutes;
                 Properties.Settings.Default.ClientTimeout = cfg.ClientTimeout;
@@ -38,6 +38,7 @@ namespace HomeMailHub
                 Properties.Settings.Default.IsSmtpLog = cfg.IsSmtpLog;
                 Properties.Settings.Default.IsSmtpSecure = cfg.IsSmtpSecure;
                 Properties.Settings.Default.IsSmtpEnable = cfg.IsSmtpEnable;
+                Properties.Settings.Default.IsVpnAlways = cfg.IsVpnAlways;
                 Properties.Settings.Default.IsVpnEnable = cfg.IsVpnEnable;
                 Properties.Settings.Default.IsVpnRandom = cfg.IsVpnRandom;
                 Properties.Settings.Default.IsProxyListRepack = cfg.IsProxyListRepack;
@@ -65,6 +66,7 @@ namespace HomeMailHub
                     Properties.Settings.Default.ForbidenEntryList.AddRange(cfg.ForbidenEntryList.ToArray());
 
                 Properties.Settings.Default.Save();
+                await Global.Instance.AccountsSave().ConfigureAwait(false);
                 return true;
             });
         }

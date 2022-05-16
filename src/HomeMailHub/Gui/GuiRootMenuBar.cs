@@ -96,7 +96,8 @@ namespace HomeMailHub.Gui
 					}),
 					new MenuItem (RES.MENU_MAILCHCEK, "", async () => {
 						_ = await Global.Instance.Tasks.Run().ConfigureAwait(false);
-					}),
+					},
+					() => !Global.Instance.Tasks.IsCheckMailRun),
 					null,
 					new MenuItem (RES.MENU_QUIT, "", () => {
 						Application.RequestStop ();
@@ -123,8 +124,8 @@ namespace HomeMailHub.Gui
 						async () => {
 							if (MessageBox.Query (50, 7,
 								RES.MENU_ACCSAVE,
-								$"{RES.MENU_ACCBACKUP}?", RES.TAG_YES, RES.TAG_NO) == 0) {
-									_ = await Global.Instance.AccountBackup();
+								$"{RES.MENU_ACCBACKUP.ClearText()}?", RES.TAG_YES, RES.TAG_NO) == 0) {
+									_ = await Global.Instance.AccountsBackup();
 									RES.MENU_ACCSAVE.StatusBarText();
                                 }
                         },
@@ -133,22 +134,22 @@ namespace HomeMailHub.Gui
                         async () => {
 							if (MessageBox.Query (50, 7,
 								RES.MENU_ACCLOAD,
-								$"{RES.MENU_ACCRESTORE}?", RES.TAG_YES, RES.TAG_NO) == 0) {
-									_ = await Global.Instance.AccountRestore();
-									RES.MENU_ACCLOAD.StatusBarText();
+								$"{RES.MENU_ACCRESTORE.ClearText()}?", RES.TAG_YES, RES.TAG_NO) == 0) {
+									_ = await Global.Instance.AccountsRestore();
+                                    try { Load(); } catch { }
+                                    RES.MENU_ACCLOAD.StatusBarText();
                                 }
                         },
                         () => BackupAllow),
-                    new MenuItem (RES.MENU_REFRESH, "",
-						() => {
-							try { Load(); } catch { }
-						}),
                     RES.MENU_LIGHTTEXT.CreateCheckedMenuItem((b) => {
 						if (b) GuiApp.IsLightText = !GuiApp.IsLightText;
 						return GuiApp.IsLightText;
 					}),
                     null,
-					new MenuItem (RES.MENU_SAVEALL, "", async () => {
+                    new MenuItem (RES.MENU_REFRESH, "", () => {
+                            try { Load(); } catch { }
+                        }, null, null, Key.AltMask | Key.O),
+                    new MenuItem (RES.MENU_SAVEALL, "", async () => {
 						try {
 							await new ConfigurationSave().Save();
 							RES.TAG_SAVE.StatusBarText();
@@ -223,7 +224,7 @@ namespace HomeMailHub.Gui
 				for (int i = 0; i < Global.Instance.VpnAccounts.Count; i++) {
 
 					VpnAccount acc = Global.Instance.VpnAccounts[i];
-                    vpnItemsMenu[i] = new MenuItem(acc.Name, "", null, () => !acc.IsEmpty && !acc.IsExpired);
+                    vpnItemsMenu[i] = new MenuItem(acc.Name, "", null, () => !acc.IsEmpty && !acc.IsExpired && acc.Enable);
                     vpnItemsMenu[i].Action = async () => {
 						_ = await Global.Instance.VpnAccounts.SelectAccount(acc.Name).ConfigureAwait(false);
 						UpdateVpnTitle();
@@ -238,7 +239,7 @@ namespace HomeMailHub.Gui
                 for (int i = 0; i < Global.Instance.SshProxy.Count; i++) {
 
                     SshAccount acc = Global.Instance.SshProxy[i];
-                    sshItemsMenu[i] = new MenuItem(acc.Name, "", null, () => !acc.IsEmpty && !acc.IsExpired);
+                    sshItemsMenu[i] = new MenuItem(acc.Name, "", null, () => !acc.IsEmpty && !acc.IsExpired && acc.Enable);
                     sshItemsMenu[i].Action = async () => {
                         _ = await Global.Instance.SshProxy.SelectAccount(acc.Name).ConfigureAwait(false);
                         UpdateSshTitle();
@@ -305,6 +306,11 @@ namespace HomeMailHub.Gui
                         if (b) { Global.Instance.Config.IsVpnRandom = !Global.Instance.Config.IsVpnRandom;
                                  ToStatusBar(RES.MENU_VPNRANDOM, Global.Instance.Config.IsVpnRandom); }
                         return Global.Instance.Config.IsVpnRandom;
+                    }),
+                    RES.MENU_VPNALWAYS.CreateCheckedMenuItem((b) => {
+                        if (b) { Global.Instance.Config.IsVpnAlways = !Global.Instance.Config.IsVpnAlways;
+                                 ToStatusBar(RES.MENU_VPNALWAYS, Global.Instance.Config.IsVpnAlways); }
+                        return Global.Instance.Config.IsVpnAlways;
                     }),
                     RES.MENU_PROXYREPACK.CreateCheckedMenuItem((b) => {
 						if (b) { Global.Instance.Config.IsProxyListRepack = !Global.Instance.Config.IsProxyListRepack;

@@ -124,6 +124,7 @@ namespace HomeMailHub.Gui
 				Width = 15,
 				DisplayMode = DisplayModeLayout.Horizontal,
 				SelectedItem = 1,
+				NoSymbol = true
 			});
 			frameSelect.Add(busyLabel = new Label("  ")
 			{

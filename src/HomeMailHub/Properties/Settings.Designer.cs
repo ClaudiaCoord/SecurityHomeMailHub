@@ -548,5 +548,17 @@ namespace HomeMailHub.Properties {
                 this["IsVpnRandom"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsVpnAlways {
+            get {
+                return ((bool)(this["IsVpnAlways"]));
+            }
+            set {
+                this["IsVpnAlways"] = value;
+            }
+        }
     }
 }

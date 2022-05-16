@@ -107,7 +107,7 @@ namespace SecyrityMail.Vpn
                     return false;
                 AccountSelected = Items[i];
                 OnPropertyChanged(nameof(AccountSelected));
-                return true;
+                return IsAccountSelected;
             });
 
         public async Task<bool> SelectAccount(string s) =>
@@ -115,9 +115,9 @@ namespace SecyrityMail.Vpn
                 if (string.IsNullOrWhiteSpace(s))
                     return false;
 
-                AccountSelected = (from i in Items where i.Name.Equals(s) select i).FirstOrDefault();
+                AccountSelected = (from i in Items where i.Name.Equals(s) && !i.IsEmpty && !i.IsExpired && i.Enable select i).FirstOrDefault();
                 OnPropertyChanged(nameof(AccountSelected));
-                return true;
+                return IsAccountSelected;
             });
 
         public override async Task<bool> RandomSelect() =>

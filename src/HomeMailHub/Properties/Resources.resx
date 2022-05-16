@@ -516,6 +516,9 @@
   <data name="MENU_VPNACCOUNT" xml:space="preserve">
     <value>Select _VPN account</value>
   </data>
+  <data name="MENU_VPNALWAYS" xml:space="preserve">
+    <value>Always _use VPN, if unavailable, disconnect</value>
+  </data>
   <data name="MENU_VPNBEGIN" xml:space="preserve">
     <value>VPN tunnel activation started</value>
   </data>
@@ -523,7 +526,7 @@
     <value>_VPN service can be activated</value>
   </data>
   <data name="MENU_VPNRANDOM" xml:space="preserve">
-    <value>Always choose a random VPN account from the available ones</value>
+    <value>Always choose a _random VPN account from the available ones</value>
   </data>
   <data name="MENU_VPNREADY" xml:space="preserve">
     <value>VPN tunnel ready, waiting</value>

@@ -480,30 +480,36 @@ namespace HomeMailHub.Gui
 			} finally { runOnce.EndRun(); }
 		}
 
-		private void IsExpireBox_Toggled(bool b) {
-			isNotExpire = !b;
-			expireDate.Enabled = b;
-			if (!b) {
-				expireStore = expireDate.Date;
-				expireDate.Date = DateTime.MinValue;
-			} else {
-				if (expireStore == DateTime.MinValue)
-					expireStore = DateTime.Now.AddDays(5.0);
-				expireDate.Date = expireStore;
-			}
-		}
+		private void IsExpireBox_Toggled(bool b) =>
+			Application.MainLoop.Invoke(() => {
+				isNotExpire = !b;
+				expireDate.Enabled = b;
+				if (!b) {
+					expireStore = expireDate.Date;
+					expireDate.Date = DateTime.MinValue;
+				} else {
+					if (expireStore == DateTime.MinValue)
+						expireStore = DateTime.Now.AddDays(5.0);
+					expireDate.Date = expireStore;
+				}
+			});
 
-		private void EnableBox_Toggled (bool b) {
-			buttonClear.Enabled =
-			buttonExport.Enabled =
-			loginText.Enabled =
-			passText.Enabled =
-			hostText.Enabled =
-			portText.Enabled =
-			nameText.Enabled =
-			expireDate.Enabled = !b;
-			buttonDelete.Enabled = buttonImport.Enabled = buttonPaste.Enabled = true;
-		}
+		private void EnableBox_Toggled (bool b) =>
+			Application.MainLoop.Invoke(() => {
+				buttonClear.Enabled =
+				buttonExport.Enabled =
+				loginText.Enabled =
+				passText.Enabled =
+				hostText.Enabled =
+				portText.Enabled =
+				nameText.Enabled =
+				expireDate.Enabled = !b;
+				buttonClear.Enabled =
+				buttonDelete.Enabled = !b;
+                buttonSave.Enabled =
+				buttonImport.Enabled =
+				buttonPaste.Enabled = true;
+			});
 
 		private void ListView_OpenSelectedItem(ListViewItemEventArgs obj) { runOnce.ResetId(); SelectedListItem(obj); }
 		private void ListView_SelectedItemChanged(ListViewItemEventArgs obj) => SelectedListItem(obj);

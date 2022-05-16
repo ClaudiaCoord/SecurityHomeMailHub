@@ -34,6 +34,7 @@ namespace HomeMailHub
         public bool IsSmtpLog { get; set; }
         public bool IsSmtpSecure { get; set; }
         public bool IsSmtpEnable { get; set; }
+        public bool IsVpnAlways { get; set; }
         public bool IsVpnEnable { get; set; }
         public bool IsVpnRandom { get; set; }
         public bool IsProxyListRepack { get; set; }
@@ -104,6 +105,7 @@ namespace HomeMailHub
             IsNewMessageSendImmediately = Properties.Settings.Default.IsNewMessageSendImmediately;
             IsReceiveOnSendOnly = Properties.Settings.Default.IsReceiveOnSendOnly;
             IsCacheMessagesLog = Properties.Settings.Default.IsCacheMessagesLog;
+            IsVpnAlways = Properties.Settings.Default.IsVpnAlways;
             IsVpnEnable = Properties.Settings.Default.IsVpnEnable;
             IsVpnRandom = Properties.Settings.Default.IsVpnRandom;
             IsEnableLogVpn = Properties.Settings.Default.IsEnableLogVpn;

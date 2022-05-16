@@ -93,11 +93,18 @@ namespace HomeMailHub.Gui {
 			GuiAttribute chfmenu = Application.Driver.MakeAttribute(Color.Red, Color.Black);
 			GuiAttribute chnmenu = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightCyan);
 
-			ColorRed = new ColorScheme() { Normal = cred, Focus = cred, HotFocus = cfred, HotNormal = cfred, Disabled = cdred };
+            GuiAttribute cndialog = Application.Driver.MakeAttribute(Color.Black, Color.Gray);
+            GuiAttribute cfdialog = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
+            GuiAttribute cddialog = Application.Driver.MakeAttribute(Color.DarkGray, Color.Gray);
+            GuiAttribute chfdialog = Application.Driver.MakeAttribute(Color.White, Color.BrightCyan);
+            GuiAttribute chndialog = Application.Driver.MakeAttribute(Color.Red, Color.Gray);
+
+            ColorRed = new ColorScheme() { Normal = cred, Focus = cred, HotFocus = cfred, HotNormal = cfred, Disabled = cdred };
 			ColorGreen = new ColorScheme() { Normal = cgreen, Focus = cgreen, HotFocus = cfgreen, HotNormal = cfgreen, Disabled = cdgreen };
 			Colors.Menu = new ColorScheme() { Normal = cnmenu, Focus = cfmenu, HotFocus = chfmenu, HotNormal = chnmenu, Disabled = cdmenu };
-			InitFieldColor(Settings.Default.IsGuiLightText);
-		}
+            Colors.Dialog = new ColorScheme() { Normal = cndialog, Focus = cfdialog, HotFocus = chfdialog, HotNormal = chndialog, Disabled = cddialog };
+            InitFieldColor(Settings.Default.IsGuiLightText);
+        }
 		static void InitFieldColor(bool b = false) {
 			GuiAttribute cfield = Application.Driver.MakeAttribute(b ? Color.White : Color.Gray, Color.BrightBlue);
 			GuiAttribute cffield = Application.Driver.MakeAttribute(Color.Blue, Color.Gray);
