@@ -1,12 +1,9 @@
 
 [![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg)
-[![GitHub version](https://badge.fury.io/gh/ClaudiaCoord/SecurityHomeMailHub.svg)](https://github.com/ClaudiaCoord/SecurityHomeMailHub)
-[![Download x64](https://img.shields.io/badge/Download-x64-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x64-1.0.8170.msi)
-[![Download x86](https://img.shields.io/badge/Download-x86-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x86-1.0.8170.msi)
-[![Only 32 Kb](https://badge-size.herokuapp.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x64-1.0.8170.msi)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x64-1.0.8170.msi)
 [![GitHub license](https://img.shields.io/github/license/ClaudiaCoord/SecurityHomeMailHub.svg)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/ClaudiaCoord/SecurityHomeMailHub.svg)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/)
-
+[![Download x64](https://img.shields.io/badge/Download-x64-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x64-1.0.8170.msi)
+[![Download x86](https://img.shields.io/badge/Download-x86-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8170/SecurityHomeMailHub-x86-1.0.8170.msi)
 
 # HomeMailHub
 Secure, anonymous, domestic home mail hub MTA / MUA

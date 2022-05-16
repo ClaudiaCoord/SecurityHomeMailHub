@@ -64,7 +64,7 @@ namespace HomeMailHub.Gui
 
 			GuiMenu = new GuiRootMenuBar(
 				UpdateLogTitle,
-				() => { lock (__lock) textView.Text = string.Empty; });
+				() => { lock (__lock) { textView.Text = string.Empty; logList.Clear(); }});
 
 			Add (textView);
 

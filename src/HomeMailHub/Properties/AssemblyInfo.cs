@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // набора атрибутов. Измените значения этих атрибутов для изменения сведений,
 // связанные с этой сборкой.
 [assembly: AssemblyTitle("HomeMailHub")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Secure, anonymous, domestic home mail hub MTA/MUA")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("HomeMailHub")]
-[assembly: AssemblyCopyright("Copyright ©  2022")]
+[assembly: AssemblyCopyright("Copyright ©  2022 https://claudiacoord.github.io/SecurityHomeMailHub/")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
