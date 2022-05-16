@@ -23,7 +23,7 @@ Secure, anonymous, domestic home mail hub MTA / MUA
  - automatic enumeration of proxies in search of the first workable,
  - PGP / GPG encryption of messages
 
- In establishing the connection may use a serial tunneling, VPN Wireguard -> SSH tunnel -> HTTP proxy server, HTTPS, SOCK4, SOCK5.
+ In establishing the connection may use a serial tunneling, `VPN Wireguard` -> `SSH tunnel` -> `HTTP` proxy server, `HTTPS`, `SOCK4`, `SOCK5`.
  At each stage of sending / receiving mail is held network testing, evaluated all the network routes to the specified node.
  Further routes are compared with the "forbidden route" table and in case of a match, the connection is broken immediately.
 
