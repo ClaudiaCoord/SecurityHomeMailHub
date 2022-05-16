@@ -12,7 +12,8 @@ Secure, anonymous, domestic home mail hub MTA / MUA
 ### Built-in encryption is:
  - VPN client Wireguard,
  - SSH tunnel, implements the interface SOCK5, also using other applications,
- - Support for HTTP proxy server, HTTPS, SOCK4, SOCK5,
+ - support for HTTP proxy server, HTTPS, SOCK4, SOCK5,
+ - automatic enumeration of proxies in search of the first workable,
  - PGP / GPG encryption of messages
 
  In establishing the connection may use a serial tunneling, VPN Wireguard -> SSH tunnel -> HTTP proxy server, HTTPS, SOCK4, SOCK5.
