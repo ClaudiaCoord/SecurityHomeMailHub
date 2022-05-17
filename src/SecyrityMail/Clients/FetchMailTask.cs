@@ -20,7 +20,6 @@ namespace SecyrityMail.Clients
         volatile Timer timer = default;
         Thread mainThread = default;
         CancellationTokenSafe cancellation = new();
-        MailEventId eventId = MailEventId.None;
         TimeSpan checkMailPeriod = Timeout.InfiniteTimeSpan;
         bool isReceiveOnSendOnly = false;
         private EventHandler<EventActionArgs> eventProxy;
@@ -29,18 +28,6 @@ namespace SecyrityMail.Clients
         public TimeSpan CheckMailPeriod { get => checkMailPeriod; set { checkMailPeriod = value; OnPropertyChanged(); } }
         public bool IsReceiveOnSendOnly { get => isReceiveOnSendOnly; set { isReceiveOnSendOnly = value; OnPropertyChanged(); } }
         public bool IsCheckMailRun => mainThread != default;
-        public MailEventId ServicesEventId {
-            get => eventId;
-            set {
-                eventId = value;
-                if (value == MailEventId.DeliveryOutMessage) {
-                    if ((mainThread != default) && mainThread.IsAlive)
-                        return;
-                    OnPropertyChanged();
-                    Run_();
-                }
-            }
-        }
         public CancellationToken Token {
             get => cancellation.GetExtendedCancellationToken();
             set => cancellation.SetExtendedCancellationToken(value);
@@ -126,15 +113,12 @@ namespace SecyrityMail.Clients
                     TokenSafe token = cancellation.TokenSafe;
                     InitClientSession session = new();
                     ProxyType proxyType = Global.Instance.Config.ProxyType;
-                    isvpn = Global.Instance.Config.IsVpnEnable;
+                    isvpn = Global.Instance.Config.IsVpnAlways || Global.Instance.Config.IsVpnEnable;
                     isvpnrun = Global.Instance.Config.IsVpnTunnelRunning;
                     isproxylist = Global.Instance.Config.ProxyType != ProxyType.None;
                     isproxyssh = Global.Instance.Config.ProxyType == ProxyType.SshSock4 || Global.Instance.Config.ProxyType == ProxyType.SshSock5;
                     isproxysshrun = Global.Instance.Config.IsSshRunning;
                     isproxylist = !isproxyssh && isproxylist;
-
-                    if (!isvpn && Global.Instance.Config.IsVpnAlways)
-                        throw new Exception($"Not selected compatible VPN account, abort");
 
                     if (isproxyssh && !isproxysshrun) {
                         if (Global.Instance.Proxy.SshProxy.IsEmpty)
@@ -169,8 +153,11 @@ namespace SecyrityMail.Clients
 
                     if (isvpn) {
                         if (!isvpnrun) {
-                            if (Global.Instance.Config.IsVpnRandom || !Global.Instance.VpnAccounts.IsAccountSelected)
+                            if (Global.Instance.Config.IsVpnRandom || !Global.Instance.VpnAccounts.IsAccountSelected) {
                                 _ = await Global.Instance.VpnAccounts.RandomSelect().ConfigureAwait(false);
+                                if (!Global.Instance.VpnAccounts.IsAccountSelected)
+                                    throw new Exception($"Not selected compatible VPN account, abort");
+                            }
                             Global.Instance.Vpn.Begin();
                         }
                         bool b = await Global.Instance.Vpn.VpnWaiter().ConfigureAwait(false);

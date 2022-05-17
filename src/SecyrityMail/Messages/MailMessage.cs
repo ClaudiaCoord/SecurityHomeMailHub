@@ -186,11 +186,11 @@ namespace SecyrityMail.Messages
                                             Global.Instance.Log.Add(nameof(MailMessageCrypt.Decrypt), ex);
                                         }
                                     }
-                                    if (!isdecrypt && localdelivery && (mmsg.HtmlBody != default)) {
+                                    if (!isdecrypt && localdelivery && !string.IsNullOrWhiteSpace(mmsg.HtmlBody)) {
 
                                         BodyBuilder builder = new();
                                         builder.HtmlBody = new ConverterHtmlToHtml().Convert(mmsg);
-                                        builder.TextBody = string.Empty;
+                                        builder.TextBody = mmsg.TextBody;
 
                                         IEnumerable<MimeEntity> attachs = mmsg.Attachments;
                                         if (attachs != null)
@@ -336,8 +336,6 @@ namespace SecyrityMail.Messages
                         return;
 
                     string path = Global.AppendPartDirectory(rootpath, Global.DirectoryPlace.Attach, dt);
-                    id = id.Replace("@", "_").Replace(".", "_");
-
                     foreach (MimeEntity a in attachments) {
                         if (a is MessagePart mep) {
                             using FileStream stream = OpenAttachFile(path, id, mep.ContentDisposition?.FileName);
@@ -351,10 +349,13 @@ namespace SecyrityMail.Messages
                 } catch (Exception ex) { Global.Instance.Log.Add(nameof(SaveAttachments), ex); }
             });
 
-        private FileStream OpenAttachFile(string path, string id, string name) {
-            string filename = Path.Combine(path,
+        private FileStream OpenAttachFile(string path, string id, string name) =>
+            File.OpenWrite(GetAttachFilePath(path, id, name));
+
+        public static string GetAttachFilePath(string path, string id, string name) {
+            id = id.Replace("@", "_").Replace(".", "_");
+            return Path.Combine(path,
                 string.IsNullOrEmpty(name) ? $"{id}-unknown.bin" : $"{id}-{name}");
-            return File.OpenWrite(filename);
         }
     }
 }

@@ -216,6 +216,8 @@ namespace SecyrityMail.Vpn
                     OnCallEvent(MailEventId.PropertyChanged, nameof(TunnelTx), TunnelTx);
                     Dispose();
                     Global.Instance.Log.Add(LogTag, $"exit tunnel, session RX:{TunnelRx.Humanize()}, TX:{TunnelTx.Humanize()}");
+                    IsVpnReady =
+                    IsVpnBegin =
                     IsTunnelRunning = false;
                 }
             });

@@ -31,10 +31,12 @@ namespace HomeMailHub.Gui
         Wait
     }
 
-    public class GuiWriteMessageWindow : Window, IGuiWindow<GuiWriteMessageWindow>
+    public class GuiMessageWriteWindow : Window, IGuiWindow<GuiMessageWriteWindow>
     {
         private Toplevel GuiToplevel { get; set; } = default;
         private MenuBar  GuiMenu { get; set; } = default;
+        private MenuBarItem attachMenu { get; set; } = default;
+        private MenuItem[] attachItemsMenu { get; set; } = default;
 
         private Button buttonClose { get; set; } = default;
         private Button buttonAttach { get; set; } = default;
@@ -66,21 +68,33 @@ namespace HomeMailHub.Gui
         private GuiRunOnce runOnce = new();
         private List<string> fromList = new();
         private List<string> attachList = new();
+        private GuiLinearLayot linearLayot { get; } = new();
         private int __lastTo = -1,
                     __lastCc = -1,
                     __lastBcc = -1;
 
         public Toplevel GetTop => GuiToplevel;
 
-        public GuiWriteMessageWindow() : base(RES.GUIMAILWRITE_TITLE1, 0) {
+        public GuiMessageWriteWindow() : base(RES.GUIMAILWRITE_TITLE1, 0) {
 
             X = 0;
             Y = 1;
             Width = Dim.Fill();
             Height = Dim.Fill() - 1;
             GuiToplevel = GuiExtensions.CreteTop();
+
+            linearLayot.Add("en", new List<GuiLinearData> {
+                new GuiLinearData(82, 5, true),
+                new GuiLinearData(92, 5, true),
+                new GuiLinearData(103, 5, true)
+            });
+            linearLayot.Add("ru", new List<GuiLinearData> {
+                new GuiLinearData(75, 5, true),
+                new GuiLinearData(87, 5, true),
+                new GuiLinearData(100, 5, true)
+            });
         }
-        ~GuiWriteMessageWindow() => Dispose();
+        ~GuiMessageWriteWindow() => Dispose();
 
         public new void Dispose() {
 
@@ -89,9 +103,11 @@ namespace HomeMailHub.Gui
         }
 
         #region Init
-        public GuiWriteMessageWindow Init(string s)
+        public GuiMessageWriteWindow Init(string s)
         {
             selectedPath = s;
+            List<GuiLinearData> layout = linearLayot.GetDefault();
+
             int addrow = string.IsNullOrWhiteSpace(selectedPath) ? 2 : 0;
             frameHeader = new FrameView(new Rect(0, 0, 116, 8 + addrow))
             {
@@ -188,7 +204,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 ColorScheme = GuiApp.ColorField
             });
-            frameHeader.Add(attachLabel = new Label(RES.TAG_ATTACH)
+            frameHeader.Add(attachLabel = new Label($"{RES.TAG_ATTACH}:")
             {
                 X = 1,
                 Y = 5 + addrow,
@@ -200,25 +216,26 @@ namespace HomeMailHub.Gui
                 X = 11,
                 Y = 5 + addrow,
                 AutoSize = true,
-                Visible = false
+                Visible = false,
+                ColorScheme = GuiApp.ColorDescription
             });
             frameHeader.Add(buttonClose = new Button(10, 19, RES.BTN_CLOSE)
             {
-                X = 82,
-                Y = 5 + addrow,
-                AutoSize = true
+                X = layout[0].X,
+                Y = layout[0].Y + addrow,
+                AutoSize = layout[0].AutoSize
             });
             frameHeader.Add(buttonAttach = new Button(10, 19, RES.BTN_ATTACH)
             {
-                X = 92,
-                Y = 5 + addrow,
-                AutoSize = true
+                X = layout[1].X,
+                Y = layout[1].Y + addrow,
+                AutoSize = layout[1].AutoSize
             });
             frameHeader.Add(buttonSend = new Button(10, 19, RES.BTN_SEND)
             {
-                X = 103,
-                Y = 5 + addrow,
-                AutoSize = true
+                X = layout[2].X,
+                Y = layout[2].Y + addrow,
+                AutoSize = layout[2].AutoSize
             });
             buttonClose.Clicked += () => {
                 Application.RequestStop();
@@ -231,8 +248,8 @@ namespace HomeMailHub.Gui
                         string[] ss = d.GuiReturnDialog();
                         if (ss.Length > 0) {
                             attachList.AddRange(ss);
-                            attachText.Visible = attachLabel.Visible = true;
-                            attachText.Text = string.Join(", ", attachList.Select(x => Path.GetFileName(x)));
+                            attachList = attachList.Distinct().ToList();
+                            BuildAttachMenu();
                         }
                     } catch (Exception ex) { ex.StatusBarError(); }
                 }
@@ -286,6 +303,7 @@ namespace HomeMailHub.Gui
             frameMsg.Add(msgText);
             Add(frameMsg);
 
+            attachMenu = new MenuBarItem($"_{RES.TAG_ATTACH}", new MenuItem[0]);
             GuiMenu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
                     new MenuItem (RES.MENU_SEND, "", async () => {
@@ -294,7 +312,8 @@ namespace HomeMailHub.Gui
                     null, null, Key.AltMask | Key.S),
                     null,
                     new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.Q)
-                })
+                }),
+                attachMenu
             });
 
             GuiToplevel.Add(GuiMenu, this);
@@ -458,6 +477,57 @@ namespace HomeMailHub.Gui
                 }
                 return SendReturn.None;
             });
+
+        private void BuildAttachMenu() {
+            try {
+                bool b = attachList.Count > 0;
+                attachText.Visible = attachLabel.Visible = b;
+                if (!b) {
+                    Application.MainLoop.Invoke(() => attachMenu.Children = new MenuItem[0]);
+                    return;
+                }
+                attachText.Text = attachList.Count.ToString();
+                attachItemsMenu = new MenuItem[attachList.Count + 2];
+                int i = 0;
+                for (; i < attachList.Count; i++) {
+                    string path = attachList[i];
+                    attachItemsMenu[i] = new MenuItem(
+                            Path.GetFileName(path.Replace('_', ' ')).Trim(), "",
+                            () => RemoveAttachFile(path));
+                }
+                attachItemsMenu[i++] = null;
+                attachItemsMenu[i] = new MenuItem(
+                        RES.MENU_DELALLATTACH, "", () => RemoveAllAttachFile());
+                Application.MainLoop.Invoke(() => attachMenu.Children = attachItemsMenu);
+            } catch (Exception ex) { ex.StatusBarError(); }
+        }
+
+        private void RemoveAttachFile(string s) {
+            if (!attachList.Contains(s)) return;
+            Application.MainLoop.Invoke(() => {
+                if (MessageBox.Query(50, 7,
+                    RES.TAG_DELETE,
+                    string.Format(RES.TAG_FMT_DELATTACH, Path.GetFileName(s)), RES.TAG_YES, RES.TAG_NO) == 0) {
+                    try {
+                        attachList.Remove(s);
+                        BuildAttachMenu();
+                    } catch (Exception ex) { ex.StatusBarError(); }
+                }
+            });
+        }
+
+        private void RemoveAllAttachFile() {
+            Application.MainLoop.Invoke(() => {
+                if (MessageBox.Query(50, 7,
+                    RES.TAG_DELETE,
+                    RES.TAG_DELALLATTACH, RES.TAG_YES, RES.TAG_NO) == 0) {
+                    try {
+                        attachList.Clear();
+                        BuildAttachMenu();
+                    } catch (Exception ex) { ex.StatusBarError(); }
+                }
+            });
+        }
 
         private void CheckSendReturn(SendReturn sr, AutoResetEvent rauto)
         {

@@ -64,7 +64,6 @@ namespace HomeMailHub
         public bool IsSshSelected { get; } /* no set */
         public bool IsSshRunning { get; } /* no set */
         public bool IsCheckMailRun { get; } /* no set */
-        public MailEventId ServicesEventId { get; set; } /* no set */
         public IPEndPoint VpnEndpoint { get; } /* no set */
 
         public ConfigurationLoad()

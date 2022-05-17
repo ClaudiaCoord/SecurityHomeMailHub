@@ -64,13 +64,13 @@ namespace HomeMailHub.Gui
                     for (int i = 0; i < ss.Length; i++) {
                         Uri uri = new Uri(ss[i]);
                         mitems[n++] = new MenuItem(
-                            uri.DnsSafeHost, "", () => GuiUtils.OpenUri(uri));
+                            uri.DnsSafeHost, "", () => GuiUtils.BrowseUri(uri));
                     }
                     mitems[n++] = null;
                     for (int i = 0; i < urlTools.Length; i++) {
                         Uri uri = new Uri(urlTools[i]);
                         mitems[n++] = new MenuItem(
-                            uri.DnsSafeHost, "", () => GuiUtils.OpenUri(uri));
+                            uri.DnsSafeHost, "", () => GuiUtils.BrowseUri(uri));
                     }
                     return mitems;
                 } catch { }
@@ -166,10 +166,17 @@ namespace HomeMailHub.Gui
         public static ustring GetListTitle(this string a, string b, int i) =>
             string.Format("{0}{1} : {2}", string.IsNullOrWhiteSpace(a) ? "" : $"{a} - ", b, i);
 
-        public static void OpenUri(this Uri uri) {
+        public static void BrowseUri(this Uri uri) {
             try {
                 System.Diagnostics.Process.Start(uri.AbsoluteUri);
-            } catch (Exception ex) { Global.Instance.Log.Add(nameof(OpenUri), ex); }
+            } catch (Exception ex) { Global.Instance.Log.Add(nameof(BrowseUri), ex); }
+        }
+
+        public static void BrowseFile(this string s) {
+            try {
+                System.Diagnostics.Process.Start(s);
+            }
+            catch (Exception ex) { Global.Instance.Log.Add(nameof(BrowseFile), ex); }
         }
 
         public static void StatusBarError(this Exception ex) => StatusBarText(ex.Message);

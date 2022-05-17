@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using NStack;
 using SecyrityMail;
@@ -47,7 +46,8 @@ namespace HomeMailHub.Gui
 		private List<string> log = new();
 		private GuiRunOnce runOnce = new();
 		private CancellationTokenSafe tokenSafe { get; set; } = new();
-		private bool IsEmptyForm =>
+        private GuiLinearLayot linearLayot { get; } = new();
+        private bool IsEmptyForm =>
 			string.IsNullOrWhiteSpace(hostText.Text.ToString()) && string.IsNullOrWhiteSpace(portText.Text.ToString());
 
 		public Toplevel GetTop => GuiToplevel;
@@ -59,9 +59,26 @@ namespace HomeMailHub.Gui
 			Width = Dim.Fill();
 			Height = Dim.Fill() - 1;
 			GuiToplevel = GuiExtensions.CreteTop();
-		}
 
-		public new void Dispose() {
+            linearLayot.Add("en", new List<GuiLinearData> {
+                new GuiLinearData(12, 6, true),
+                new GuiLinearData(21, 6, true),
+                new GuiLinearData(31, 6, true),
+                new GuiLinearData(42, 6, true),
+                new GuiLinearData(23, 3, true),
+                new GuiLinearData(43, 3, true)
+            });
+            linearLayot.Add("ru", new List<GuiLinearData> {
+                new GuiLinearData(12, 6, true),
+                new GuiLinearData(26, 6, true),
+                new GuiLinearData(39, 6, true),
+                new GuiLinearData(51, 6, true),
+                new GuiLinearData(23, 3, true),
+                new GuiLinearData(37, 3, true)
+            });
+        }
+
+        public new void Dispose() {
 
 			this.GetType().IDisposableObject(this);
 			base.Dispose();
@@ -70,7 +87,9 @@ namespace HomeMailHub.Gui
 		#region Init
 		public GuiProxyListWindow Init(string __)
 		{
-			frameList = new FrameView(new Rect(0, 0, 35, 25), RES.GUIPROXY_TITLE1)
+            List<GuiLinearData> layout = linearLayot.GetDefault();
+
+            frameList = new FrameView(new Rect(0, 0, 35, 25), RES.GUIPROXY_TITLE1)
 			{
 				X = 1,
 				Y = 1,
@@ -165,48 +184,48 @@ namespace HomeMailHub.Gui
 			});
 			frameForm.Add(buttonCheckHost = new Button(10, 19, RES.BTN_CHECK)
 			{
-				X = labelOffset + 11,
-				Y = 3,
-				AutoSize = true,
+                X = layout[4].X,
+                Y = layout[4].Y,
+                AutoSize = layout[4].AutoSize,
 				Enabled = false
 			});
 			frameForm.Add(buttonPaste = new Button(10, 19, RES.BTN_PASTE)
 			{
-				X = labelOffset + 21,
-				Y = 3,
-				AutoSize = true,
+                X = layout[5].X,
+                Y = layout[5].Y,
+                AutoSize = layout[5].AutoSize,
 				Enabled = false
 			});
 
 			frameForm.Add(buttonSave = new Button(10, 19, RES.BTN_SAVE)
 			{
-				X = labelOffset,
-				Y = 6,
-				AutoSize = true,
+                X = layout[0].X,
+                Y = layout[0].Y,
+                AutoSize = layout[0].AutoSize,
 				Enabled = false,
 				TabIndex = 13
 			});
 			frameForm.Add(buttonClear = new Button(10, 19, RES.BTN_CLEAR)
 			{
-				X = 21,
-				Y = 6,
-				AutoSize = true,
+                X = layout[1].X,
+                Y = layout[1].Y,
+                AutoSize = layout[1].AutoSize,
 				Enabled = false,
 				TabIndex = 14
 			});
 			frameForm.Add(buttonDelete = new Button(10, 19, RES.BTN_DELETE)
 			{
-				X = 31,
-				Y = 6,
-				AutoSize = true,
+                X = layout[2].X,
+                Y = layout[2].Y,
+                AutoSize = layout[2].AutoSize,
 				Enabled = false,
 				TabIndex = 15
 			});
 			frameForm.Add(buttonCheckAll = new Button(10, 19, RES.BTN_CHECKALL)
 			{
-				X = 42,
-				Y = 6,
-				AutoSize = true,
+                X = layout[3].X,
+                Y = layout[3].Y,
+                AutoSize = layout[3].AutoSize,
 				Enabled = false,
 				TabIndex = 15
 			});
@@ -405,18 +424,18 @@ namespace HomeMailHub.Gui
 			}
 			finally { runOnce.EndRun(SetBusy); }
 		}
-		private void Clean() {
-			portText.Text =
-			hostText.Text = string.Empty;
-			buttonCheckHost.Enabled =
-			buttonDelete.Enabled = false;
-		}
-		private void DataClear() {
+		private void Clean() =>
 			Application.MainLoop.Invoke(() => {
-				Clean();
-				data.Clear();
-				frameList.Title = $"{RES.GUIPROXY_TITLE1} : 0";
+				portText.Text =
+				hostText.Text = string.Empty;
+				buttonCheckHost.Enabled =
+				buttonDelete.Enabled = false;
 			});
+
+		private void DataClear() {
+            data.Clear();
+            Clean();
+            Application.MainLoop.Invoke(() => frameList.Title = $"{RES.GUIPROXY_TITLE1} : 0");
 			runOnce.ResetId();
 		}
 

@@ -81,17 +81,40 @@ namespace HomeMailHub.Gui
 		private InMailType inMailType { get; set; } = InMailType.None;
 		private GuiRunOnce runOnce = new();
 		private List<string> data = new();
+        private GuiLinearLayot linearLayot { get; } = new();
 
-		public GuiMailAccountWindow() : base (RES.GUIMAIL_TITLE1, 0)
+        private bool IsEmptyForm =>
+            string.IsNullOrWhiteSpace(loginText.Text.ToString()) ||
+            string.IsNullOrWhiteSpace(passText.Text.ToString());
+
+        private void ButtonsEnable(bool b) =>
+            buttonSave.Enabled = buttonClear.Enabled = buttonDelete.Enabled = buttonExport.Enabled = b;
+
+        public GuiMailAccountWindow() : base (RES.GUIMAIL_TITLE1, 0)
 		{
 			X = 0;
 			Y = 1;
 			Width = Dim.Fill ();
 			Height = Dim.Fill () - 1;
 			GuiToplevel = GuiExtensions.CreteTop ();
-		}
 
-		public new void Dispose() {
+            linearLayot.Add("en", new List<GuiLinearData> {
+                new GuiLinearData(10, 12, true),
+                new GuiLinearData(19, 12, true),
+                new GuiLinearData(29, 12, true),
+                new GuiLinearData(40, 12, true),
+                new GuiLinearData(51, 12, true)
+            });
+            linearLayot.Add("ru", new List<GuiLinearData> {
+                new GuiLinearData(10, 12, true),
+                new GuiLinearData(24, 12, true),
+                new GuiLinearData(37, 12, true),
+                new GuiLinearData(49, 12, true),
+                new GuiLinearData(60, 12, true)
+            });
+        }
+
+        public new void Dispose() {
 
 			account = default;
 			this.GetType().IDisposableObject(this);
@@ -101,7 +124,9 @@ namespace HomeMailHub.Gui
 		#region Init
 		public GuiMailAccountWindow Init(string __)
 		{
-			frameList = new FrameView (new Rect (0, 0, 35, 25), RES.TAG_ACCOUNTS) {
+            List<GuiLinearData> layout = linearLayot.GetDefault();
+
+            frameList = new FrameView (new Rect (0, 0, 35, 25), RES.TAG_ACCOUNTS) {
 				X = 1,
 				Y = 1
 			};
@@ -277,36 +302,38 @@ namespace HomeMailHub.Gui
 			enableBox.Toggled += EnableBox_Toggled;
 
 			frameUser.Add (buttonSave = new Button (10, 19, RES.BTN_SAVE) {
-				X = labelOffset,
-				Y = 12,
-				AutoSize = true,
-				TabIndex = 13
+                X = layout[0].X,
+                Y = layout[0].Y,
+                AutoSize = layout[0].AutoSize,
+                TabIndex = 13
 			});
 			frameUser.Add (buttonClear = new Button (10, 19, RES.BTN_CLEAR) {
-				X = 19,
-				Y = 12,
-				AutoSize = true,
-				TabIndex = 14
+                X = layout[1].X,
+                Y = layout[1].Y,
+                AutoSize = layout[1].AutoSize,
+                TabIndex = 14
 			});
 			frameUser.Add (buttonDelete = new Button (10, 19, RES.BTN_DELETE) {
-				X = 29,
-				Y = 12,
-				AutoSize = true,
-				TabIndex = 15
+                X = layout[2].X,
+                Y = layout[2].Y,
+                AutoSize = layout[2].AutoSize,
+                TabIndex = 15
 			});
 			frameUser.Add (buttonImport = new Button (10, 19, RES.BTN_IMPORT) {
-				X = 40,
-				Y = 12,
-				AutoSize = true,
-				TabIndex = 16
+                X = layout[3].X,
+                Y = layout[3].Y,
+                AutoSize = layout[3].AutoSize,
+                TabIndex = 16
 			});
 			frameUser.Add (buttonExport = new Button (10, 19, RES.BTN_EXPORT) {
-				X = 51,
-				Y = 12,
-				AutoSize = true,
-				TabIndex = 17
+                X = layout[4].X,
+                Y = layout[4].Y,
+                AutoSize = layout[4].AutoSize,
+                TabIndex = 17
 			});
-			Add (frameUser);
+            loginText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
+            passText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
+            Add(frameUser);
 
 			buttonSave.Clicked += () => SaveItem();
 			buttonClear.Clicked += () => Clean();
@@ -401,9 +428,10 @@ namespace HomeMailHub.Gui
 			GuiToplevel.Add (GuiMenu, this);
 			return this;
 		}
-		#endregion
+        #endregion
 
-		public async void Load() => _ = await Load_().ConfigureAwait(false);
+        #region Load
+        public async void Load() => _ = await Load_().ConfigureAwait(false);
 		private async Task<bool> Load_() =>
 			await Task.Run(async () => {
 				DataClear();
@@ -421,8 +449,9 @@ namespace HomeMailHub.Gui
                 catch { }
                 return true;
 			});
+        #endregion
 
-		private void MailType_SelectedItemChanged (SelectedItemChangedArgs obj) {
+        private void MailType_SelectedItemChanged (SelectedItemChangedArgs obj) {
 			if ((obj == null) || (obj.SelectedItem < 0) || (obj.SelectedItem >= typeopt.Length))
 				return;
 			ustring s = typeopt[obj.SelectedItem].ClearText();
@@ -434,26 +463,27 @@ namespace HomeMailHub.Gui
 		private void DataClear() {
 			data.Clear();
 			Clean();
-			frameList.Title = selectedName.GetListTitle(0);
+            Application.MainLoop.Invoke(() => frameList.Title = selectedName.GetListTitle(0));
 		}
-		private void Clean()
-		{
-			hostInText.Text =
-			hostOutText.Text =
-			loginText.Text =
-			passText.Text =
-			emailText.Text =
-			nameText.Text = string.Empty;
-			portInText.Text = "110";
-			portOutText.Text = "25";
+		private void Clean() =>
+			Application.MainLoop.Invoke(() => {
+                hostInText.Text =
+                hostOutText.Text =
+                loginText.Text =
+                passText.Text =
+                emailText.Text =
+                nameText.Text = string.Empty;
+                portInText.Text = "110";
+                portOutText.Text = "25";
 
-			enableBox.Checked = true;
-			tlsInText.SelectedItem = 0;
-			tlsOutText.SelectedItem = 0;
-			enableBox.Checked = true;
-			inMailType = InMailType.None;
-			frameIn.Title = GetInTitle();
-		}
+                enableBox.Checked = true;
+                tlsInText.SelectedItem = 0;
+                tlsOutText.SelectedItem = 0;
+                enableBox.Checked = true;
+                inMailType = InMailType.None;
+                frameIn.Title = GetInTitle();
+                ButtonsEnable(false);
+            });
 
 		private async void Delete() {
 
@@ -483,22 +513,20 @@ namespace HomeMailHub.Gui
 			} finally { runOnce.EndRun(); }
 		}
 
-		private void EnableBox_Toggled(bool b) {
-			buttonClear.Enabled =
-			buttonDelete.Enabled =
-			buttonImport.Enabled =
-			buttonExport.Enabled =
-			hostInText.Enabled =
-			portInText.Enabled =
-			hostOutText.Enabled =
-			portOutText.Enabled =
-			tlsInText.Enabled =
-			tlsOutText.Enabled =
-			loginText.Enabled =
-			passText.Enabled =
-			emailText.Enabled =
-			nameText.Enabled = !b;
-		}
+		private void EnableBox_Toggled(bool b) =>
+			Application.MainLoop.Invoke(() => {
+                hostInText.Enabled =
+				portInText.Enabled =
+				hostOutText.Enabled =
+				portOutText.Enabled =
+				tlsInText.Enabled =
+				tlsOutText.Enabled =
+				loginText.Enabled =
+				passText.Enabled =
+				emailText.Enabled =
+				nameText.Enabled = !b;
+                ButtonsEnable(!b);
+            });
 
 		private void ListView_OpenSelectedItem(ListViewItemEventArgs obj) => SelectedListItem(obj);
 		private void ListView_SelectedItemChanged(ListViewItemEventArgs obj) => SelectedListItem(obj);
@@ -566,8 +594,9 @@ namespace HomeMailHub.Gui
 				enableBox.Checked = a.Enable;
 				EnableBox_Toggled(!a.Enable);
 				account = a;
+                ButtonsEnable(true);
 
-			} finally { runOnce.EndRun(); }
+            } finally { runOnce.EndRun(); }
 		}
 
 		private async void SaveItem() {

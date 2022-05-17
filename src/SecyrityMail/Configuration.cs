@@ -48,7 +48,6 @@ namespace SecyrityMail
         public bool IsProxyListRepack { get; set; } = true;
         public bool IsReceiveOnSendOnly { get => Global.Instance.Tasks.IsReceiveOnSendOnly; set => Global.Instance.Tasks.IsReceiveOnSendOnly = value; }
         public TimeSpan CheckMailPeriod { get => Global.Instance.Tasks.CheckMailPeriod; set => Global.Instance.Tasks.CheckMailPeriod = value; }
-        public MailEventId ServicesEventId { get => Global.Instance.Tasks.ServicesEventId; set => Global.Instance.Tasks.ServicesEventId = value; }
 
         public string VpnDnsDefault { get; set; } = string.Empty;
         public string VpnAllowedIPDefault { get; set; } = string.Empty;
@@ -150,7 +149,6 @@ namespace SecyrityMail
             Pop3ClientIdle = cfg.Pop3ClientIdle;
             Pop3ServicePort = cfg.Pop3ServicePort;
             ProxyType = cfg.ProxyType;
-            ServicesEventId = cfg.ServicesEventId;
             SmtpClientIdle = cfg.SmtpClientIdle;
             SmtpServicePort = cfg.SmtpServicePort;
             SpamCheckCount = cfg.SpamCheckCount;

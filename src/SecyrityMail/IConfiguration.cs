@@ -55,7 +55,6 @@ namespace SecyrityMail
         double Pop3ClientIdle { get; set; }
         int Pop3ServicePort { get; set; }
         ProxyType ProxyType { get; set; }
-        MailEventId ServicesEventId { get; set; }
         double SmtpClientIdle { get; set; }
         int SmtpServicePort { get; set; }
         int SpamCheckCount { get; set; }

@@ -87,6 +87,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -100,19 +101,20 @@
     <Compile Include="CmdLine\CmdOptionException.cs" />
     <Compile Include="ConfigurationLoad.cs" />
     <Compile Include="ConfigurationSave.cs" />
+    <Compile Include="Gui\GuiLinearLayot.cs" />
     <Compile Include="Gui\GuiProxyListWindow.cs" />
     <Compile Include="Gui\GuiRootMenuBar.cs" />
     <Compile Include="Gui\GuiRunOnce.cs" />
     <Compile Include="Gui\GuiServicesSettingsWindow.cs" />
-    <Compile Include="Gui\GuiWriteMessageWindow.cs" />
+    <Compile Include="Gui\GuiMessageWriteWindow.cs" />
     <Compile Include="Gui\Dialogs\GuiOpenDialog.cs" />
     <Compile Include="Gui\Dialogs\GuiSaveDialog.cs" />
     <Compile Include="Gui\Dialogs\IFileDialog.cs" />
     <Compile Include="Gui\GuiApp.cs" />
     <Compile Include="Gui\GuiExtensions.cs" />
     <Compile Include="Gui\GuiMailAccountWindow.cs" />
-    <Compile Include="Gui\GuiMailMessagesWindow.cs" />
-    <Compile Include="Gui\GuiReadMessageWindow.cs" />
+    <Compile Include="Gui\GuiMessagesListWindow.cs" />
+    <Compile Include="Gui\GuiMessageReadWindow.cs" />
     <Compile Include="Gui\GuiRootStatusBar.cs" />
     <Compile Include="Gui\GuiRootWindow.cs" />
     <Compile Include="Gui\GuiSshAccountWindow.cs" />
@@ -136,6 +138,7 @@
     </Compile>
     <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Version\GithubFeed.cs" />
   </ItemGroup>
   <ItemGroup>
     <ContentWithTargetPath Include="Install\proxy\ProxyHttp.in">

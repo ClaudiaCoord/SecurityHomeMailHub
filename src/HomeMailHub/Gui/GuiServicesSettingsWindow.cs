@@ -100,6 +100,7 @@ namespace HomeMailHub.Gui
         private RadioGroup entrySelectType { get; set; } = default;
 
         private List<string> adapters = new();
+        private GuiLinearLayot linearLayot { get; } = new();
 
         public Toplevel GetTop => GuiToplevel;
 
@@ -111,6 +112,23 @@ namespace HomeMailHub.Gui
             Height = Dim.Fill() - 1;
             GuiToplevel = GuiExtensions.CreteTop();
             adapters.Add("*");
+
+            linearLayot.Add("en", new List<GuiLinearData> {
+                new GuiLinearData(21, 14, true),
+                new GuiLinearData(30, 14, true),
+                new GuiLinearData(38, 14, true),
+                new GuiLinearData(30, 8, true),
+                new GuiLinearData(39, 8, true),
+                new GuiLinearData(47, 8, true)
+            });
+            linearLayot.Add("ru", new List<GuiLinearData> {
+                new GuiLinearData(8,  14, true),
+                new GuiLinearData(24, 14, true),
+                new GuiLinearData(37, 14, true),
+                new GuiLinearData(17, 8, true),
+                new GuiLinearData(33, 8, true),
+                new GuiLinearData(46, 8, true)
+            });
         }
         ~GuiServicesSettingsWindow() => Dispose();
 
@@ -123,6 +141,8 @@ namespace HomeMailHub.Gui
         #region Init
         public GuiServicesSettingsWindow Init(string s)
         {
+            List<GuiLinearData> layout = linearLayot.GetDefault();
+
             tabView = new TabView()
             {
                 X = 0,
@@ -562,21 +582,21 @@ namespace HomeMailHub.Gui
             });
             frameSecureEntry.Add(buttonForbidenEntrySort = new Button(10, 19, RES.BTN_SORT)
             {
-                X = 21,
-                Y = 14,
-                AutoSize = true
+                X = layout[0].X,
+                Y = layout[0].Y,
+                AutoSize = layout[0].AutoSize
             });
             frameSecureEntry.Add(buttonForbidenEntryAdd = new Button(10, 19, RES.BTN_ADD)
             {
-                X = 30,
-                Y = 14,
-                AutoSize = true
+                X = layout[1].X,
+                Y = layout[1].Y,
+                AutoSize = layout[1].AutoSize
             });
             frameSecureEntry.Add(buttonForbidenEntryDelete = new Button(10, 19, RES.BTN_DELETE)
             {
-                X = 38,
-                Y = 14,
-                AutoSize = true
+                X = layout[2].X,
+                Y = layout[2].Y,
+                AutoSize = layout[2].AutoSize
             });
             listForbidenEntryView.OpenSelectedItem += ListForbidenEntryView_OpenSelectedItem;
             listForbidenEntryView.SelectedItemChanged += ListForbidenEntryView_SelectedItemChanged;
@@ -620,21 +640,21 @@ namespace HomeMailHub.Gui
             });
             frameSecureRoute.Add(buttonForbidenRouteSort = new Button(10, 19, RES.BTN_SORT)
             {
-                X = 30,
-                Y = 8,
-                AutoSize = true
+                X = layout[3].X,
+                Y = layout[3].Y,
+                AutoSize = layout[3].AutoSize
             });
             frameSecureRoute.Add(buttonForbidenRouteAdd = new Button(10, 19, RES.BTN_ADD)
             {
-                X = 39,
-                Y = 8,
-                AutoSize = true
+                X = layout[4].X,
+                Y = layout[4].Y,
+                AutoSize = layout[4].AutoSize
             });
             frameSecureRoute.Add(buttonForbidenRouteDelete = new Button(10, 19, RES.BTN_DELETE)
             {
-                X = 47,
-                Y = 8,
-                AutoSize = true
+                X = layout[5].X,
+                Y = layout[5].Y,
+                AutoSize = layout[5].AutoSize
             });
             listForbidenRouteView.OpenSelectedItem += ListForbidenRrouteView_OpenSelectedItem;
             listForbidenRouteView.SelectedItemChanged += ListForbidenRrouteView_SelectedItemChanged;

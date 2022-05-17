@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Reflection;
+using HomeMailHub.Version;
 using SecyrityMail;
 using SecyrityMail.Data;
 using SecyrityMail.MailAccounts;
@@ -17,6 +18,7 @@ namespace HomeMailHub.Gui
 		private Action actionUpdateTitle = () => { };
 		private Action actionClearLog = () => { };
         private string appVersion;
+        private bool   appVersionBusy = false;
 
         private MenuBarItem[] rootItems;
         private MenuItem[]  userItemsMenu { get; set; } = default;
@@ -57,7 +59,7 @@ namespace HomeMailHub.Gui
 		public GuiRootMenuBar(Action aupdate, Action aclear) {
             actionUpdateTitle = aupdate;
             actionClearLog = aclear;
-            appVersion = string.Format(RES.TAG_FMT_VERSION, Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            appVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             Init();
         }
@@ -92,7 +94,7 @@ namespace HomeMailHub.Gui
 				new MenuBarItem (RES.MENU_MAIL, new MenuItem [] {
 					mailboxMenu,
 					new MenuItem (RES.MENU_MAILNEW, "", () => {
-						GuiApp.Get.LoadWindow(typeof(GuiWriteMessageWindow));
+						GuiApp.Get.LoadWindow(typeof(GuiMessageWriteWindow));
 					}),
 					new MenuItem (RES.MENU_MAILCHCEK, "", async () => {
 						_ = await Global.Instance.Tasks.Run().ConfigureAwait(false);
@@ -156,7 +158,32 @@ namespace HomeMailHub.Gui
 						} catch (Exception ex) { ex.StatusBarError(); }
 					}, null, null, Key.AltMask | Key.S),
                     null,
-                    new MenuItem (appVersion, "", () => { }, () => false)
+                    new MenuItem (string.Format(RES.TAG_FMT_VERSION, appVersion), "", async () => {
+                        try {
+							if (appVersionBusy)
+								return;
+                            appVersionBusy = true;
+
+                            GithubFeed feed = new();
+							bool b = await feed.GetReleaseVersion().ConfigureAwait(false);
+							if (!b || feed.IsEmpty) {
+								RES.TAG_VERSIONERROR.StatusBarText();
+								return;
+                            }
+							if (!(b = feed.CompareVersion(appVersion)))
+                                feed.GetDescription.StatusBarText();
+							Application.MainLoop.Invoke(() => {
+								int x = MessageBox.Query (50, 7,
+									RES.MENU_VERSIONCHECK,
+									b ? string.Format(RES.MENU_FMT_VERSIONOLD, appVersion) :
+									    string.Format(RES.MENU_FMT_VERSIONNEW, appVersion, feed.GetVersion),
+									RES.TAG_YES, RES.TAG_NO);
+								if (!b && (x == 0))
+									new Uri(feed.GetReleasesUrl, UriKind.Absolute).BrowseUri();
+                            });
+                        } catch (Exception ex) { ex.StatusBarError(); }
+						finally { appVersionBusy = false; }
+					}, () => !appVersionBusy)
                 }),
 				new MenuBarItem ($"_{RES.TAG_ACCOUNTS}", new MenuItem [] {
 					new MenuItem (RES.MENU_MAILACCOUNT, "", () => {
@@ -214,7 +241,7 @@ namespace HomeMailHub.Gui
 
                     UserAccount acc = Global.Instance.Accounts[i];
                     userItemsMenu[i] = new MenuItem(
-                        acc.Email, "", () => GuiApp.Get.LoadWindow(typeof(GuiMailMessagesWindow), acc.Email), () => acc.Enable);
+                        acc.Email, "", () => GuiApp.Get.LoadWindow(typeof(GuiMessagesListWindow), acc.Email), () => acc.Enable);
                 }
             }
             Application.MainLoop.Invoke(() => mailboxMenu.Children = (userItemsMenu == null) ? defaultMenuItem() : userItemsMenu);
@@ -335,8 +362,12 @@ namespace HomeMailHub.Gui
 					}, false),
 					RES.MENU_PROXYCHECK.CreateCheckedMenuItem((b) => {
 						return Global.Instance.Config.IsProxyCheckRun;
-					}, false)
-				};
+					}, false),
+                    null,
+                    new MenuItem (RES.MENU_REFRESHVPN, "", () => {
+                            try { Load(); } catch { }
+                        }, null, null, Key.AltMask | Key.R),
+                };
             Application.MainLoop.Invoke(() => tunnelMenu.Children = buildTunnelMenu);
 		}
         #endregion

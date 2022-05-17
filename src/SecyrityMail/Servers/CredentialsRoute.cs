@@ -133,7 +133,8 @@ namespace SecyrityMail.Servers
                             mmsg.To.Clear();
                             mmsg.To.Add(new MailboxAddress(t.Item3.Item1, t.Item3.Item2));
 
-                            if (t.Item1 || (t.Item2 == Global.DirectoryPlace.Error))
+                            bool isDeliveryOutMessage = t.Item1 || (t.Item2 == Global.DirectoryPlace.Error);
+                            if (isDeliveryOutMessage)
                                 msg = await LocalDelivery(t.Item2, t.Item4, t.Item3.Item2, mmsg, t.Item5)
                                             .ConfigureAwait(false);
                             else
@@ -142,7 +143,7 @@ namespace SecyrityMail.Servers
 
                             if (msg != null)
                                 act.Invoke(
-                                    t.Item1 ? MailEventId.DeliveryLocalMessage : MailEventId.DeliveryOutMessage,
+                                    isDeliveryOutMessage ? MailEventId.DeliveryLocalMessage : MailEventId.DeliveryOutMessage,
                                     $"{t.Item3.Item1} {t.Item3.Item2}", msg);
                         }
                         return MessageStoreReturn.MessageDelivered;

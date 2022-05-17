@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using HomeMailHub.Gui;
+using HomeMailHub.Version;
 using SecyrityMail;
 using SecyrityMail.Utils;
 

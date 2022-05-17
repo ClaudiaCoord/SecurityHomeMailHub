@@ -13,7 +13,7 @@ using RES = HomeMailHub.Properties.Resources;
 
 namespace HomeMailHub.Gui
 {
-    public class GuiMailMessagesWindow : Window, IGuiWindow<GuiMailMessagesWindow>
+    public class GuiMessagesListWindow : Window, IGuiWindow<GuiMessagesListWindow>
     {
         private Toplevel GuiToplevel { get; set; } = default;
         private MenuBar GuiMenu { get; set; } = default;
@@ -49,10 +49,11 @@ namespace HomeMailHub.Gui
         private List<string> data = new();
         private MailMessages msgs { get; set; } = default;
         private Timer systemTimer { get; set; } = default;
+        private GuiLinearLayot linearLayot { get; } = new();
 
         public Toplevel GetTop => GuiToplevel;
 
-        public GuiMailMessagesWindow() : base(RES.GUIMESSAGE_TITLE1, 0)
+        public GuiMessagesListWindow() : base(RES.GUIMESSAGE_TITLE1, 0)
         {
             X = 0;
             Y = 1;
@@ -62,8 +63,21 @@ namespace HomeMailHub.Gui
             systemTimer = new Timer((a) => {
                 Application.MainLoop?.Invoke(() => waitLoadProgress.Pulse());
             }, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+
+            linearLayot.Add("en", new List<GuiLinearData> {
+                new GuiLinearData(73, 4, true),
+                new GuiLinearData(83, 4, true),
+                new GuiLinearData(94, 4, true),
+                new GuiLinearData(104, 4, true)
+            });
+            linearLayot.Add("ru", new List<GuiLinearData> {
+                new GuiLinearData(65, 4, true),
+                new GuiLinearData(77, 4, true),
+                new GuiLinearData(89, 4, true),
+                new GuiLinearData(102, 4, true)
+            });
         }
-        ~GuiMailMessagesWindow() => Dispose();
+        ~GuiMessagesListWindow() => Dispose();
 
         public new void Dispose() {
 
@@ -74,9 +88,10 @@ namespace HomeMailHub.Gui
         }
 
         #region Init
-        public GuiMailMessagesWindow Init(string s)
+        public GuiMessagesListWindow Init(string s)
         {
             selectedName = s;
+            List<GuiLinearData> layout = linearLayot.GetDefault();
 
             frameList = new FrameView(new Rect(0, 0, 116, 17), $"{s} - {RES.TAG_MESSAGE}")
             {
@@ -133,7 +148,8 @@ namespace HomeMailHub.Gui
                 X = 5,
                 Y = 1,
                 Width = 5,
-                Height = 1
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
             });
             frameMsg.Add(msgIdLabel = new Label("MsgId: ")
             {
@@ -146,7 +162,8 @@ namespace HomeMailHub.Gui
                 X = 18,
                 Y = 1,
                 Width = 15,
-                Height = 1
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
             });
             frameMsg.Add(dateLabel = new Label(RES.TAG_DATE)
             {
@@ -159,7 +176,8 @@ namespace HomeMailHub.Gui
                 X = 84,
                 Y = 1,
                 Width = 15,
-                Height = 1
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
             });
             frameMsg.Add(folderLabel = new Label(RES.TAG_FOLDER)
             {
@@ -172,7 +190,8 @@ namespace HomeMailHub.Gui
                 X = 11,
                 Y = 2,
                 Width = 10,
-                Height = 1
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
             });
             frameMsg.Add(sizeLabel = new Label(RES.TAG_SIZE)
             {
@@ -185,7 +204,8 @@ namespace HomeMailHub.Gui
                 X = 86,
                 Y = 2,
                 Width = 10,
-                Height = 1
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
             });
             frameMsg.Add(subjLabel = new Label(RES.TAG_SUBJECT)
             {
@@ -197,31 +217,32 @@ namespace HomeMailHub.Gui
             {
                 X = 11,
                 Y = 3,
-                AutoSize = true
+                AutoSize = true,
+                ColorScheme = GuiApp.ColorDescription
             });
             frameMsg.Add(buttonClose = new Button(10, 19, RES.BTN_CLOSE)
             {
-                X = 73,
-                Y = 4,
-                AutoSize = true
+                X = layout[0].X,
+                Y = layout[0].Y,
+                AutoSize = layout[0].AutoSize
             });
             frameMsg.Add(buttonDelete = new Button(10, 19, RES.BTN_DELETE)
             {
-                X = 83,
-                Y = 4,
-                AutoSize = true
+                X = layout[1].X,
+                Y = layout[1].Y,
+                AutoSize = layout[1].AutoSize
             });
             frameMsg.Add(buttonReply = new Button(10, 19, RES.BTN_REPLAY)
             {
-                X = 94,
-                Y = 4,
-                AutoSize = true
+                X = layout[2].X,
+                Y = layout[2].Y,
+                AutoSize = layout[2].AutoSize
             });
             frameMsg.Add(buttonOpen = new Button(10, 19, RES.BTN_OPEN)
             {
-                X = 104,
-                Y = 4,
-                AutoSize = true
+                X = layout[3].X,
+                Y = layout[3].Y,
+                AutoSize = layout[3].AutoSize
             });
             buttonClose.Clicked += () => {
                 Application.RequestStop();
@@ -242,12 +263,12 @@ namespace HomeMailHub.Gui
             buttonReply.Clicked += () => {
                 if ((msgs == null) || string.IsNullOrEmpty(selectedPath))
                     return;
-                GuiApp.Get.LoadWindow(typeof(GuiWriteMessageWindow), selectedPath);
+                GuiApp.Get.LoadWindow(typeof(GuiMessageWriteWindow), selectedPath);
             };
             buttonOpen.Clicked += () => {
                 if ((msgs == null) || string.IsNullOrEmpty(selectedPath))
                     return;
-                GuiApp.Get.LoadWindow(typeof(GuiReadMessageWindow), selectedPath);
+                GuiApp.Get.LoadWindow(typeof(GuiMessageReadWindow), selectedPath);
             };
 
             Add(frameMsg);
@@ -267,8 +288,8 @@ namespace HomeMailHub.Gui
         }
         #endregion
 
+        #region Load
         public async void Load() => _ = await Load_().ConfigureAwait(false);
-
         private async Task<bool> Load_() =>
             await Task.Run(async () => {
                 WaitStart();
@@ -291,6 +312,7 @@ namespace HomeMailHub.Gui
                 finally { WaitStop(); }
                 return true;
             });
+        #endregion
 
         private void WaitStart() {
             Application.MainLoop?.Invoke(() => waitLoadProgress.Visible = true);
@@ -352,7 +374,7 @@ namespace HomeMailHub.Gui
             if ((obj.Item >= 0) && (obj.Item < msgs.Count)) {
                 selectedPath = msgs.Items[ReverseIndex(obj.Item)].FilePath;
                 if (!string.IsNullOrEmpty(selectedPath))
-                    GuiApp.Get.LoadWindow(typeof(GuiReadMessageWindow), selectedPath);
+                    GuiApp.Get.LoadWindow(typeof(GuiMessageReadWindow), selectedPath);
             }
         }
 

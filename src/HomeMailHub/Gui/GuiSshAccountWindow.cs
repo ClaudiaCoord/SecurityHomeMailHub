@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HomeMailHub.Gui.Dialogs;
@@ -9,7 +8,6 @@ using NStack;
 using SecyrityMail;
 using SecyrityMail.Proxy;
 using SecyrityMail.Proxy.SshProxy;
-using SecyrityMail.Vpn;
 using Terminal.Gui;
 using RES = HomeMailHub.Properties.Resources;
 
@@ -56,15 +54,17 @@ namespace HomeMailHub.Gui
 		private DateField expireDate { get; set; } = default;
 		private CheckBox  expireBox { get; set; } = default;
 		private CheckBox  enableBox { get; set; } = default;
+        private ColorScheme ColorWarning { get; set; } = default;
 
-		private bool isNotExpire { get; set; } = true;
+        private bool isNotExpire { get; set; } = true;
 		private DateTime expireStore { get; set; } = DateTime.MinValue;
 		private string selectedName { get; set; } = string.Empty;
 		private SshAccount account { get; set; } = default;
 		private GuiRunOnce runOnce = new();
 		private List<string> data = new();
+        private GuiLinearLayot linearLayot { get; } = new();
 
-		public Toplevel GetTop => GuiToplevel;
+        public Toplevel GetTop => GuiToplevel;
 
 		public GuiSshAccountWindow () : base (RES.GUISSH_TITLE1, 0)
 		{
@@ -72,10 +72,27 @@ namespace HomeMailHub.Gui
 			Y = 1;
 			Width = Dim.Fill ();
 			Height = Dim.Fill () - 1;
-			GuiToplevel = GuiExtensions.CreteTop ();
-		}
+			GuiToplevel = GuiExtensions.CreteTop();
 
-		public new void Dispose() {
+            linearLayot.Add("en", new List<GuiLinearData> {
+                new GuiLinearData(12, 16, true),
+                new GuiLinearData(21, 16, true),
+                new GuiLinearData(31, 16, true),
+                new GuiLinearData(42, 16, true),
+                new GuiLinearData(53, 16, true),
+                new GuiLinearData(33, 7, true)
+            });
+            linearLayot.Add("ru", new List<GuiLinearData> {
+                new GuiLinearData(12, 16, true),
+                new GuiLinearData(26, 16, true),
+                new GuiLinearData(39, 16, true),
+                new GuiLinearData(51, 16, true),
+                new GuiLinearData(62, 16, true),
+                new GuiLinearData(30, 7, true)
+            });
+        }
+
+        public new void Dispose() {
 
 			account = default;
 			this.GetType().IDisposableObject(this);
@@ -85,7 +102,9 @@ namespace HomeMailHub.Gui
 		#region Init
 		public GuiSshAccountWindow Init(string __)
 		{
-			frameList = new FrameView (new Rect (0, 0, 35, 25), RES.TAG_ACCOUNTS) {
+            List<GuiLinearData> layout = linearLayot.GetDefault();
+
+            frameList = new FrameView (new Rect (0, 0, 35, 25), RES.TAG_ACCOUNTS) {
 				X = 1,
 				Y = 1
 			};
@@ -157,11 +176,10 @@ namespace HomeMailHub.Gui
 			});
 			frameForm.Add(buttonPaste = new Button(10, 19, RES.BTN_PASTE)
 			{
-				X = labelOffset + 21,
-				Y = 7,
-				AutoSize = true
+                X = layout[5].X,
+                Y = layout[5].Y,
+                AutoSize = layout[5].AutoSize,
 			});
-
 			frameForm.Add(proxyLabel = new Label(RES.TAG_TYPE)
 			{
 				X = 1,
@@ -224,37 +242,37 @@ namespace HomeMailHub.Gui
 			enableBox.Toggled += EnableBox_Toggled;
 
 			frameForm.Add (buttonSave = new Button (10, 19, RES.BTN_SAVE) {
-				X = labelOffset,
-				Y = 16,
-				AutoSize = true,
+                X = layout[0].X,
+                Y = layout[0].Y,
+                AutoSize = layout[0].AutoSize,
 				Enabled = false,
 				TabIndex = 13
 			});
 			frameForm.Add (buttonClear = new Button (10, 19, RES.BTN_CLEAR) {
-				X = 21,
-				Y = 16,
-				AutoSize = true,
-				Enabled = false,
+                X = layout[1].X,
+                Y = layout[1].Y,
+                AutoSize = layout[1].AutoSize,
+                Enabled = false,
 				TabIndex = 14
 			});
 			frameForm.Add (buttonDelete = new Button (10, 19, RES.BTN_DELETE) {
-				X = 31,
-				Y = 16,
-				AutoSize = true,
-				Enabled = false,
+                X = layout[2].X,
+                Y = layout[2].Y,
+                AutoSize = layout[2].AutoSize,
+                Enabled = false,
 				TabIndex = 15
 			});
 			frameForm.Add (buttonImport = new Button (10, 19, RES.BTN_IMPORT) {
-				X = 42,
-				Y = 16,
-				AutoSize = true,
-				TabIndex = 16
+                X = layout[3].X,
+                Y = layout[3].Y,
+                AutoSize = layout[3].AutoSize,
+                TabIndex = 16
 			});
 			frameForm.Add (buttonExport = new Button (10, 19, RES.BTN_EXPORT) {
-				X = 53,
-				Y = 16,
-				AutoSize = true,
-				Enabled = false,
+                X = layout[4].X,
+                Y = layout[4].Y,
+                AutoSize = layout[4].AutoSize,
+                Enabled = false,
 				TabIndex = 17
 			});
 			buttonSave.Clicked += () => SaveItem();
@@ -356,9 +374,10 @@ namespace HomeMailHub.Gui
 			GuiToplevel.Add(GuiMenu, this);
 			return this;
 		}
-		#endregion
+        #endregion
 
-		private async Task<bool> FromClipBoard() =>
+        #region Load
+        private async Task<bool> FromClipBoard() =>
 			await Task.Run(() => {
 				try {
 
@@ -426,6 +445,7 @@ namespace HomeMailHub.Gui
                 catch (Exception ex) { ex.StatusBarError(); }
                 return true;
             });
+        #endregion
 
         private void DataClear() {
 			data.Clear();
@@ -549,7 +569,7 @@ namespace HomeMailHub.Gui
 					$"{RES.TAG_ACCOUNT} {GetInTitle(a.Type)}" : $"{RES.TAG_ACCOUNT} {GetInTitle(a.Type)} - {a.Name}";
 
 				if (a.IsExpired)
-					expireLabel.ColorScheme = Colors.Error;
+					expireLabel.ColorScheme = GuiApp.ColorWarning;
 				else
 					expireLabel.ColorScheme = Colors.Base;
 

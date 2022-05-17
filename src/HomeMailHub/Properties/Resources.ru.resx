@@ -117,50 +117,56 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BTN_ADD" xml:space="preserve">
+    <value>_Добавить</value>
+  </data>
   <data name="BTN_ATTACH" xml:space="preserve">
-    <value>_Attach</value>
+    <value>_Вложения</value>
   </data>
   <data name="BTN_CHECK" xml:space="preserve">
-    <value>_Check</value>
+    <value>_Проверить</value>
   </data>
   <data name="BTN_CHECKALL" xml:space="preserve">
-    <value>Check _All</value>
+    <value>П_роверить Все</value>
   </data>
   <data name="BTN_CLEAR" xml:space="preserve">
-    <value>Cl_ear</value>
+    <value>_Очистить</value>
   </data>
   <data name="BTN_CLOSE" xml:space="preserve">
-    <value>_Close</value>
+    <value>_Закрыть</value>
   </data>
   <data name="BTN_DELETE" xml:space="preserve">
-    <value>_Delete</value>
+    <value>_Удалить</value>
   </data>
   <data name="BTN_EXPORT" xml:space="preserve">
-    <value>_Export</value>
+    <value>_Экспорт</value>
   </data>
   <data name="BTN_IMPORT" xml:space="preserve">
-    <value>_Import</value>
+    <value>_Импорт</value>
   </data>
   <data name="BTN_OPEN" xml:space="preserve">
-    <value>_Open</value>
+    <value>_Открыть</value>
   </data>
   <data name="BTN_PASTE" xml:space="preserve">
-    <value>_Paste</value>
+    <value>_Вставить</value>
   </data>
   <data name="BTN_RELOAD" xml:space="preserve">
-    <value>_Reload</value>
+    <value>_Перезагрузить</value>
   </data>
   <data name="BTN_REPLAY" xml:space="preserve">
-    <value>_Reply</value>
+    <value>_Ответить</value>
   </data>
   <data name="BTN_SAVE" xml:space="preserve">
-    <value>_Save</value>
+    <value>_Сохранить</value>
   </data>
   <data name="BTN_SEND" xml:space="preserve">
-    <value>_Send</value>
+    <value>_Отправить</value>
   </data>
   <data name="BTN_SORT" xml:space="preserve">
-    <value>_Sort</value>
+    <value>_Сортировать</value>
+  </data>
+  <data name="BTN_SOURCE" xml:space="preserve">
+    <value>_Источник</value>
   </data>
   <data name="BTN_START" xml:space="preserve">
     <value>_Старт</value>
@@ -417,8 +423,17 @@
   <data name="MENU_CLOSE" xml:space="preserve">
     <value>_Закрыть</value>
   </data>
+  <data name="MENU_DELALLATTACH" xml:space="preserve">
+    <value>_Удалить все вложения</value>
+  </data>
   <data name="MENU_DELETE" xml:space="preserve">
     <value>_Удалить</value>
+  </data>
+  <data name="MENU_FMT_VERSIONNEW" xml:space="preserve">
+    <value>Текущая версия {0}, новая версия {1}, открыть страницу с обновлениями?</value>
+  </data>
+  <data name="MENU_FMT_VERSIONOLD" xml:space="preserve">
+    <value>Текущая версия {0}, обновлений нет</value>
   </data>
   <data name="MENU_LIGHTTEXT" xml:space="preserve">
     <value>_Более яркий текст в формах</value>
@@ -483,6 +498,9 @@
   <data name="MENU_REFRESH" xml:space="preserve">
     <value>_Обновить данные в меню</value>
   </data>
+  <data name="MENU_REFRESHVPN" xml:space="preserve">
+    <value>_Обновить статистику Proxy/VPN</value>
+  </data>
   <data name="MENU_RELOAD" xml:space="preserve">
     <value>_Перезагрузить</value>
   </data>
@@ -509,6 +527,9 @@
   </data>
   <data name="MENU_SSHSELECT" xml:space="preserve">
     <value>SSH аккаунт выбран</value>
+  </data>
+  <data name="MENU_VERSIONCHECK" xml:space="preserve">
+    <value>Проверка новой версии</value>
   </data>
   <data name="MENU_VPNACCOUNT" xml:space="preserve">
     <value>Выбрать _VPN аккаунт</value>
@@ -544,7 +565,7 @@
     <value>Разрешён</value>
   </data>
   <data name="TAG_ATTACH" xml:space="preserve">
-    <value>Вложения:</value>
+    <value>Вложения</value>
   </data>
   <data name="TAG_BANNEDIPLIST" xml:space="preserve">
     <value>Правила доступа для IP, NET или кодов стран</value>
@@ -564,6 +585,9 @@
   <data name="TAG_DATE" xml:space="preserve">
     <value>Дата:</value>
   </data>
+  <data name="TAG_DELALLATTACH" xml:space="preserve">
+    <value>Удалить все файлы из вложений?</value>
+  </data>
   <data name="TAG_DELETE" xml:space="preserve">
     <value>Удалить</value>
   </data>
@@ -578,6 +602,9 @@
   </data>
   <data name="TAG_FMT_ACCESSRELOAD" xml:space="preserve">
     <value>Список доступа перезагружен, всего {0} записей</value>
+  </data>
+  <data name="TAG_FMT_DELATTACH" xml:space="preserve">
+    <value>Удалить файл '{0}' из вложений?</value>
   </data>
   <data name="TAG_FMT_VERSION" xml:space="preserve">
     <value>Версия: {0}</value>
@@ -666,9 +693,6 @@
   <data name="TAG_SIZE" xml:space="preserve">
     <value>Размер:</value>
   </data>
-  <data name="TAG_SOURCE" xml:space="preserve">
-    <value>Источник</value>
-  </data>
   <data name="TAG_SPAMCOUNT" xml:space="preserve">
     <value>Количество срабатываний спам счетчика</value>
   </data>
@@ -686,6 +710,9 @@
   </data>
   <data name="TAG_TYPE" xml:space="preserve">
     <value>Тип:</value>
+  </data>
+  <data name="TAG_VERSIONERROR" xml:space="preserve">
+    <value>Ошибка загрузки Git фида текущей версии</value>
   </data>
   <data name="TAG_YES" xml:space="preserve">
     <value>Да</value>

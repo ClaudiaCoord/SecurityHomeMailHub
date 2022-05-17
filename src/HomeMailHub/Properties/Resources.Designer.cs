@@ -205,6 +205,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Source.
+        /// </summary>
+        internal static string BTN_SOURCE {
+            get {
+                return ResourceManager.GetString("BTN_SOURCE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на _Start.
         /// </summary>
         internal static string BTN_START {
@@ -970,11 +979,38 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Remove all attachments.
+        /// </summary>
+        internal static string MENU_DELALLATTACH {
+            get {
+                return ResourceManager.GetString("MENU_DELALLATTACH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на D_elete.
         /// </summary>
         internal static string MENU_DELETE {
             get {
                 return ResourceManager.GetString("MENU_DELETE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Current version {0}, new version {1}, open the update page?.
+        /// </summary>
+        internal static string MENU_FMT_VERSIONNEW {
+            get {
+                return ResourceManager.GetString("MENU_FMT_VERSIONNEW", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Current version {0}, no updates.
+        /// </summary>
+        internal static string MENU_FMT_VERSIONOLD {
+            get {
+                return ResourceManager.GetString("MENU_FMT_VERSIONOLD", resourceCulture);
             }
         }
         
@@ -1168,6 +1204,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Refresh Proxy/VPN statistic.
+        /// </summary>
+        internal static string MENU_REFRESHVPN {
+            get {
+                return ResourceManager.GetString("MENU_REFRESHVPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на _Reload.
         /// </summary>
         internal static string MENU_RELOAD {
@@ -1245,6 +1290,15 @@ namespace HomeMailHub.Properties {
         internal static string MENU_SSHSELECT {
             get {
                 return ResourceManager.GetString("MENU_SSHSELECT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Check new version.
+        /// </summary>
+        internal static string MENU_VERSIONCHECK {
+            get {
+                return ResourceManager.GetString("MENU_VERSIONCHECK", resourceCulture);
             }
         }
         
@@ -1348,7 +1402,7 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Attach:.
+        ///   Ищет локализованную строку, похожую на Attach.
         /// </summary>
         internal static string TAG_ATTACH {
             get {
@@ -1411,6 +1465,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Remove all file  from attachments?.
+        /// </summary>
+        internal static string TAG_DELALLATTACH {
+            get {
+                return ResourceManager.GetString("TAG_DELALLATTACH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Delete.
         /// </summary>
         internal static string TAG_DELETE {
@@ -1452,6 +1515,15 @@ namespace HomeMailHub.Properties {
         internal static string TAG_FMT_ACCESSRELOAD {
             get {
                 return ResourceManager.GetString("TAG_FMT_ACCESSRELOAD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Remove file &apos;{0}&apos; from attachments?.
+        /// </summary>
+        internal static string TAG_FMT_DELATTACH {
+            get {
+                return ResourceManager.GetString("TAG_FMT_DELATTACH", resourceCulture);
             }
         }
         
@@ -1708,15 +1780,6 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Source.
-        /// </summary>
-        internal static string TAG_SOURCE {
-            get {
-                return ResourceManager.GetString("TAG_SOURCE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Ищет локализованную строку, похожую на Number of spam counter hits.
         /// </summary>
         internal static string TAG_SPAMCOUNT {
@@ -1771,6 +1834,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Error loading current version Git feed.
+        /// </summary>
+        internal static string TAG_VERSIONERROR {
+            get {
+                return ResourceManager.GetString("TAG_VERSIONERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Yes.
         /// </summary>
         internal static string TAG_YES {
@@ -1816,7 +1888,7 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Eroor load message.
+        ///   Ищет локализованную строку, похожую на Error load message.
         /// </summary>
         internal static string UTILS_TXT4 {
             get {

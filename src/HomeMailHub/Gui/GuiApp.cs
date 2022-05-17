@@ -77,8 +77,10 @@ namespace HomeMailHub.Gui {
 		public static ColorScheme ColorGreen { get; private set; }
 		public static ColorScheme ColorRed { get; private set; }
 		public static ColorScheme ColorField { get; private set; }
+        public static ColorScheme ColorWarning { get; private set; }
+        public static ColorScheme ColorDescription { get; set; } = default;
 
-		static void InitStaticGuiApp() {
+        static void InitStaticGuiApp() {
 			GuiAttribute cgreen = Application.Driver.MakeAttribute(Color.White, Color.Green);
 			GuiAttribute cdgreen = Application.Driver.MakeAttribute(Color.DarkGray, Color.Green);
 			GuiAttribute cfgreen = Application.Driver.MakeAttribute(Color.BrightYellow, Color.Green);
@@ -99,13 +101,21 @@ namespace HomeMailHub.Gui {
             GuiAttribute chfdialog = Application.Driver.MakeAttribute(Color.White, Color.BrightCyan);
             GuiAttribute chndialog = Application.Driver.MakeAttribute(Color.Red, Color.Gray);
 
+            GuiAttribute cwarn = Application.Driver.MakeAttribute(Color.Red, Color.Blue);
+            GuiAttribute cdwarn = Application.Driver.MakeAttribute(Color.DarkGray, Color.Blue);
+
+            GuiAttribute cdesc = Application.Driver.MakeAttribute(Color.Gray, Color.Blue);
+            GuiAttribute cddesc = Application.Driver.MakeAttribute(Color.DarkGray, Color.Blue);
+
             ColorRed = new ColorScheme() { Normal = cred, Focus = cred, HotFocus = cfred, HotNormal = cfred, Disabled = cdred };
 			ColorGreen = new ColorScheme() { Normal = cgreen, Focus = cgreen, HotFocus = cfgreen, HotNormal = cfgreen, Disabled = cdgreen };
-			Colors.Menu = new ColorScheme() { Normal = cnmenu, Focus = cfmenu, HotFocus = chfmenu, HotNormal = chnmenu, Disabled = cdmenu };
+            ColorWarning = new ColorScheme() { Normal = cwarn, Focus = cwarn, HotFocus = cwarn, HotNormal = cwarn, Disabled = cdwarn };
+            ColorDescription = new ColorScheme() { Normal = cdesc, Focus = cdesc, HotFocus = cdesc, HotNormal = cdesc, Disabled = cddesc };
+            Colors.Menu = new ColorScheme() { Normal = cnmenu, Focus = cfmenu, HotFocus = chfmenu, HotNormal = chnmenu, Disabled = cdmenu };
             Colors.Dialog = new ColorScheme() { Normal = cndialog, Focus = cfdialog, HotFocus = chfdialog, HotNormal = chndialog, Disabled = cddialog };
             InitFieldColor(Settings.Default.IsGuiLightText);
         }
-		static void InitFieldColor(bool b = false) {
+        static void InitFieldColor(bool b = false) {
 			GuiAttribute cfield = Application.Driver.MakeAttribute(b ? Color.White : Color.Gray, Color.BrightBlue);
 			GuiAttribute cffield = Application.Driver.MakeAttribute(Color.Blue, Color.Gray);
 			ColorField = new ColorScheme() { Normal = cfield, Focus = cfield, HotFocus = cffield, HotNormal = cffield, Disabled = cffield };
@@ -142,9 +152,9 @@ namespace HomeMailHub.Gui {
 				case nameof(GuiMailAccountWindow): LoadWindow<GuiMailAccountWindow>(s); break;
 				case nameof(GuiVpnAccountWindow): LoadWindow<GuiVpnAccountWindow>(s); break;
 				case nameof(GuiSshAccountWindow): LoadWindow<GuiSshAccountWindow>(s); break;
-				case nameof(GuiMailMessagesWindow): LoadWindow<GuiMailMessagesWindow>(s); break;
-				case nameof(GuiReadMessageWindow): LoadWindow<GuiReadMessageWindow>(s); break;
-				case nameof(GuiWriteMessageWindow): LoadWindow<GuiWriteMessageWindow>(s); break;
+				case nameof(GuiMessagesListWindow): LoadWindow<GuiMessagesListWindow>(s); break;
+				case nameof(GuiMessageReadWindow): LoadWindow<GuiMessageReadWindow>(s); break;
+				case nameof(GuiMessageWriteWindow): LoadWindow<GuiMessageWriteWindow>(s); break;
 				case nameof(GuiProxyListWindow): LoadWindow<GuiProxyListWindow>(s); break;
 				case nameof(GuiServicesSettingsWindow): LoadWindow<GuiServicesSettingsWindow>(s); break;
 			}

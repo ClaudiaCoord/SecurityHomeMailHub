@@ -165,6 +165,9 @@
   <data name="BTN_SORT" xml:space="preserve">
     <value>_Sort</value>
   </data>
+  <data name="BTN_SOURCE" xml:space="preserve">
+    <value>_Source</value>
+  </data>
   <data name="BTN_START" xml:space="preserve">
     <value>_Start</value>
   </data>
@@ -420,8 +423,17 @@
   <data name="MENU_CLOSE" xml:space="preserve">
     <value>_Close</value>
   </data>
+  <data name="MENU_DELALLATTACH" xml:space="preserve">
+    <value>_Remove all attachments</value>
+  </data>
   <data name="MENU_DELETE" xml:space="preserve">
     <value>D_elete</value>
+  </data>
+  <data name="MENU_FMT_VERSIONNEW" xml:space="preserve">
+    <value>Current version {0}, new version {1}, open the update page?</value>
+  </data>
+  <data name="MENU_FMT_VERSIONOLD" xml:space="preserve">
+    <value>Current version {0}, no updates</value>
   </data>
   <data name="MENU_LIGHTTEXT" xml:space="preserve">
     <value>Brighter text in shapes</value>
@@ -486,6 +498,9 @@
   <data name="MENU_REFRESH" xml:space="preserve">
     <value>_Refresh menu data</value>
   </data>
+  <data name="MENU_REFRESHVPN" xml:space="preserve">
+    <value>_Refresh Proxy/VPN statistic</value>
+  </data>
   <data name="MENU_RELOAD" xml:space="preserve">
     <value>_Reload</value>
   </data>
@@ -512,6 +527,9 @@
   </data>
   <data name="MENU_SSHSELECT" xml:space="preserve">
     <value>SSH account selected</value>
+  </data>
+  <data name="MENU_VERSIONCHECK" xml:space="preserve">
+    <value>Check new version</value>
   </data>
   <data name="MENU_VPNACCOUNT" xml:space="preserve">
     <value>Select _VPN account</value>
@@ -547,7 +565,7 @@
     <value>Allowed</value>
   </data>
   <data name="TAG_ATTACH" xml:space="preserve">
-    <value>Attach:</value>
+    <value>Attach</value>
   </data>
   <data name="TAG_BANNEDIPLIST" xml:space="preserve">
     <value>Access rules for IP, NET or country codes</value>
@@ -567,6 +585,9 @@
   <data name="TAG_DATE" xml:space="preserve">
     <value>Date:</value>
   </data>
+  <data name="TAG_DELALLATTACH" xml:space="preserve">
+    <value>Remove all file  from attachments?</value>
+  </data>
   <data name="TAG_DELETE" xml:space="preserve">
     <value>Delete</value>
   </data>
@@ -581,6 +602,9 @@
   </data>
   <data name="TAG_FMT_ACCESSRELOAD" xml:space="preserve">
     <value>Access list reloaded, total {0} entries</value>
+  </data>
+  <data name="TAG_FMT_DELATTACH" xml:space="preserve">
+    <value>Remove file '{0}' from attachments?</value>
   </data>
   <data name="TAG_FMT_VERSION" xml:space="preserve">
     <value>Version: {0}</value>
@@ -666,9 +690,6 @@
   <data name="TAG_SIZE" xml:space="preserve">
     <value>Size:</value>
   </data>
-  <data name="TAG_SOURCE" xml:space="preserve">
-    <value>Source</value>
-  </data>
   <data name="TAG_SPAMCOUNT" xml:space="preserve">
     <value>Number of spam counter hits</value>
   </data>
@@ -687,6 +708,9 @@
   <data name="TAG_TYPE" xml:space="preserve">
     <value>Type:</value>
   </data>
+  <data name="TAG_VERSIONERROR" xml:space="preserve">
+    <value>Error loading current version Git feed</value>
+  </data>
   <data name="TAG_YES" xml:space="preserve">
     <value>Yes</value>
   </data>
@@ -703,6 +727,6 @@
     <value>Message file length is zero</value>
   </data>
   <data name="UTILS_TXT4" xml:space="preserve">
-    <value>Eroor load message</value>
+    <value>Error load message</value>
   </data>
 </root>

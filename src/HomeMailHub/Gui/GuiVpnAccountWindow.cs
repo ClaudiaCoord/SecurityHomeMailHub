@@ -1,13 +1,13 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HomeMailHub.Gui.Dialogs;
 using SecyrityMail;
 using SecyrityMail.Vpn;
 using Terminal.Gui;
+using GuiAttribute = Terminal.Gui.Attribute;
 using RES = HomeMailHub.Properties.Resources;
 
 namespace HomeMailHub.Gui
@@ -62,8 +62,18 @@ namespace HomeMailHub.Gui
         private VpnAccount account { get; set; } = default;
         private GuiRunOnce runOnce = new();
         private List<string> data = new();
+        private GuiLinearLayot linearLayot { get; } = new();
 
         public Toplevel GetTop => GuiToplevel;
+
+        private bool IsEmptyForm =>
+            string.IsNullOrWhiteSpace(pubkeyText.Text.ToString()) ||
+            string.IsNullOrWhiteSpace(privkeyText.Text.ToString()) ||
+            string.IsNullOrWhiteSpace(addrText.Text.ToString()) ||
+            string.IsNullOrWhiteSpace(hostText.Text.ToString());
+
+        private void ButtonsEnable(bool b) =>
+            buttonSave.Enabled = buttonClear.Enabled = buttonDelete.Enabled = buttonExport.Enabled = b;
 
         public GuiVpnAccountWindow() : base(RES.GUIVPN_TITLE1, 0)
         {
@@ -72,6 +82,21 @@ namespace HomeMailHub.Gui
             Width = Dim.Fill();
             Height = Dim.Fill() - 1;
             GuiToplevel = GuiExtensions.CreteTop();
+
+            linearLayot.Add("en", new List<GuiLinearData> {
+                new GuiLinearData(14, 12, true),
+                new GuiLinearData(23, 12, true),
+                new GuiLinearData(33, 12, true),
+                new GuiLinearData(44, 12, true),
+                new GuiLinearData(55, 12, true)
+            });
+            linearLayot.Add("ru", new List<GuiLinearData> {
+                new GuiLinearData(14, 12, true),
+                new GuiLinearData(28, 12, true),
+                new GuiLinearData(41, 12, true),
+                new GuiLinearData(53, 12, true),
+                new GuiLinearData(64, 12, true)
+            });
         }
 
         public new void Dispose() {
@@ -84,6 +109,8 @@ namespace HomeMailHub.Gui
         #region Init
         public GuiVpnAccountWindow Init(string __)
         {
+            List<GuiLinearData> layout = linearLayot.GetDefault();
+
             frameList = new FrameView(new Rect(0, 0, 35, 25), RES.TAG_ACCOUNTS)
             {
                 X = 1,
@@ -110,7 +137,6 @@ namespace HomeMailHub.Gui
             };
             listView.OpenSelectedItem += ListView_OpenSelectedItem;
             listView.SelectedItemChanged += ListView_SelectedItemChanged;
-            listView.RowRender += ListView_RowRender;
 
             frameList.Add(listView);
             Add(frameList);
@@ -157,6 +183,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 ColorScheme = GuiApp.ColorField
             });
+            privkeyText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
             Add(frameInterface);
 
             framePeer.Add(pubkeyLabel = new Label("Public Key: ")
@@ -280,40 +307,43 @@ namespace HomeMailHub.Gui
 
             framePeer.Add(buttonSave = new Button(10, 19, RES.BTN_SAVE)
             {
-                X = labelOffset,
-                Y = 12,
-                AutoSize = true,
+                X = layout[0].X,
+                Y = layout[0].Y,
+                AutoSize = layout[0].AutoSize,
                 TabIndex = 13
             });
             framePeer.Add(buttonClear = new Button(10, 19, RES.BTN_CLEAR)
             {
-                X = 23,
-                Y = 12,
-                AutoSize = true,
+                X = layout[1].X,
+                Y = layout[1].Y,
+                AutoSize = layout[1].AutoSize,
+                Enabled = false,
                 TabIndex = 14
             });
             framePeer.Add(buttonDelete = new Button(10, 19, RES.BTN_DELETE)
             {
-                X = 33,
-                Y = 12,
-                AutoSize = true,
+                X = layout[2].X,
+                Y = layout[2].Y,
+                AutoSize = layout[2].AutoSize,
+                Enabled = false,
                 TabIndex = 15
             });
             framePeer.Add(buttonImport = new Button(10, 19, RES.BTN_IMPORT)
             {
-                X = 44,
-                Y = 12,
-                AutoSize = true,
+                X = layout[3].X,
+                Y = layout[3].Y,
+                AutoSize = layout[3].AutoSize,
                 TabIndex = 16
             });
             framePeer.Add(buttonExport = new Button(10, 19, RES.BTN_EXPORT)
             {
-                X = 55,
-                Y = 12,
-                AutoSize = true,
+                X = layout[4].X,
+                Y = layout[4].Y,
+                AutoSize = layout[4].AutoSize,
+                Enabled = false,
                 TabIndex = 17
             });
-
+            
             buttonSave.Clicked += () => SaveItem();
             buttonClear.Clicked += () => Clean();
             buttonDelete.Clicked += () => Delete();
@@ -359,6 +389,9 @@ namespace HomeMailHub.Gui
                     } catch (Exception ex) { ex.StatusBarError(); }
                 }
             };
+            pubkeyText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
+            addrText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
+            hostText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
             Add(framePeer);
 
             urlmenu = new MenuBarItem("_Url", new MenuItem[0]);
@@ -414,6 +447,7 @@ namespace HomeMailHub.Gui
         }
         #endregion
 
+        #region Load
         public async void Load() => _ = await Load_().ConfigureAwait(false);
         private async Task<bool> Load_() =>
             await Task.Run(async () => {
@@ -443,6 +477,7 @@ namespace HomeMailHub.Gui
                 catch (Exception ex) { ex.StatusBarError(); }
                 return true;
             });
+        #endregion
 
         private void DataClear() {
             data.Clear();
@@ -450,7 +485,7 @@ namespace HomeMailHub.Gui
             Application.MainLoop.Invoke(() => frameList.Title = selectedName.GetListTitle(0));
         }
 
-        private void Clean() {
+        private void Clean() =>
             Application.MainLoop.Invoke(() => {
                 prekeyText.Text =
                 pubkeyText.Text =
@@ -477,8 +512,9 @@ namespace HomeMailHub.Gui
                 isNotExpire = false;
                 expireDate.Enabled = !isNotExpire;
                 expireBox.Checked = isNotExpire;
+                expireLabel.ColorScheme = Colors.Base;
+                ButtonsEnable(false);
             });
-        }
 
         private async void Delete() {
 
@@ -503,6 +539,7 @@ namespace HomeMailHub.Gui
                         Global.Instance.VpnAccounts.Items.Remove(a);
                         _ = await Global.Instance.VpnAccounts.Save().ConfigureAwait(false);
                         _ = await LoadVpnAccounts_().ConfigureAwait(false);
+                        Clean();
                         runOnce.ResetId();
                     } catch (Exception ex) { ex.StatusBarError(); }
                 }
@@ -511,21 +548,22 @@ namespace HomeMailHub.Gui
             finally { runOnce.EndRun(); }
         }
 
-        private void EnableBox_Toggled(bool b) {
-            buttonClear.Enabled =
-            buttonDelete.Enabled =
-            buttonExport.Enabled =
-            prekeyText.Enabled =
-            privkeyText.Enabled =
-            pubkeyText.Enabled =
-            addrText.Enabled =
-            dnsText.Enabled =
-            hostText.Enabled =
-            ipsText.Enabled =
-            aliveText.Enabled =
-            mtuText.Enabled =
-            expireDate.Enabled = !b;
-        }
+        private void EnableBox_Toggled(bool b) =>
+            Application.MainLoop.Invoke(() => {
+                buttonClear.Enabled =
+                buttonDelete.Enabled =
+                buttonExport.Enabled =
+                prekeyText.Enabled =
+                privkeyText.Enabled =
+                pubkeyText.Enabled =
+                addrText.Enabled =
+                dnsText.Enabled =
+                hostText.Enabled =
+                ipsText.Enabled =
+                aliveText.Enabled =
+                mtuText.Enabled =
+                expireDate.Enabled = !b;
+            });
 
         private void IsexpireBox_Toggled(bool b) {
             isNotExpire = !b;
@@ -540,15 +578,8 @@ namespace HomeMailHub.Gui
             }
         }
 
-        private void ListView_RowRender(ListViewRowEventArgs obj) {
-            if (listView.AllowsMarking && listView.Source.IsMarked(obj.Row) &&
-                (obj.Row >= 0) && (obj.Row < data.Count))
-                SelectItem(data[obj.Row], obj.Row);
-        }
-
         private void ListView_OpenSelectedItem(ListViewItemEventArgs obj) => SelectedListItem(obj);
         private void ListView_SelectedItemChanged(ListViewItemEventArgs obj) => SelectedListItem(obj);
-
         private void SelectedListItem(ListViewItemEventArgs obj) {
             if (obj == null)
                 return;
@@ -581,7 +612,7 @@ namespace HomeMailHub.Gui
                 mtuText.Text = a.Interface.MTU.ToString();
 
                 if (a.IsExpired)
-                    expireLabel.ColorScheme = Colors.Error;
+                    expireLabel.ColorScheme = GuiApp.ColorWarning;
                 else
                     expireLabel.ColorScheme = Colors.Base;
 
@@ -592,6 +623,7 @@ namespace HomeMailHub.Gui
                 expireBox.Checked = a.Expired == DateTime.MinValue;
                 expireDate.Enabled = a.Enable && !expireBox.Checked;
                 account = a;
+                ButtonsEnable(true);
 
             } finally { runOnce.EndRun(); }
         }
