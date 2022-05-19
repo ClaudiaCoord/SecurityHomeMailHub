@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,37 +15,57 @@ namespace SecyrityMail.Messages
 {
     public class MailMessagesManager : IDisposable
     {
+        private readonly object __lock = new object();
         private volatile Timer timer;
         private List<MailMessagesCache> MessagesCache { get; } = new();
         private bool isCacheMessagesLog = false;
         public bool IsCacheMessagesLog {
             get => isCacheMessagesLog;
             set {
-                isCacheMessagesLog = value;
-                if (value)
-                    timer.Change(TimeSpan.FromSeconds(30.0), TimeSpan.FromSeconds(60.0));
-                else
-                    timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                if (isCacheMessagesLog != value)
+                    isCacheMessagesLog = value;
             }
         }
+        public const string Tag = "Messages Manager";
 
         public MailMessagesManager() =>
-            timer = new(TimerCb, default, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            timer = new(TimerCb, default, TimeSpan.FromSeconds(30.0), TimeSpan.FromSeconds(60.0));
         ~MailMessagesManager() => Dispose();
 
         private void TimerCb(object _) {
-            foreach(var msg in MessagesCache)
-                Global.Instance.Log.Add(
-                    "MessagesManager", "in cache: " +
-                    $"{msg.Email}/{msg.Count}/{msg.CanClosed} = " +
-                    $"{msg.MessagesCount}/{msg.MessagesIsModify}/{msg.MessagesIsBusy}");
+            if (MessagesCache.Count == 0) return;
+            try {
+                for (int i = MessagesCache.Count - 1; 0 <= i; i--) {
+                    MailMessagesCache mscs;
+                    lock (__lock)
+                        mscs = MessagesCache[i];
+                    if (mscs == null) continue;
+
+                    if (IsCacheMessagesLog) {
+                        Global.Instance.Log.Add(
+                            MailMessagesCache.Tag, $"   using: {mscs.UsingClass}");
+                        Global.Instance.Log.Add(
+                            MailMessagesCache.Tag, "in cache: " +
+                            $"{mscs.Email}/{mscs.Count}/{mscs.CanClose} = " +
+                            $"{mscs.MessagesCount}/{mscs.MessagesIsModify}/{mscs.MessagesIsBusy}");
+                    }
+                    if (mscs.CanClose) {
+                        lock (__lock) {
+                            MessagesCache.Remove(mscs);
+                            mscs.Dispose();
+                        }
+                    }
+                }
+            } catch (Exception ex) { Global.Instance.Log.Add(Tag, ex); }
         }
 
         public void Dispose() {
             try {
-                foreach (var cache in MessagesCache)
-                    cache.Dispose();
-                MessagesCache.Clear();
+                lock (__lock) {
+                    foreach (var cache in MessagesCache)
+                        cache.Dispose();
+                    MessagesCache.Clear();
+                }
             } catch { }
 
             Timer t = timer;
@@ -48,25 +74,47 @@ namespace SecyrityMail.Messages
                 t.Dispose();
         }
 
-        public async Task<MailMessages> Open(string email) {
-            MailMessagesCache mscs = Find(email);
-            if (mscs != default)
-                return await mscs.Open(email).ConfigureAwait(false);
-
-            mscs = new MailMessagesCache();
-            MailMessages msgs = await mscs.Open(email).ConfigureAwait(false);
+        public  async Task<MailMessages> Open(CacheOpenerData u, string email) => await OpenCache(u, email, false);
+        public  async Task<MailMessages> ReOpen(CacheOpenerData u, string email) => await OpenCache(u, email, true);
+        private async Task<MailMessages> OpenCache(CacheOpenerData u, string email, bool isreload) {
+            MailMessagesCache mscs;
+            lock (__lock)
+                mscs = Find(email);
+            if ((mscs == default) || mscs.IsEmpty) { isreload = false; mscs = new(); }
+            MailMessages msgs = isreload ?
+                await mscs.ReOpen(u, email).ConfigureAwait(false) :
+                await mscs.Open(u, email).ConfigureAwait(false);
             if ((msgs == null) || mscs.IsEmpty)
                 return default;
-            MessagesCache.Add(mscs);
+            lock (__lock)
+                if (!MessagesCache.Contains(mscs))
+                    MessagesCache.Add(mscs);
             return msgs;
         }
 
-        public void Close(string email) {
-            MailMessagesCache mscs = Find(email);
+        public void Close(CacheOpenerData u, string email) {
+            MailMessagesCache mscs;
+            lock (__lock)
+                mscs = Find(email);
             if (mscs != default) {
-                if (mscs.Close()) {
-                    MessagesCache.Remove(mscs);
-                    mscs.Dispose();
+                if (mscs.Close(u)) {
+                    lock (__lock) {
+                        MessagesCache.Remove(mscs);
+                        mscs.Dispose();
+                    }
+                }
+            }
+        }
+
+        public void Close(CacheOpenerData u) {
+            lock (__lock) {
+                for (int i = MessagesCache.Count - 1; 0 <= i; i--) {
+                    MailMessagesCache mscs = MessagesCache[i];
+                    if (mscs == default) continue;
+                    if (mscs.Close(u)) {
+                        MessagesCache.Remove(mscs);
+                        mscs.Dispose();
+                    }
                 }
             }
         }

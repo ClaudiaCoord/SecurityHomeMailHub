@@ -1,12 +1,16 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 using SecyrityMail.Utils;
 
@@ -123,6 +127,7 @@ namespace SecyrityMail.Vpn
             return !IsEmpty;
         }
 
+        #region Export
         public async Task<string> Export(string path = default) =>
             await Task.Run(() => {
                 try {
@@ -156,7 +161,9 @@ namespace SecyrityMail.Vpn
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Export), ex); }
                 return string.Empty;
             });
+        #endregion
 
+        #region Import
         public async Task<bool> Import(string path) =>
             await Task.Run(() => {
                 try {
@@ -182,36 +189,89 @@ namespace SecyrityMail.Vpn
 
                         string key = m.Groups[1].Value,
                                val = m.Groups[2].Value;
-                        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(val))
-                            continue;
 
-                        val = val.Trim();
-                        key = key.Trim();
-
-                        if (key.Equals(nameof(VpnInterface.PrivateKey)))
-                            Interface.PrivateKey = val;
-                        else if (key.Equals(nameof(VpnInterface.Address)))
-                            Interface.Address = val;
-                        else if (key.Equals(nameof(VpnInterface.DNS)))
-                            Interface.DNS = val;
-                        else if (key.Equals(nameof(VpnInterface.MTU)))
-                            Interface.MTU = val;
-                        else if (key.Equals(nameof(VpnPeer.PublicKey)))
-                            Peer.PublicKey = val;
-                        else if (key.Equals(nameof(VpnPeer.PresharedKey)))
-                            Peer.PresharedKey = val;
-                        else if (key.Equals(nameof(VpnPeer.Endpoint)))
-                            Peer.Endpoint = val;
-                        else if (key.Equals(nameof(VpnPeer.AllowedIPs)))
-                            Peer.AllowedIPs = val;
-                        else if (key.Equals(nameof(VpnPeer.PersistentKeepalive)))
-                            Peer.PersistentKeepalive = short.Parse(val);
+                        ImportSetValues(key, val);
                     }
                     return !IsEmpty;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Import), ex); }
                 return false;
             });
+
+        public async Task<bool> ImportFromString(string s) =>
+            await Task.Run(() => {
+                try {
+                    if (string.IsNullOrWhiteSpace(s))
+                        throw new Exception("import string is empty..");
+
+                    Regex r = new(@"\[(?<grp>\w+)\]|(?<key>\w+)\s?=\s?(?<val>[\:\=\.\/A-Za-z0-9]+)\s?",
+                        RegexOptions.CultureInvariant |
+                        RegexOptions.Singleline |
+                        RegexOptions.IgnoreCase |
+                        RegexOptions.ExplicitCapture |
+                        RegexOptions.Compiled);
+
+                    MatchCollection matches = r.Matches(s);
+                    if (matches.Count > 0) {
+
+                        string[] names = r.GetGroupNames();
+                        string group = string.Empty;
+                        foreach (Match m in matches) {
+
+                            Group grp = m.Groups["grp"];
+                            if ((grp != null) && !string.IsNullOrWhiteSpace(grp.Value)) {
+                                group = grp.Value;
+                                continue;
+                            }
+                            if (string.IsNullOrWhiteSpace(group))
+                                continue;
+
+                            string key = string.Empty,
+                                   val = string.Empty;
+
+                            foreach (string name in names) {
+                                if (name.Equals("key"))
+                                    key = m.Groups[name].Value;
+                                else if (name.Equals("val"))
+                                    val = m.Groups[name].Value;
+                            }
+                            ImportSetValues(key, val);
+                        }
+                    }
+                    return !IsEmpty;
+                }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(Import), ex); }
+                return false;
+            });
+
+        private void ImportSetValues(string key, string val) {
+
+            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(val))
+                return;
+
+            val = val.Trim();
+            key = key.Trim();
+
+            if (key.Equals(nameof(VpnInterface.PrivateKey)))
+                Interface.PrivateKey = val;
+            else if (key.Equals(nameof(VpnInterface.Address)))
+                Interface.Address = val;
+            else if (key.Equals(nameof(VpnInterface.DNS)))
+                Interface.DNS = val;
+            else if (key.Equals(nameof(VpnInterface.MTU)))
+                Interface.MTU = val;
+            else if (key.Equals(nameof(VpnPeer.PublicKey)))
+                Peer.PublicKey = val;
+            else if (key.Equals(nameof(VpnPeer.PresharedKey)))
+                Peer.PresharedKey = val;
+            else if (key.Equals(nameof(VpnPeer.Endpoint)))
+                Peer.Endpoint = val;
+            else if (key.Equals(nameof(VpnPeer.AllowedIPs)))
+                Peer.AllowedIPs = val;
+            else if (key.Equals(nameof(VpnPeer.PersistentKeepalive)))
+                Peer.PersistentKeepalive = short.Parse(val);
+        }
+        #endregion
 
         public async Task<bool> Load(string path) =>
             await Task.Run(() => {

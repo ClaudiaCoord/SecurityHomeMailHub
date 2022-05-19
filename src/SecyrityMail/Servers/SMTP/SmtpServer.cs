@@ -1,11 +1,16 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using SecyrityMail.Data;
-using SecyrityMail.Servers.POP3;
 using SecyrityMail.Utils;
 
 namespace SecyrityMail.Servers.SMTP
@@ -16,7 +21,7 @@ namespace SecyrityMail.Servers.SMTP
         public SmtpServer(int port, IPAddress ip, CancellationTokenSafe token) : base(port, ip, token, 465) => InitOptions();
         ~SmtpServer() => Dispose();
 
-        private void InitOptions() {
+        protected override void InitOptions() {
             IsLog = Global.Instance.Config.IsSmtpLog;
             IsSecure = Global.Instance.Config.IsSmtpSecure;
         }
@@ -56,9 +61,9 @@ namespace SecyrityMail.Servers.SMTP
                 }
                 catch (SocketException ex) {
                     if (ex.SocketErrorCode == SocketError.Interrupted)
-                        OnCallEvent(MailEventId.Cancelled, nameof(Pop3Server));
+                        OnCallEvent(MailEventId.Cancelled, nameof(SmtpServer));
                     else
-                        Global.Instance.Log.Add(nameof(Pop3Server), ex);
+                        Global.Instance.Log.Add(nameof(SmtpServer), ex);
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(SmtpServer), ex); }
                 finally { Dispose(); IsServiceRun = false; }
@@ -66,6 +71,7 @@ namespace SecyrityMail.Servers.SMTP
             MainThread.Name = $"{nameof(SmtpServer)} - {IpEndPoint}";
             MainThread.IsBackground = true;
             MainThread.Start();
+            OnCallEvent(MailEventId.Started, nameof(SmtpServer));
         }
     }
 }

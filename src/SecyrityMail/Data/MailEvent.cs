@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Runtime.CompilerServices;
 using SecyrityMail.Messages;
@@ -12,6 +18,7 @@ namespace SecyrityMail.Data
         DeliveryInMessage,
         DeliverySendMessage,
         DeliveryLocalMessage,
+        DeliveryErrorMessage,
         DeleteMessage,
         DateExpired,
         BeginInit,
@@ -19,6 +26,7 @@ namespace SecyrityMail.Data
         BeginCall,
         EndCall,
         Cancelled,
+        Started,
         NotFound,
         PropertyChanged,
         ProxyCheckStart,
@@ -34,13 +42,13 @@ namespace SecyrityMail.Data
     {
         public MailEventId Id { get; set; } = MailEventId.None;
         public MailMessage Message => (Obj is MailMessage msg) ? msg : default;
-        public string Src { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
         public object Sender { get; set; } = null;
         public object Obj { get; set; } = null;
 
         public EventActionArgs(MailEventId id, object sender, string src, object msg) {
             Id = id;
-            Src = src;
+            Text = src;
             Sender = sender;
             Obj = msg;
         }

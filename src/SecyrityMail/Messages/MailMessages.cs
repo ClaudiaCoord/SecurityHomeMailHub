@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -11,6 +17,11 @@ using SecyrityMail.Utils;
 
 namespace SecyrityMail.Messages
 {
+    internal class DateComparer : IComparer<MailMessage> {
+        public int Compare(MailMessage x, MailMessage y) =>
+            DateTimeOffset.Compare(x.Date, y.Date);
+    }
+
     [Serializable]
     [DesignerCategory("code")]
     [XmlType(AnonymousType = true)]
@@ -53,7 +64,7 @@ namespace SecyrityMail.Messages
         [XmlIgnore]
         public bool IsBusy => IsBusy_;
         [XmlIgnore]
-        public bool IsModify => (Items.Count > 0) && isModify;
+        public bool IsModify => isModify;
         [XmlIgnore]
         public MailMessage this[int i] { get => Items[i]; set => Items[i] = value; }
 
@@ -61,7 +72,7 @@ namespace SecyrityMail.Messages
         public string RootDirectory { get; set; } = string.Empty;
         [XmlElement("items")]
         public List<MailMessage> Items { get; set; } = new();
-        public void OnChange() { OnPropertyChanged(nameof(MailMessages)); }
+        public void OnChange() { isModify = true; OnPropertyChanged(nameof(MailMessages)); }
         public void Clear() {
             lock(__lock)
                 Items.Clear();
@@ -131,7 +142,7 @@ namespace SecyrityMail.Messages
             return msg;
         }
 
-        #region Load* / Save*
+        #region Load* / Save* / Open / Exist / Delete
         public async Task<MailMessages> Open(string email) {
             RootDirectory = Global.GetUserDirectory(email);
             _ = await Load();
@@ -156,7 +167,7 @@ namespace SecyrityMail.Messages
                     return Copy(path.DeserializeFromFile<MailMessages>());
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Load), ex); }
-                finally { IsBusy_ = false; }
+                finally { IsBusy_ = false; isModify = false; }
                 return false;
             });
         }
@@ -174,6 +185,7 @@ namespace SecyrityMail.Messages
                             if (Directory.CreateDirectory(RootDirectory) == default)
                                 return false;
 
+                        Items.Sort(new DateComparer());
                         for (int i = 0; i < Items.Count; i++)
                             Items[i].Id = i + 1;
 
@@ -186,9 +198,35 @@ namespace SecyrityMail.Messages
                     return true;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Save), ex); }
-                finally { IsBusy_ = false; }
+                finally { IsBusy_ = false; isModify = false; }
                 return false;
             });
+        }
+
+        public bool MailMessagesExist() {
+            if (string.IsNullOrWhiteSpace(RootDirectory))
+                return false;
+            if (!Directory.Exists(RootDirectory))
+                if (Directory.CreateDirectory(RootDirectory) == default)
+                    return false;
+            FileInfo fi = new(
+                Path.Combine(RootDirectory, $"{nameof(MailMessages)}.cache"));
+            return (fi != default) && fi.Exists && (fi.Length > 0L);
+        }
+
+        public void MailMessagesDelete() {
+            try {
+                if (string.IsNullOrWhiteSpace(RootDirectory))
+                    return;
+                if (!Directory.Exists(RootDirectory))
+                    return;
+                FileInfo fi = new(
+                    Path.Combine(RootDirectory, $"{nameof(MailMessages)}.cache"));
+                if ((fi != default) && fi.Exists)
+                    fi.Delete();
+            }
+            catch (Exception ex) { Global.Instance.Log.Add(nameof(MailMessagesDelete), ex); }
+            finally { isModify = false; }
         }
         #endregion
 
@@ -236,11 +274,16 @@ namespace SecyrityMail.Messages
                             }
                         } catch (Exception ex) { Global.Instance.Log.Add(nameof(Scan), ex); }
                     }
-                    if (list.Count > 0)
-                        foreach (MailMessage msg in list.OrderBy(o => o.Id)) Add(msg);
+                    if (list.Count > 0) {
+                        list.Sort(new DateComparer());
+                        for (int i = 0; i < list.Count; i++) {
+                            list[i].Id = i + 1;
+                            Add(list[i]);
+                        }
+                    }
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Scan), ex); }
-                finally { IsBusy_ = false; }
+                finally { IsBusy_ = false; isModify = true; }
                 return Count > 0;
             });
         }
@@ -258,10 +301,12 @@ namespace SecyrityMail.Messages
                                                              .ConfigureAwait(false);
                     if (msg != null) {
                         Add(msg);
+
+                        isModify = true;
                         return true;
                     }
                 }
-                catch (Exception ex) { Global.Instance.Log.Add(nameof(SafeDelete), ex); }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
                 finally { IsBusy_ = false; }
                 return false;
             });
@@ -278,10 +323,12 @@ namespace SecyrityMail.Messages
                                                              .ConfigureAwait(false);
                     if (msg != null) {
                         Add(msg);
+
+                        isModify = true;
                         return true;
                     }
                 }
-                catch (Exception ex) { Global.Instance.Log.Add(nameof(SafeDelete), ex); }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
                 finally { IsBusy_ = false; }
                 return false;
             });
@@ -298,11 +345,11 @@ namespace SecyrityMail.Messages
                 try {
                     MailMessage msg = Find(msgid);
                     if (msg == null) return false;
-                    FileDelete_(msg.FilePath);
                     Delete(msg);
+                    isModify = true;
                     return true;
                 }
-                catch (Exception ex) { Global.Instance.Log.Add(nameof(SafeDelete), ex); }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
                 finally { IsBusy_ = false; }
                 return false;
             });
@@ -317,11 +364,11 @@ namespace SecyrityMail.Messages
                 try {
                     MailMessage msg = Find(id);
                     if (msg == null) return false;
-                    FileDelete_(msg.FilePath);
                     Delete(msg);
+                    isModify = true;
                     return true;
                 }
-                catch (Exception ex) { Global.Instance.Log.Add(nameof(SafeDelete), ex); }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
                 finally { IsBusy_ = false; }
                 return false;
             });
@@ -329,23 +376,30 @@ namespace SecyrityMail.Messages
         #endregion
 
         #region Safe Delete*
-        public void UnDelete()
+        public async Task<bool> UnDelete()
         {
             if (IsBusy_)
-                return;
+                return false;
             IsBusy_ = true;
-            try {
-                if (ItemsDeleted.Count > 0) {
-                    foreach (MailMessage m in ItemsDeleted) Add(m);
-                    lock (__lock)
-                        ItemsDeleted.Clear();
+            return await Task.Run(() => {
+                try {
+                    if (ItemsDeleted.Count > 0) {
+                        ItemsDeleted.Reverse();
+                        foreach (MailMessage m in ItemsDeleted) Add(m);
+                        lock (__lock)
+                            ItemsDeleted.Clear();
+
+                        isModify = true;
+                        return true;
+                    }
                 }
-            }
-            catch (Exception ex) { Global.Instance.Log.Add(nameof(UnDelete), ex); }
-            finally { IsBusy_ = false; }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(UnDelete), ex); }
+                finally { IsBusy_ = false; }
+                return false;
+            });
         }
 
-        public async Task<bool> SafeDelete()
+        public async Task<bool> ClearDeleted()
         {
             if (IsBusy_)
                 return false;
@@ -359,9 +413,11 @@ namespace SecyrityMail.Messages
                     }
                     lock (__lock)
                         ItemsDeleted.Clear();
+
+                    isModify = true;
                     return true;
                 }
-                catch (Exception ex) { Global.Instance.Log.Add(nameof(SafeDelete), ex); }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
                 finally { IsBusy_ = false; }
                 return false;
             });

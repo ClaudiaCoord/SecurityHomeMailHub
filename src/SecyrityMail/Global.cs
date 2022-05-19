@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -190,9 +196,10 @@ namespace SecyrityMail
             set { accounts.Copy(value); }
         }
         public UserAccount FindAccount(string login) => accounts.Find(login);
+        public UserAccount FindFromEmail(string login) => accounts.FindFromEmail(login);
         #endregion
 
-        #region all Accounts backup/restore
+        #region All Accounts backup/restore
         public async Task<bool> AccountsSave() => await AccountsSave_(false).ConfigureAwait(false);
         public async Task<bool> AccountsBackup() => await AccountsSave_(true).ConfigureAwait(false);
         public async Task<bool> AccountsLoad() => await AccountsLoad_(false).ConfigureAwait(false);
@@ -204,6 +211,7 @@ namespace SecyrityMail
                     _ = await Accounts.Save(b).ConfigureAwait(false);
                     _ = await SshProxy.Save(b).ConfigureAwait(false);
                     _ = await VpnAccounts.Save(b).ConfigureAwait(false);
+                    _ = await EmailAddresses.Save(b).ConfigureAwait(false);
                 }
                 catch (Exception ex) { Log.Add(nameof(AccountsBackup), ex); }
                 return true;
@@ -217,6 +225,7 @@ namespace SecyrityMail
                     _ = await SshProxy.RandomSelect().ConfigureAwait(false);
                     _ = await VpnAccounts.Load(b).ConfigureAwait(false);
                     _ = await VpnAccounts.RandomSelect().ConfigureAwait(false);
+                    _ = await EmailAddresses.Load(b).ConfigureAwait(false);
                 }
                 catch (Exception ex) { Log.Add(nameof(AccountsRestore), ex); }
                 return true;
@@ -431,7 +440,7 @@ namespace SecyrityMail
                     return false;
 
                 InterfaceMapping m = type.GetInterfaceMap(typeof(IDisposable));
-                MethodInfo mi = type.GetMethod(nameof(IDisposable.Dispose));
+                MethodInfo mi = type.GetMethod(nameof(IDisposable.Dispose), new Type[0]);
                 if ((mi != default) && (m.TargetMethods.Length > 0)) {
                     System.Diagnostics.Debug.WriteLine($"\tIDisposable: {type.Name}");
                     return true;

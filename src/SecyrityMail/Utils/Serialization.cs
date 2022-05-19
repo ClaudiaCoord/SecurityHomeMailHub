@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
@@ -34,8 +40,10 @@ namespace SecyrityMail.Utils
         public static T1 DeserializeFromFile<T1>(this string path, Encoding enc = default)
         {
             if (string.IsNullOrWhiteSpace(path)) return default;
+            FileInfo fi = new FileInfo(path);
+            if ((fi == default) || !fi.Exists) return default;
             enc = enc == default ? new UTF8Encoding(false) : enc;
-            using StreamReader sr = new(path, enc, true);
+            using StreamReader sr = new(fi.FullName, enc, true);
             XmlSerializer xml = new(typeof(T1));
             if (xml.Deserialize(sr) is T1 val)
                 return val;

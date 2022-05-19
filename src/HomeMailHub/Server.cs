@@ -1,9 +1,14 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using HomeMailHub.CmdLine;
 using HomeMailHub.Gui;
-using HomeMailHub.Version;
 using SecyrityMail;
 using SecyrityMail.Utils;
 
@@ -11,22 +16,28 @@ namespace HomeMailHub
 {
     internal class Server
     {
+        static Options options = default;
         static GuiApp gui = default;
         static CancellationTokenSafe cancellation = new();
         static StreamWriter[] filelog = new StreamWriter[2];
 
         [STAThread]
-        static void Main(string[] __)
+        static void Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException +=
                 new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             TaskScheduler.UnobservedTaskException +=
                 new EventHandler<UnobservedTaskExceptionEventArgs>(TaskScheduler_UnobservedTaskException);
 
+            options = CmdOption.Parse<Options>(args);
+            if (!options.Check())
+                return;
+
             filelog[0] = new StreamWriter(Global.GetRootFile(Global.DirectoryPlace.Log, "main.log"), false);
             filelog[0].AutoFlush = true;
             filelog[1] = new StreamWriter(Global.GetRootFile(Global.DirectoryPlace.Log, "event.log"), false);
             filelog[1].AutoFlush = true;
+            GuiApp.IsWriteLog = options.IsAllLog;
 
             gui = new();
             gui.EventCb += Gui_EventCb;
@@ -44,7 +55,7 @@ namespace HomeMailHub
             };
             Global.Instance.EventCb += (s, a) => {
                 if (IsWriteLog(1))
-                    filelog[1].WriteLine($"{a.Id}/{a.Sender} - {a.Src} - {a.Obj}");
+                    filelog[1].WriteLine($"{a.Id}/{a.Sender} - {a.Text} - {a.Obj}");
                 if (IsIsViewEvent())
                     gui.AddEvent(a);
             };

@@ -108,5 +108,8 @@
   <ItemGroup>
     <Content Include="VpnWireGuard.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="VpnWireGuard.licenseheader" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

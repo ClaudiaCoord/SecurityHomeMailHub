@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using System;
 using System.Reflection;
 using HomeMailHub.Version;
@@ -95,15 +100,15 @@ namespace HomeMailHub.Gui
 					mailboxMenu,
 					new MenuItem (RES.MENU_MAILNEW, "", () => {
 						GuiApp.Get.LoadWindow(typeof(GuiMessageWriteWindow));
-					}),
+					}, () => true, null, Key.F4),
 					new MenuItem (RES.MENU_MAILCHCEK, "", async () => {
 						_ = await Global.Instance.Tasks.Run().ConfigureAwait(false);
 					},
-					() => !Global.Instance.Tasks.IsCheckMailRun),
+					() => !Global.Instance.Tasks.IsCheckMailRun, null, Key.F5),
 					null,
 					new MenuItem (RES.MENU_QUIT, "", () => {
 						Application.RequestStop ();
-					})
+					}, () => true, null, Key.F10)
 				}),
 				logMenu,
 				new MenuBarItem (RES.MENU_SERVICES, new MenuItem [] {
@@ -147,6 +152,14 @@ namespace HomeMailHub.Gui
 						if (b) GuiApp.IsLightText = !GuiApp.IsLightText;
 						return GuiApp.IsLightText;
 					}),
+                    RES.MENU_DELETECONFIRM.CreateCheckedMenuItem((b) => {
+                        if (b) Properties.Settings.Default.IsConfirmDeleteMessages = !Properties.Settings.Default.IsConfirmDeleteMessages;
+                        return Properties.Settings.Default.IsConfirmDeleteMessages;
+                    }),
+                    RES.MENU_UNDELETECONFIRM.CreateCheckedMenuItem((b) => {
+                        if (b) Properties.Settings.Default.IsConfirmRestoreMessages = !Properties.Settings.Default.IsConfirmRestoreMessages;
+                        return Properties.Settings.Default.IsConfirmRestoreMessages;
+                    }),
                     null,
                     new MenuItem (RES.MENU_REFRESH, "", () => {
                             try { Load(); } catch { }
@@ -209,7 +222,7 @@ namespace HomeMailHub.Gui
 
 			if ((a == null) ||
 				(a.Id != MailEventId.EndInit) ||
-				!"FindAutoInit".Equals(a.Src)) return;
+				!"FindAutoInit".Equals(a.Text)) return;
 			Load();
         }
 
@@ -313,18 +326,18 @@ namespace HomeMailHub.Gui
                     new MenuBarItem ($"VPN {RES.TAG_SERVICE}", new MenuItem [] {
                         new MenuItem (RES.BTN_START, "",
 							async () => await Global.Instance.Vpn.Start().ConfigureAwait(false),
-							() => Global.Instance.Config.IsVpnEnable && !Global.Instance.Config.IsVpnTunnelRunning),
+							() => Global.Instance.Config.IsVpnEnable && !Global.Instance.Config.IsVpnTunnelRunning, null, Key.F2),
                         new MenuItem (RES.BTN_STOP, "",
 							() => Global.Instance.Vpn.Stop(),
-							() => Global.Instance.Config.IsVpnTunnelRunning)
+							() => Global.Instance.Config.IsVpnTunnelRunning, null, Key.AltMask | Key.F2)
                     }),
                     new MenuBarItem ($"SSH SOCKS5 {RES.TAG_SERVICE}", new MenuItem [] {
                         new MenuItem (RES.BTN_START, "",
 							async () => await Global.Instance.SshProxy.Start().ConfigureAwait(false),
-							() => !Global.Instance.SshProxy.IsEmpty && !Global.Instance.Config.IsSshRunning),
+							() => !Global.Instance.SshProxy.IsEmpty && !Global.Instance.Config.IsSshRunning, null, Key.F3),
                         new MenuItem (RES.BTN_STOP, "",
 							() => Global.Instance.SshProxy.Stop(),
-							() => Global.Instance.Config.IsSshRunning)
+							() => Global.Instance.Config.IsSshRunning, null, Key.AltMask | Key.F3)
                     }),
                     vpnAccountsMenu,
                     sshAccountsMenu,

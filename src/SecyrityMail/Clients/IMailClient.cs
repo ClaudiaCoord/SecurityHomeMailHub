@@ -1,4 +1,10 @@
-﻿using System.Net;
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using MailKit.Net.Proxy;

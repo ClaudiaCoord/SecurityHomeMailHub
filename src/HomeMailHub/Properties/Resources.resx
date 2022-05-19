@@ -129,6 +129,9 @@
   <data name="BTN_CHECKALL" xml:space="preserve">
     <value>Check _All</value>
   </data>
+  <data name="BTN_CHECKSTOP" xml:space="preserve">
+    <value>_Stop Check</value>
+  </data>
   <data name="BTN_CLEAR" xml:space="preserve">
     <value>_Clear</value>
   </data>
@@ -225,20 +228,35 @@
   <data name="CHKBOX_SMTPPGPSIGN" xml:space="preserve">
     <value>Certify PGP email signature if available</value>
   </data>
-  <data name="E1" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_E1" xml:space="preserve">
+    <value>Unsupported configuration type</value>
   </data>
-  <data name="E2" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_E2" xml:space="preserve">
+    <value>empty filename</value>
   </data>
-  <data name="E3" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_E3" xml:space="preserve">
+    <value>character '{0}' cannot be accepted in file path: {1}</value>
   </data>
-  <data name="E4" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_E4" xml:space="preserve">
+    <value>character '{0}' cannot be used in file name: {1}</value>
   </data>
-  <data name="E5" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_H1" xml:space="preserve">
+    <value>Help, list of keys</value>
+  </data>
+  <data name="CMD_LINE_H2" xml:space="preserve">
+    <value>Interface language selection (En|Ru)</value>
+  </data>
+  <data name="CMD_LINE_H3" xml:space="preserve">
+    <value>Enable all logs</value>
+  </data>
+  <data name="CMD_LINE_H4" xml:space="preserve">
+    <value>Do not start POP3 service</value>
+  </data>
+  <data name="CMD_LINE_H5" xml:space="preserve">
+    <value>Do not start SMTP service</value>
+  </data>
+  <data name="CMD_LINE_H6" xml:space="preserve">
+    <value>Use proxy type (Http,Https,Sock4,Sock5,SshSock5)</value>
   </data>
   <data name="GUIACCOUNT_FMT1" xml:space="preserve">
     <value>_{0} all {1} accounts</value>
@@ -302,6 +320,9 @@
   </data>
   <data name="GUIMESSAGE_FMT3" xml:space="preserve">
     <value>{0} - Messages : {1}</value>
+  </data>
+  <data name="GUIMESSAGE_FMT4" xml:space="preserve">
+    <value>There are {0} messages deleted, they can be restored</value>
   </data>
   <data name="GUIMESSAGE_TITLE1" xml:space="preserve">
     <value>Mail Messages</value>
@@ -429,6 +450,21 @@
   <data name="MENU_DELETE" xml:space="preserve">
     <value>D_elete</value>
   </data>
+  <data name="MENU_DELETEALL" xml:space="preserve">
+    <value>_Delete all messages</value>
+  </data>
+  <data name="MENU_DELETECONFIRM" xml:space="preserve">
+    <value>Show message _deletion warning</value>
+  </data>
+  <data name="MENU_DELETEMENU" xml:space="preserve">
+    <value>_Delete</value>
+  </data>
+  <data name="MENU_FMT_DELETECLEAR" xml:space="preserve">
+    <value>_Permanently delete messages: {0}</value>
+  </data>
+  <data name="MENU_FMT_UNDELETE" xml:space="preserve">
+    <value>_Undelete messages: {0}</value>
+  </data>
   <data name="MENU_FMT_VERSIONNEW" xml:space="preserve">
     <value>Current version {0}, new version {1}, open the update page?</value>
   </data>
@@ -477,6 +513,15 @@
   <data name="MENU_MENU" xml:space="preserve">
     <value>_Menu</value>
   </data>
+  <data name="MENU_MSGSREADALL" xml:space="preserve">
+    <value>_Mark All Read</value>
+  </data>
+  <data name="MENU_OPENMSGFROM" xml:space="preserve">
+    <value>_Open message in ..</value>
+  </data>
+  <data name="MENU_OPENURI" xml:space="preserve">
+    <value>_To open with ..</value>
+  </data>
   <data name="MENU_PROXYCHECK" xml:space="preserve">
     <value>Proxy check started</value>
   </data>
@@ -522,11 +567,32 @@
   <data name="MENU_SETTINGS" xml:space="preserve">
     <value>_Settings</value>
   </data>
+  <data name="MENU_SORT" xml:space="preserve">
+    <value>_Sorting</value>
+  </data>
+  <data name="MENU_SORTDATE" xml:space="preserve">
+    <value>From _date</value>
+  </data>
+  <data name="MENU_SORTDOWN" xml:space="preserve">
+    <value>From _smallest to largest</value>
+  </data>
+  <data name="MENU_SORTFROM" xml:space="preserve">
+    <value>By _sender's name</value>
+  </data>
+  <data name="MENU_SORTSUBJ" xml:space="preserve">
+    <value>From _subject</value>
+  </data>
+  <data name="MENU_SORTUP" xml:space="preserve">
+    <value>From _largest to smallest</value>
+  </data>
   <data name="MENU_SSHACCOUNT" xml:space="preserve">
     <value>Select _SSH account</value>
   </data>
   <data name="MENU_SSHSELECT" xml:space="preserve">
     <value>SSH account selected</value>
+  </data>
+  <data name="MENU_UNDELETECONFIRM" xml:space="preserve">
+    <value>Show message _recovery messages</value>
   </data>
   <data name="MENU_VERSIONCHECK" xml:space="preserve">
     <value>Check new version</value>
@@ -576,7 +642,10 @@
   <data name="TAG_CLIENTS" xml:space="preserve">
     <value>Email clients</value>
   </data>
-  <data name="TAG_CLIENTSMAILPERIOD" xml:space="preserve">
+  <data name="TAG_CLIENTSMAILPERIODHOURS" xml:space="preserve">
+    <value>Mail check interval in hours</value>
+  </data>
+  <data name="TAG_CLIENTSMAILPERIODMIN" xml:space="preserve">
     <value>Mail check period in minutes</value>
   </data>
   <data name="TAG_CLIENTSTIMEOUT" xml:space="preserve">
@@ -593,6 +662,15 @@
   </data>
   <data name="TAG_DISABLE" xml:space="preserve">
     <value>Disable</value>
+  </data>
+  <data name="TAG_DT_DATE" xml:space="preserve">
+    <value>DATE</value>
+  </data>
+  <data name="TAG_DT_NUM" xml:space="preserve">
+    <value>Num</value>
+  </data>
+  <data name="TAG_DT_SUBJ" xml:space="preserve">
+    <value>Subject</value>
   </data>
   <data name="TAG_ENABLE" xml:space="preserve">
     <value>Enable</value>
@@ -629,6 +707,9 @@
   </data>
   <data name="TAG_MESSAGE" xml:space="preserve">
     <value>Message</value>
+  </data>
+  <data name="TAG_MSGREADING" xml:space="preserve">
+    <value>Reading</value>
   </data>
   <data name="TAG_NAME" xml:space="preserve">
     <value>Name:</value>

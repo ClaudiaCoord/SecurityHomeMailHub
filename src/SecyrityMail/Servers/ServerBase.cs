@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 /*
 	Protocol Plain       TLS/SSL
     IMAP	 Port 143	Port 993
@@ -44,9 +50,11 @@ namespace SecyrityMail.Servers
             IsSecure = port > maxPort;
             Listener = new TcpListener(ip, port);
             Listener.ExclusiveAddressUse = !Global.Instance.Config.IsSharingSocket;
-            InitLog(IsLog_);
+            InitOptions();
+            InitLog(IsLog);
             eventClient = new EventHandler<EventActionArgs>(Client_ProxyEventCb);
         }
+        protected virtual void InitOptions() { }
         protected void InitLog(bool islog) { 
             if (islog && string.IsNullOrEmpty(LogLocation)) {
                 DirectoryInfo dir = Directory.CreateDirectory(

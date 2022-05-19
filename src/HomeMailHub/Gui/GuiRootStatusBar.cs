@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using Terminal.Gui;
 
 namespace HomeMailHub.Gui {
@@ -51,8 +56,8 @@ namespace HomeMailHub.Gui {
 			Application.MainLoop.Invoke(() => {
 				GuiStatusItems[idx].Title =
 					((id == GuiStatusItemId.ServiceName) && string.IsNullOrWhiteSpace(val.ToString())) ?
-						"  -  " : val.ToString();
-                Redraw(Bounds);
+						"  -  " : val.ToString().Normalize();
+                SetNeedsDisplay();
             });
 		}
 	}

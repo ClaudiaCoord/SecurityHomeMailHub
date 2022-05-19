@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -48,8 +54,6 @@ namespace SecyrityMail.Data
                 return true;
             });
 
-        private string PathFile(bool b, string s) => b ? $"{s}.bak" : s;
-
         public async Task<bool> Load() =>
             await Load(Global.GetRootFile(Global.DirectoryPlace.Root, FileName), false);
 
@@ -59,7 +63,7 @@ namespace SecyrityMail.Data
         public async Task<bool> Load(string path, bool isbackup = false) =>
             await Task.Run(() => {
                 try {
-                    T1 accs = PathFile(isbackup, path).DeserializeFromFile<T1>();
+                    T1 accs = path.BasePathFile(isbackup).DeserializeFromFile<T1>();
                     return Copy(accs);
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Load), ex); }
@@ -75,7 +79,7 @@ namespace SecyrityMail.Data
         public async Task<bool> Save(T1 clz, string path, bool isbackup = false) =>
             await Task.Run(() => {
                 try {
-                    PathFile(isbackup, path).SerializeToFile<T1>(clz);
+                    path.BasePathFile(isbackup).SerializeToFile<T1>(clz);
                     return true;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Save), ex); }

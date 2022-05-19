@@ -1,0 +1,23 @@
+﻿extensions: .cs
+/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+extensions: .cpp .h
+// Copyright (c) 2022 СС
+
+extensions: .aspx .ascx
+<%-- 
+Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+Copyright (c) 2022 СС
+License MIT.
+--%>
+
+extensions: .xml .config .xsd
+<!--
+Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+Copyright (c) 2022 СС
+License MIT.
+-->

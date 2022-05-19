@@ -1,3 +1,9 @@
+/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 ÑÑ
+ * License MIT.
+ */
+
 
 using System;
 using System.IO;
@@ -243,7 +249,7 @@ namespace SecyrityMail.Servers.SMTP
                 case SmtpCommand.CRAMMD5: {
                         if (data.IsAuthorize) {
                             await stream.SendClient(SmtpResponseId.AlreadyLogged.SmtpResponse(), fslog)
-                                  .ConfigureAwait(false);
+                                        .ConfigureAwait(false);
                             return;
                         }
                         break;
@@ -255,7 +261,7 @@ namespace SecyrityMail.Servers.SMTP
                             break;
                         if (!data.IsAuthorize) {
                             await stream.SendClient(SmtpResponseId.NeededLogged.SmtpResponse(), fslog)
-                                  .ConfigureAwait(false);
+                                        .ConfigureAwait(false);
                             return;
                         }
                         LastCommand = SmtpCommand.NOOP;
@@ -264,7 +270,7 @@ namespace SecyrityMail.Servers.SMTP
                 default: {
                         if (!data.IsAuthorize) {
                             await stream.SendClient(SmtpResponseId.NeededLogged.SmtpResponse(), fslog)
-                                  .ConfigureAwait(false);
+                                        .ConfigureAwait(false);
                             return;
                         }
                         LastCommand = SmtpCommand.NOOP;
@@ -302,13 +308,13 @@ namespace SecyrityMail.Servers.SMTP
                                     await stream.SendClient(SmtpResponseId.AuthOk.SmtpResponse(), fslog)
                                           .ConfigureAwait(false);
                                     LastCommand = SmtpCommand.NOOP;
-                                    AuthToEvent();
+                                    AuthToEvent(cmd);
                                     break;
                                 }
                             }
                             await stream.SendClient(SmtpResponseId.AuthErrorArgs.SmtpResponse(cmd.ToString()), fslog)
                                   .ConfigureAwait(false);
-                            AddAuthFilter.Invoke(IpEndPoint);
+                            WrongAuthToEvent(scmd);
                         }
                         catch (Exception ex) {
                             await stream.SendClient(SmtpResponseId.ErrorArgs.SmtpResponse(ex.Message), fslog)
@@ -325,13 +331,13 @@ namespace SecyrityMail.Servers.SMTP
                                     await stream.SendClient(SmtpResponseId.AuthOk.SmtpResponse(), fslog)
                                           .ConfigureAwait(false);
                                     LastCommand = SmtpCommand.NOOP;
-                                    AuthToEvent();
+                                    AuthToEvent(cmd);
                                     break;
                                 }
                             }
                             await stream.SendClient(SmtpResponseId.AuthErrorArgs.SmtpResponse(cmd.ToString()), fslog)
                                   .ConfigureAwait(false);
-                            AddAuthFilter.Invoke(IpEndPoint);
+                            WrongAuthToEvent(scmd);
                         }
                         catch (Exception ex) {
                             await stream.SendClient(SmtpResponseId.ErrorArgs.SmtpResponse(ex.Message), fslog)
@@ -354,13 +360,13 @@ namespace SecyrityMail.Servers.SMTP
                                     await stream.SendClient(SmtpResponseId.AuthOk.SmtpResponse(), fslog)
                                           .ConfigureAwait(false);
                                     LastCommand = SmtpCommand.NOOP;
-                                    AuthToEvent();
+                                    AuthToEvent(cmd);
                                     break;
                                 }
                             }
                             await stream.SendClient(SmtpResponseId.AuthErrorArgs.SmtpResponse(cmd.ToString()), fslog)
                                   .ConfigureAwait(false);
-                            AddAuthFilter.Invoke(IpEndPoint);
+                            WrongAuthToEvent(scmd);
                         }
                         catch (Exception ex) {
                             await stream.SendClient(SmtpResponseId.ErrorArgs.SmtpResponse(ex.Message), fslog)
@@ -401,7 +407,7 @@ namespace SecyrityMail.Servers.SMTP
 
                                         await stream.SendClient(SmtpResponseId.AuthErrorArgs.SmtpResponse(opt.ToString()), fslog)
                                               .ConfigureAwait(false);
-                                        AddAuthFilter.Invoke(IpEndPoint);
+                                        WrongAuthToEvent(scmd);
                                         LastCommand = SmtpCommand.NOOP;
                                         break;
                                     }
@@ -409,7 +415,7 @@ namespace SecyrityMail.Servers.SMTP
                                         if (scmd.Length != 2) {
                                             await stream.SendClient(SmtpResponseId.AuthErrorArgs.SmtpResponse(opt.ToString()), fslog)
                                                   .ConfigureAwait(false);
-                                            AddAuthFilter.Invoke(IpEndPoint);
+                                            WrongAuthToEvent(scmd);
                                             break;
                                         }
                                         LastCommand = opt;
@@ -435,14 +441,14 @@ namespace SecyrityMail.Servers.SMTP
                     {
                         if (scmd.Length >= 2) data.Domain = scmd[1];
                         await stream.SendClient(SmtpResponseId.Hello.SmtpResponse(), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
                         break;
                     }
                 case SmtpCommand.EHLO:
                     {
                         if (scmd.Length >= 2) data.Domain = scmd[1];
                         await stream.SendClient(SmtpResponseId.EHello.SmtpResponse(data.Domain), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
                         break;
                     }
                 case SmtpCommand.FROM:
@@ -452,7 +458,7 @@ namespace SecyrityMail.Servers.SMTP
                                 if (!data.CheckFrom(scmd[2])) {
                                     await stream.SendClient(SmtpResponseId.SenderErrorFrom.SmtpResponse(), fslog)
                                           .ConfigureAwait(false);
-                                    AddAuthFilter.Invoke(IpEndPoint);
+                                    WrongAuthToEvent(scmd);
                                     Dispose();
                                     break;
                                 }
@@ -476,26 +482,26 @@ namespace SecyrityMail.Servers.SMTP
                                 if (!data.CheckTo(scmd[2], originalto)) {
                                     await stream.SendClient(SmtpResponseId.BadMailbox.SmtpResponse(), fslog)
                                           .ConfigureAwait(false);
-                                    AddAuthFilter.Invoke(IpEndPoint);
+                                    WrongAuthToEvent(scmd);
                                     Dispose();
                                     break;
                                 }
                             } else {
                                 await stream.SendClient(SmtpResponseId.NeededLogged.SmtpResponse(), fslog)
                                       .ConfigureAwait(false);
-                                AddAuthFilter.Invoke(IpEndPoint);
+                                WrongAuthToEvent(scmd);
                                 Dispose();
                                 break;
                             }
                         }
                         await stream.SendClient(SmtpResponseId.Ok.SmtpResponse(), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
                         break;
                     }
                 case SmtpCommand.DATA:
                     {
                         await stream.SendClient(SmtpResponseId.DataBegin.SmtpResponse(), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
                         IsData = true;
                         break;
                     }
@@ -542,9 +548,17 @@ namespace SecyrityMail.Servers.SMTP
             }
         }
 
-        private void AuthToEvent() {
+        private void AuthToEvent(SmtpCommand cmd) {
             string ip = (IpEndPoint == default) ? "" : IpEndPoint.ToString();
-            OnCallEvent(MailEventId.UserAuth, $"{data.UserAccount.Email}/{ip}", data.UserAccount);
+            OnCallEvent(MailEventId.UserAuth, $"Auth {cmd}: {data.UserAccount.Email}/{ip}", data.UserAccount);
+        }
+        private void WrongAuthToEvent(string[] ss) {
+            string ip = string.Empty;
+            if (IpEndPoint != default) {
+                AddAuthFilter.Invoke(IpEndPoint);
+                ip = IpEndPoint.ToString();
+            }
+            OnCallEvent(MailEventId.UserAuth, $"Auth BAD: {ip}", string.Join(",", ss));
         }
         #endregion
 

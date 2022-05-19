@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +88,9 @@ namespace HomeMailHub.Gui
 					if (logList.Count >= 100)
 						logList.RemoveRange(99, logList.Count - 99);
 					logList.Insert(0, t);
-					string s = string.Join(Environment.NewLine, logList.Select(t => $"{t.Item1:HH:mm:ss} - {t.Item2} - {t.Item3}"));
+					string s = string.Join(
+						Environment.NewLine,
+						logList.Select(t => $"{t.Item1:HH:mm:ss} - {t.Item2.HumanizeClassName()} - {t.Item3}"));
 					textView.Text = s;
 				} catch { }
 				Application.MainLoop.Invoke(() => { try { Redraw(Bounds); } catch { } });

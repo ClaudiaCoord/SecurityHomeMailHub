@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -15,7 +21,7 @@ namespace SecyrityMail.Servers.POP3
         public Pop3Server(int port, IPAddress ip, CancellationTokenSafe token) : base(port, ip, token, 995) { }
         ~Pop3Server() => base.Dispose();
 
-        private void InitOptions() {
+        protected override void InitOptions() {
             IsLog = Global.Instance.Config.IsPop3Log;
             IsSecure = Global.Instance.Config.IsPop3Secure;
         }
@@ -65,6 +71,7 @@ namespace SecyrityMail.Servers.POP3
             MainThread.Name = $"{nameof(Pop3Server)} - {IpEndPoint}";
             MainThread.IsBackground = true;
             MainThread.Start();
+            OnCallEvent(MailEventId.Started, nameof(Pop3Server));
         }
     }
 }

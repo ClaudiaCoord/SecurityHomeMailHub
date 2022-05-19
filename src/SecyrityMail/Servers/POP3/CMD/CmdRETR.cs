@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +34,8 @@ namespace SecyrityMail.Servers.POP3.CMD
                     using StreamReader reader = new StreamReader(msg.FilePath, Encoding.UTF8, false);
                     await stream.SendClient(reader.ReadToEnd(), true, fslog)
                           .ConfigureAwait(false);
+                    msg.IsRead = true;
+                    data.OnChange();
                     return true;
 
                 } while (false);

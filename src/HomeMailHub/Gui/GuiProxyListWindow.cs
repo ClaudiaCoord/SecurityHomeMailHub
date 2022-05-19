@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,6 +13,7 @@ using SecyrityMail.Proxy;
 using SecyrityMail.Utils;
 using Terminal.Gui;
 using RES = HomeMailHub.Properties.Resources;
+using GuiAttribute = Terminal.Gui.Attribute;
 
 namespace HomeMailHub.Gui
 {
@@ -40,12 +46,14 @@ namespace HomeMailHub.Gui
 		private TextField portText { get; set; } = default;
 		private TextView  logView { get; set; } = default;
 		private RadioGroup proxySelectType { get; set; } = default;
+		private ColorScheme colorProgressBar { get; set; } = default;
 
-		private ProxyType proxyType { get; set; } = ProxyType.None;
+        private ProxyType proxyType { get; set; } = ProxyType.None;
 		private List<string> data = new();
 		private List<string> log = new();
 		private GuiRunOnce runOnce = new();
-		private CancellationTokenSafe tokenSafe { get; set; } = new();
+        private GuiProgressBar checkProgress { get; set; } = default;
+        private CancellationTokenSafe tokenSafe { get; set; } = new();
         private GuiLinearLayot linearLayot { get; } = new();
         private bool IsEmptyForm =>
 			string.IsNullOrWhiteSpace(hostText.Text.ToString()) && string.IsNullOrWhiteSpace(portText.Text.ToString());
@@ -76,6 +84,9 @@ namespace HomeMailHub.Gui
                 new GuiLinearData(23, 3, true),
                 new GuiLinearData(37, 3, true)
             });
+
+            GuiAttribute cpb = Application.Driver.MakeAttribute(Color.BrightGreen, Color.BrightBlue);
+            colorProgressBar = new ColorScheme() { Normal = cpb, Focus = cpb, HotFocus = cpb, HotNormal = cpb, Disabled = cpb };
         }
 
         public new void Dispose() {
@@ -109,7 +120,7 @@ namespace HomeMailHub.Gui
 				X = 37,
 				Y = 16
 			};
-			listView = new ListView(data)
+            frameList.Add(listView = new ListView(data)
 			{
 				X = 1,
 				Y = 1,
@@ -117,14 +128,21 @@ namespace HomeMailHub.Gui
 				Height = Dim.Fill() - 1,
 				AllowsMarking = true,
 				AllowsMultipleSelection = false
-			};
-			listView.OpenSelectedItem += ListView_OpenSelectedItem;
+			});
+            frameList.Add(checkProgress = new GuiProgressBar()
+            {
+                X = 1,
+                Y = 22,
+                Width = 31,
+                Height = 1,
+                ProgressBarStyle = ProgressBarStyle.Continuous,
+                ColorScheme = colorProgressBar
+            });
+            listView.OpenSelectedItem += ListView_OpenSelectedItem;
 			listView.SelectedItemChanged += ListView_SelectedItemChanged;
-
-			frameList.Add(listView);
 			Add(frameList);
 
-			logView = new TextView()
+            frameCheck.Add(logView = new TextView()
 			{
 				X = 1,
 				Y = 0,
@@ -132,8 +150,7 @@ namespace HomeMailHub.Gui
 				Height = Dim.Fill(),
 				Multiline = true,
 				ReadOnly = true
-			};
-			frameCheck.Add(logView);
+			});
 			Add(frameCheck);
 
 			frameSelect.Add(proxySelectType = new RadioGroup(proxyopt)
@@ -313,9 +330,8 @@ namespace HomeMailHub.Gui
 				{
 					int count = data.Count;
 					ProxyListConverter converter = new();
-					List<string> list = await converter.HidemyConvert(Clipboard.Contents.ToString(), data)
+                    List<string> list = await converter.HidemyConvert(Clipboard.Contents.ToString(), new List<string>())
 													   .ConfigureAwait(false);
-
 					if (list.Count == 0) {
 						Application.MainLoop.Invoke(() => frameList.Title = $"{RES.GUIPROXY_TITLE1} : {data.Count}");
 						$"{RES.GUIPROXY_TXT10}!".StatusBarText();
@@ -556,7 +572,8 @@ namespace HomeMailHub.Gui
 
 				Application.MainLoop.Invoke(() => {
 					frameCheck.Title = RES.GUIPROXY_TITLE4;
-					buttonCheckAll.ColorScheme = GuiApp.ColorRed;
+					buttonCheckAll.Text = RES.BTN_CHECKALL;
+                    buttonCheckAll.ColorScheme = GuiApp.ColorRed;
 					RES.GUIPROXY_TXT1.StatusBarText();
 				});
 				return;
@@ -579,19 +596,23 @@ namespace HomeMailHub.Gui
 				try {
 					_goodCheck = _badCheck = 0;
 					frameCheck.Title = $"{RES.GUIPROXY_TITLE4} - {proxyType}";
-					buttonCheckAll.ColorScheme = GuiApp.ColorGreen;
+                    buttonCheckAll.Text = RES.BTN_CHECKSTOP;
+                    buttonCheckAll.ColorScheme = GuiApp.ColorGreen;
 					RES.GUIPROXY_TXT5.StatusBarText();
-					List<string> list = new(data);
-					await Global.Instance.Proxy.CheckProxyes(proxyType, list, tokenSafe.Token, UpdateLogPanel)
+                    List<string> list = new(data);
+                    checkProgress.Begin(data.Count);
+                    await Global.Instance.Proxy.CheckProxyes(proxyType, list, tokenSafe.Token, UpdateLogPanel)
 											   .ContinueWith(async (t) => {
 												   Application.MainLoop.Invoke(() => {
 													   buttonCheckAll.ColorScheme = Colors.Base;
 													   string.Empty.StatusBarText();
 												   });
 												   await LoadProxyList(proxyType, proxyType, list)
-															.ContinueWith((t) => runOnce.EndRun(SetBusy))
-															.ConfigureAwait(false);
-											   }).ConfigureAwait(false);
+															.ContinueWith((t) => {
+                                                                checkProgress.End();
+                                                                runOnce.EndRun(SetBusy);
+                                                            }).ConfigureAwait(false);
+                                               }).ConfigureAwait(false);
 				} catch (Exception ex) { ex.StatusBarError(); runOnce.EndRun(SetBusy); }
 			}
 		}
@@ -630,7 +651,7 @@ namespace HomeMailHub.Gui
 						$"{host} {RES.GUIPROXY_TXT11}".StatusBarText();
 						return;
 					}
-					frameCheck.Title = $"{RES.GUIPROXY_TITLE5} - {proxyType} - {host}:{port}";
+                    frameCheck.Title = $"{RES.GUIPROXY_TITLE5} - {proxyType} - {host}:{port}";
 					buttonCheckHost.ColorScheme = GuiApp.ColorGreen;
 					$"{RES.GUIPROXY_TXT7} {hostText.Text}:{portText.Text}..".StatusBarText();
 					await Global.Instance.Proxy.CheckProxyHost(proxyType, host, port, tokenSafe.Token, UpdateLogPanel)
@@ -660,15 +681,27 @@ namespace HomeMailHub.Gui
 
 					if (txt.Contains("check ")) {
 						if (txt.Contains(" OK ")) _goodCheck++;
-						else if (txt.Contains(" ERROR ")) _badCheck++;
-					}
+						else if (txt.Contains(" ERROR ")) {
+                            _badCheck++;
+                            int idx = txt.IndexOf(' ', 6);
+                            if (idx > 6) {
+                                string s = txt.Substring(6, idx - 6).Trim();
+                                if (!string.IsNullOrWhiteSpace(s)) {
+                                    data.Remove(s);
+                                    listView.SetChildNeedsDisplay();
+                                }
+                            }
+                            frameList.Title = $"{RES.GUIPROXY_TITLE1} : {data.Count}";
+                        }
+                        checkProgress.Pulse();
+                    }
 					frameCheck.Title = $"{RES.GUIPROXY_TITLE4} - {proxyType} - {_goodCheck}/{_badCheck}";
 				} catch { }
 			}
 		}
 		#endregion
 
-		private void SetBusy(bool b) =>
+        private void SetBusy(bool b) =>
 			Application.MainLoop.Invoke(() => busyLabel.ColorScheme = b ? GuiApp.ColorRed : Colors.Base);
 
 		private int ProxyTypeSelect(ProxyType opt) =>

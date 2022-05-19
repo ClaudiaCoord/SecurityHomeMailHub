@@ -130,7 +130,7 @@
     <value>_Вставить</value>
   </data>
   <data name="ctxRedo" xml:space="preserve">
-    <value>_Переделывать</value>
+    <value>_Изменить</value>
   </data>
   <data name="ctxSelectAll" xml:space="preserve">
     <value>_Выбрать все</value>

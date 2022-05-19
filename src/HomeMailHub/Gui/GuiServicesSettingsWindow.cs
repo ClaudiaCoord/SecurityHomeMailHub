@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -701,7 +706,7 @@ namespace HomeMailHub.Gui
                 Text = Global.Instance.Config.ClientTimeout.ToString(),
                 ColorScheme = GuiApp.ColorField
             });
-            frameClientsLeft.Add(checkMailClientsLabel = new Label(RES.TAG_CLIENTSMAILPERIOD)
+            frameClientsLeft.Add(checkMailClientsLabel = new Label(RES.TAG_CLIENTSMAILPERIODMIN)
             {
                 X = 1,
                 Y = 4,
@@ -970,7 +975,7 @@ namespace HomeMailHub.Gui
         #region Forbiden Route List
         private void ForbidenRouteText_KeyUp(KeyEventEventArgs obj) {
             if ((obj != null) && (obj.KeyEvent.Key == Key.Enter))
-                ForbidenRouteIp(true,true);
+                ForbidenRouteIp(true, true);
         }
         private void ForbidenRouteIp(bool b, bool auto = false) =>
                 ForbidenList(

@@ -1,51 +1,18 @@
-﻿//
-// ScrollView.cs: ScrollView view.
-//
-// Authors:
-//   Miguel de Icaza (miguel@gnome.org)
-//
-//
-// TODO:
-// - focus in scrollview
-// - focus handling in scrollview to auto scroll to focused view
-// - Raise events
-// - Perhaps allow an option to not display the scrollbar arrow indicators?
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 
 namespace Terminal.Gui {
-	/// <summary>
-	/// Scrollviews are views that present a window into a virtual space where subviews are added.  Similar to the iOS UIScrollView.
-	/// </summary>
-	/// <remarks>
-	/// <para>
-	///   The subviews that are added to this <see cref="Gui.ScrollView"/> are offset by the
-	///   <see cref="ContentOffset"/> property.  The view itself is a window into the 
-	///   space represented by the <see cref="ContentSize"/>.
-	/// </para>
-	/// <para>
-	///   Use the 
-	/// </para>
-	/// </remarks>
 	public class ScrollView : View {
 		View contentView = null;
 		ScrollBarView vertical, horizontal;
 
-		/// <summary>
-		///  Initializes a new instance of the <see cref="Gui.ScrollView"/> class using <see cref="LayoutStyle.Absolute"/> positioning.
-		/// </summary>
-		/// <param name="frame"></param>
 		public ScrollView (Rect frame) : base (frame)
 		{
 			Initialize (frame);
 		}
 
 
-		/// <summary>
-		///  Initializes a new instance of the <see cref="Gui.ScrollView"/> class using <see cref="LayoutStyle.Computed"/> positioning.
-		/// </summary>
 		public ScrollView () : base ()
 		{
 			Initialize (Rect.Empty);
@@ -84,7 +51,6 @@ namespace Terminal.Gui {
 			contentView.MouseEnter += View_MouseEnter;
 			contentView.MouseLeave += View_MouseLeave;
 
-			// Things this view knows how to do
 			AddCommand (Command.ScrollUp, () => ScrollUp (1));
 			AddCommand (Command.ScrollDown, () => ScrollDown (1));
 			AddCommand (Command.ScrollLeft, () => ScrollLeft (1));
@@ -98,7 +64,6 @@ namespace Terminal.Gui {
 			AddCommand (Command.LeftHome, () => ScrollLeft (contentSize.Width));
 			AddCommand (Command.RightEnd, () => ScrollRight (contentSize.Width));
 
-			// Default keybindings for this view
 			AddKeyBinding (Key.CursorUp, Command.ScrollUp);
 			AddKeyBinding (Key.CursorDown, Command.ScrollDown);
 			AddKeyBinding (Key.CursorLeft, Command.ScrollLeft);
@@ -125,10 +90,6 @@ namespace Terminal.Gui {
 		bool keepContentAlwaysInViewport = true;
 		bool autoHideScrollBars = true;
 
-		/// <summary>
-		/// Represents the contents of the data shown inside the scrollview
-		/// </summary>
-		/// <value>The size of the content.</value>
 		public Size ContentSize {
 			get {
 				return contentSize;
@@ -144,10 +105,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Represents the top left corner coordinate that is displayed by the scrollview
-		/// </summary>
-		/// <value>The content offset.</value>
 		public Point ContentOffset {
 			get {
 				return contentOffset;
@@ -170,9 +127,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// If true the vertical/horizontal scroll bars won't be showed if it's not needed.
-		/// </summary>
 		public bool AutoHideScrollBars {
 			get => autoHideScrollBars;
 			set {
@@ -183,9 +137,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Get or sets if the view-port is kept always visible in the area of this <see cref="ScrollView"/>
-		/// </summary>
 		public bool KeepContentAlwaysInViewport {
 			get { return keepContentAlwaysInViewport; }
 			set {
@@ -211,10 +162,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Adds the view to the scrollview.
-		/// </summary>
-		/// <param name="view">The view to add to the scrollview.</param>
 		public override void Add (View view)
 		{
 			if (!IsOverridden (view)) {
@@ -245,10 +192,6 @@ namespace Terminal.Gui {
 			return (m.DeclaringType == t || m.ReflectedType == t) && m.GetBaseDefinition ().DeclaringType == typeof (Responder);
 		}
 
-		/// <summary>
-		/// Gets or sets the visibility for the horizontal scroll indicator.
-		/// </summary>
-		/// <value><c>true</c> if show horizontal scroll indicator; otherwise, <c>false</c>.</value>
 		public bool ShowHorizontalScrollIndicator {
 			get => showHorizontalScrollIndicator;
 			set {
@@ -274,20 +217,11 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		///   Removes all widgets from this container.
-		/// </summary>
-		/// <remarks>
-		/// </remarks>
 		public override void RemoveAll ()
 		{
 			contentView.RemoveAll ();
 		}
 
-		/// <summary>
-		/// Gets or sets the visibility for the vertical scroll indicator.
-		/// </summary>
-		/// <value><c>true</c> if show vertical scroll indicator; otherwise, <c>false</c>.</value>
 		public bool ShowVerticalScrollIndicator {
 			get => showVerticalScrollIndicator;
 			set {
@@ -313,7 +247,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <inheritdoc/>
 		public override void Redraw (Rect region)
 		{
 			Driver.SetAttribute (GetNormalColor ());
@@ -339,7 +272,6 @@ namespace Terminal.Gui {
 				}
 			}
 
-			// Fill in the bottom left corner
 			if (ShowVerticalScrollIndicator && ShowHorizontalScrollIndicator) {
 				AddRune (Bounds.Width - 1, Bounds.Height - 1, ' ');
 			}
@@ -415,7 +347,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		///<inheritdoc/>
 		public override void PositionCursor ()
 		{
 			if (InternalSubviews.Count == 0)
@@ -424,11 +355,6 @@ namespace Terminal.Gui {
 				base.PositionCursor ();
 		}
 
-		/// <summary>
-		/// Scrolls the view up.
-		/// </summary>
-		/// <returns><c>true</c>, if left was scrolled, <c>false</c> otherwise.</returns>
-		/// <param name="lines">Number of lines to scroll.</param>
 		public bool ScrollUp (int lines)
 		{
 			if (contentOffset.Y < 0) {
@@ -438,11 +364,6 @@ namespace Terminal.Gui {
 			return false;
 		}
 
-		/// <summary>
-		/// Scrolls the view to the left
-		/// </summary>
-		/// <returns><c>true</c>, if left was scrolled, <c>false</c> otherwise.</returns>
-		/// <param name="cols">Number of columns to scroll by.</param>
 		public bool ScrollLeft (int cols)
 		{
 			if (contentOffset.X < 0) {
@@ -452,11 +373,6 @@ namespace Terminal.Gui {
 			return false;
 		}
 
-		/// <summary>
-		/// Scrolls the view down.
-		/// </summary>
-		/// <returns><c>true</c>, if left was scrolled, <c>false</c> otherwise.</returns>
-		/// <param name="lines">Number of lines to scroll.</param>
 		public bool ScrollDown (int lines)
 		{
 			if (vertical.CanScroll (lines, out _, true)) {
@@ -466,11 +382,6 @@ namespace Terminal.Gui {
 			return false;
 		}
 
-		/// <summary>
-		/// Scrolls the view to the right.
-		/// </summary>
-		/// <returns><c>true</c>, if right was scrolled, <c>false</c> otherwise.</returns>
-		/// <param name="cols">Number of columns to scroll by.</param>
 		public bool ScrollRight (int cols)
 		{
 			if (horizontal.CanScroll (cols, out _)) {
@@ -480,7 +391,6 @@ namespace Terminal.Gui {
 			return false;
 		}
 
-		///<inheritdoc/>
 		public override bool ProcessKey (KeyEvent kb)
 		{
 			if (base.ProcessKey (kb))
@@ -493,7 +403,6 @@ namespace Terminal.Gui {
 			return false;
 		}
 
-		///<inheritdoc/>
 		public override bool MouseEvent (MouseEvent me)
 		{
 			if (me.Flags != MouseFlags.WheeledDown && me.Flags != MouseFlags.WheeledUp &&
@@ -522,21 +431,17 @@ namespace Terminal.Gui {
 			return true;
 		}
 
-		///<inheritdoc/>
 		protected override void Dispose (bool disposing)
 		{
 			if (!showVerticalScrollIndicator) {
-				// It was not added to SuperView, so it won't get disposed automatically
 				vertical?.Dispose ();
 			}
 			if (!showHorizontalScrollIndicator) {
-				// It was not added to SuperView, so it won't get disposed automatically
 				horizontal?.Dispose ();
 			}
 			base.Dispose (disposing);
 		}
 
-		///<inheritdoc/>
 		public override bool OnEnter (View view)
 		{
 			if (Subviews.Count == 0 || !Subviews.Any (subview => subview.CanFocus)) {

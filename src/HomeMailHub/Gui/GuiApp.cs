@@ -1,3 +1,8 @@
+/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 ÑÑ
+ * License MIT.
+ */
 
 using System;
 using System.Threading;
@@ -146,8 +151,7 @@ namespace HomeMailHub.Gui {
 		}
 		~GuiApp() => Dispose();
 
-		public void LoadWindow(Type t, string s = default)
-		{
+		public void LoadWindow(Type t, string s = default) {
 			switch (t.Name) {
 				case nameof(GuiMailAccountWindow): LoadWindow<GuiMailAccountWindow>(s); break;
 				case nameof(GuiVpnAccountWindow): LoadWindow<GuiVpnAccountWindow>(s); break;
@@ -226,18 +230,33 @@ namespace HomeMailHub.Gui {
 				case MailEventId.None: return;
 				case MailEventId.PropertyChanged:
 					{
-						if ("TunnelRx".Equals(a.Src))
+						if ("TunnelRx".Equals(a.Text))
 							GuiMainStatusBar.UpdateStatus(GuiStatusItemId.Rx, ((long)a.Obj).Humanize());
-						else if ("TunnelTx".Equals(a.Src))
+						else if ("TunnelTx".Equals(a.Text))
 							GuiMainStatusBar.UpdateStatus(GuiStatusItemId.Tx, ((long)a.Obj).Humanize());
 						return;
 					}
-				case MailEventId.DateExpired:
+				case MailEventId.UserAuth:
+                    {
+                        t = (a.Obj is string s) ? new(DateTime.Now, a.Sender.GetType().Name.HumanizeClassName(), $"{a.Text} -> {s}") :
+												  new(DateTime.Now, a.Sender.GetType().Name.HumanizeClassName(), a.Text);
+                        break;
+                    }
+                case MailEventId.Started:
+                case MailEventId.Cancelled:
+                    {
+                        t = new(
+                            DateTime.Now, a.Sender.GetType().Name.HumanizeClassName(),
+							string.Format(
+								"{0}: {1}", (a.Id == MailEventId.Started) ? "Started" : "Stopped", a.Text.HumanizeClassName()));
+                        break;
+                    }
+                case MailEventId.DateExpired:
 					{
-						if (a.Obj is TimeSpan ts)
-							t = new(DateTime.Now, $"{a.Sender.GetType().Name}/{a.Src}", $"date expired {ts}");
-						else
-							t = new(DateTime.Now, $"{a.Sender.GetType().Name}/{a.Src}", "date expired");
+                        t = (a.Obj is TimeSpan ts) ? new(DateTime.Now, $"{a.Sender.GetType().Name.HumanizeClassName()}/{a.Text}",
+															$"date expired: {ts.Days} day, {ts:hh\\:mm}") :
+													 new(DateTime.Now, $"{a.Sender.GetType().Name.HumanizeClassName()}/{a.Text}",
+															"date expired");
 						break;
 					}
 				case MailEventId.StopFetchMail:
@@ -249,13 +268,31 @@ namespace HomeMailHub.Gui {
 							GuiStatusItemId.ServiceName, (a.Id == MailEventId.StartFetchMail) ? "Mail Fetch" : string.Empty);
 						break;
 					}
-				case MailEventId.BeginCall:
-					GuiMainStatusBar.UpdateStatus(GuiStatusItemId.ServiceName, a.Src); return;
+				case MailEventId.DeliveryInMessage:
+                case MailEventId.DeliveryOutMessage:
+				case MailEventId.DeliverySendMessage:
+                case MailEventId.DeliveryErrorMessage:
+                case MailEventId.DeliveryLocalMessage:
+                    {
+						string place = a.Id switch {
+							MailEventId.DeliveryLocalMessage => "Local",
+                            MailEventId.DeliveryOutMessage => "Outgoing",
+                            MailEventId.DeliveryErrorMessage => "Error",
+                            MailEventId.DeliverySendMessage => "Send",
+                            MailEventId.DeliveryInMessage => "Incoming",
+							_ => string.Empty
+                        },
+						msg = $"{place} message: {a.Text}";
+                        t = new(DateTime.Now, "Delivery Message", msg);
+						msg.StatusBarText();
+                        break;
+                    }
+                case MailEventId.BeginCall:
+					GuiMainStatusBar.UpdateStatus(GuiStatusItemId.ServiceName, a.Text); return;
 				case MailEventId.EndCall:
 					GuiMainStatusBar.UpdateStatus(GuiStatusItemId.ServiceName, string.Empty); return;
-				default:
-					{
-						t = new(DateTime.Now, a.Sender.GetType().Name, a.Src);
+				default: {
+						t = new(DateTime.Now, a.Sender.GetType().Name.HumanizeClassName(), a.Text);
 						break;
 					}
 			}

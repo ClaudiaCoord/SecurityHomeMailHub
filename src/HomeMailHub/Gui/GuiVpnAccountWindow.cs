@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +12,6 @@ using HomeMailHub.Gui.Dialogs;
 using SecyrityMail;
 using SecyrityMail.Vpn;
 using Terminal.Gui;
-using GuiAttribute = Terminal.Gui.Attribute;
 using RES = HomeMailHub.Properties.Resources;
 
 namespace HomeMailHub.Gui
@@ -27,6 +31,7 @@ namespace HomeMailHub.Gui
         private Button buttonDelete { get; set; } = default;
         private Button buttonImport { get; set; } = default;
         private Button buttonExport { get; set; } = default;
+        private Button buttonPaste { get; set; } = default;
 
         private Label pubkeyLabel { get; set; } = default;
         private Label privkeyLabel { get; set; } = default;
@@ -88,14 +93,16 @@ namespace HomeMailHub.Gui
                 new GuiLinearData(23, 12, true),
                 new GuiLinearData(33, 12, true),
                 new GuiLinearData(44, 12, true),
-                new GuiLinearData(55, 12, true)
+                new GuiLinearData(55, 12, true),
+                new GuiLinearData(54, 10, true)
             });
             linearLayot.Add("ru", new List<GuiLinearData> {
                 new GuiLinearData(14, 12, true),
                 new GuiLinearData(28, 12, true),
                 new GuiLinearData(41, 12, true),
                 new GuiLinearData(53, 12, true),
-                new GuiLinearData(64, 12, true)
+                new GuiLinearData(64, 12, true),
+                new GuiLinearData(55, 10, true)
             });
         }
 
@@ -302,6 +309,12 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = true
             });
+            framePeer.Add(buttonPaste = new Button(1, 0, RES.BTN_PASTE)
+            {
+                X = layout[5].X,
+                Y = layout[5].Y,
+                AutoSize = layout[5].AutoSize,
+            });
             expireBox.Toggled += IsexpireBox_Toggled;
             enableBox.Toggled += EnableBox_Toggled;
 
@@ -347,6 +360,7 @@ namespace HomeMailHub.Gui
             buttonSave.Clicked += () => SaveItem();
             buttonClear.Clicked += () => Clean();
             buttonDelete.Clicked += () => Delete();
+            buttonPaste.Clicked += async () => await FromClipBoard().ConfigureAwait(false);
             buttonImport.Clicked += async () =>
             {
                 GuiOpenDialog d = string.Format(RES.GUIACCOUNT_FMT6, RES.TAG_OPEN_IMPORT, tag).GuiOpenDialogs(true, extension);
@@ -463,7 +477,6 @@ namespace HomeMailHub.Gui
                 finally { runOnce.EndRun(); }
                 return true;
             });
-
         private async Task<bool> LoadVpnAccounts_() =>
             await Task.Run(async () => {
                 try {
@@ -476,6 +489,25 @@ namespace HomeMailHub.Gui
                 }
                 catch (Exception ex) { ex.StatusBarError(); }
                 return true;
+            });
+        private async Task<bool> FromClipBoard() =>
+            await Task.Run(async () => {
+                try {
+
+                    if (Clipboard.Contents.IsEmpty)
+                        return false;
+
+                    Clean();
+                    VpnAccount acc = new();
+                    bool b = await acc.ImportFromString(Clipboard.Contents.ToString())
+                                      .ConfigureAwait(false);
+                    if (b) {
+                        SelectItem(acc);
+                        return true;
+                    }
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
+                return false;
             });
         #endregion
 
@@ -495,15 +527,12 @@ namespace HomeMailHub.Gui
                 aliveText.Text =
                 mtuText.Text = string.Empty;
 
-                if (account != default)
-                {
+                if (account != default) {
                     account.Interface.SetDefault();
                     account.Peer.SetDefault();
                     dnsText.Text = account.Interface.DNS;
                     ipsText.Text = account.Peer.AllowedIPs;
-                }
-                else
-                {
+                } else {
                     dnsText.Text =
                     ipsText.Text = string.Empty;
                 }
@@ -588,44 +617,46 @@ namespace HomeMailHub.Gui
         }
 
         private void SelectItem(string s, int id) {
-
             if (string.IsNullOrEmpty(s) || !runOnce.GoRun(id))
                 return;
 
             try {
-                VpnAccount a = (from i in Global.Instance.VpnAccounts.Items
+                VpnAccount acc = (from i in Global.Instance.VpnAccounts.Items
                                 where i.Name.Equals(s)
                                 select i).FirstOrDefault();
-                if (a == default)
-                    return;
-
+                if (acc == default) return;
                 selectedName = s;
+                SelectItem(acc);
+            } finally { runOnce.EndRun(); }
+        }
 
-                privkeyText.Text = a.Interface.PrivateKey;
-                prekeyText.Text = a.Peer.PresharedKey;
-                addrText.Text = a.Interface.Address;
-                dnsText.Text = a.Interface.DNS;
-                pubkeyText.Text = a.Peer.PublicKey;
-                hostText.Text = a.Peer.Endpoint;
-                ipsText.Text = a.Peer.AllowedIPs;
-                aliveText.Text = a.Peer.PersistentKeepalive.ToString();
-                mtuText.Text = a.Interface.MTU.ToString();
+        private void SelectItem(VpnAccount acc) {
+            Application.MainLoop.Invoke(() => {
 
-                if (a.IsExpired)
+                privkeyText.Text = acc.Interface.PrivateKey;
+                prekeyText.Text = acc.Peer.PresharedKey;
+                addrText.Text = acc.Interface.Address;
+                dnsText.Text = acc.Interface.DNS;
+                pubkeyText.Text = acc.Peer.PublicKey;
+                hostText.Text = acc.Peer.Endpoint;
+                ipsText.Text = acc.Peer.AllowedIPs;
+                aliveText.Text = acc.Peer.PersistentKeepalive.ToString();
+                mtuText.Text = acc.Interface.MTU.ToString();
+
+                if (acc.IsExpired)
                     expireLabel.ColorScheme = GuiApp.ColorWarning;
                 else
                     expireLabel.ColorScheme = Colors.Base;
 
-                enableBox.Checked = a.Enable;
-                EnableBox_Toggled(!a.Enable);
-                expireStore = a.Expired;
+                enableBox.Checked = acc.Enable;
+                EnableBox_Toggled(!acc.Enable);
+                expireStore = acc.Expired;
                 expireDate.Date = expireStore;
-                expireBox.Checked = a.Expired == DateTime.MinValue;
-                expireDate.Enabled = a.Enable && !expireBox.Checked;
-                account = a;
+                expireBox.Checked = acc.Expired == DateTime.MinValue;
+                expireDate.Enabled = acc.Enable && !expireBox.Checked;
+                account = acc;
                 ButtonsEnable(true);
-
-            } finally { runOnce.EndRun(); }
+            });
         }
 
         private async void SaveItem() {

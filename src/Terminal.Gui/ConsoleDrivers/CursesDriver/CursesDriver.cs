@@ -1,10 +1,4 @@
-﻿//
-// Driver.cs: Curses-based Driver
-//
-// Authors:
-//   Miguel de Icaza (miguel@gnome.org)
-//
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -14,9 +8,6 @@ using Unix.Terminal;
 
 namespace Terminal.Gui {
 
-	/// <summary>
-	/// This is the Curses driver for the gui.cs/Terminal framework.
-	/// </summary>
 	internal class CursesDriver : ConsoleDriver {
 		public override int Cols => Curses.Cols;
 		public override int Rows => Curses.Lines;
@@ -32,7 +23,6 @@ namespace Terminal.Gui {
 
 		internal override int [,,] Contents => contents;
 
-		// Current row, and current col, tracked by Move/AddRune only
 		int ccol, crow;
 		bool needMove;
 		public override void Move (int col, int row)
@@ -77,7 +67,6 @@ namespace Terminal.Gui {
 
 		public override void AddStr (ustring str)
 		{
-			// TODO; optimize this to determine if the str fits in the clip region, and if so, use Curses.addstr directly
 			foreach (var rune in str)
 				AddRune (rune);
 		}
@@ -106,18 +95,6 @@ namespace Terminal.Gui {
 
 			Curses.endwin ();
 
-			// I'm commenting this because was used in a trying to fix the Linux hanging and forgot to exclude it.
-			// Clear and reset entire screen.
-			//Console.Out.Write ("\x1b[2J");
-			//Console.Out.Flush ();
-
-			// Set top and bottom lines of a window.
-			//Console.Out.Write ("\x1b[1;25r");
-			//Console.Out.Flush ();
-
-			//Set cursor key to cursor.
-			//Console.Out.Write ("\x1b[?1l");
-			//Console.Out.Flush ();
 		}
 
 		public override void UpdateScreen () => window.redrawwin ();
@@ -132,25 +109,13 @@ namespace Terminal.Gui {
 
 		public Curses.Window window;
 
-		//static short last_color_pair = 16;
-
-		/// <summary>
-		/// Creates a curses color from the provided foreground and background colors
-		/// </summary>
-		/// <param name="foreground">Contains the curses attributes for the foreground (color, plus any attributes)</param>
-		/// <param name="background">Contains the curses attributes for the background (color, plus any attributes)</param>
-		/// <returns></returns>
 		public static Attribute MakeColor (short foreground, short background)
 		{
 			var v = (short)((int)foreground | background << 4);
-			//Curses.InitColorPair (++last_color_pair, foreground, background);
 			Curses.InitColorPair (v, foreground, background);
 			return new Attribute (
-				//value: Curses.ColorPair (last_color_pair),
 				value: Curses.ColorPair (v),
-				//foreground: (Color)foreground,
 				foreground: MapCursesColor (foreground),
-				//background: (Color)background);
 				background: MapCursesColor (background));
 		}
 
@@ -289,8 +254,6 @@ namespace Terminal.Gui {
 			} else {
 				buttonPressedCount = 0;
 			}
-			//System.Diagnostics.Debug.WriteLine ($"buttonPressedCount: {buttonPressedCount}");
-
 			if (buttonPressedCount == 2
 				&& (cev.ButtonState == Curses.Event.Button1Pressed
 				|| cev.ButtonState == Curses.Event.Button2Pressed
@@ -413,7 +376,6 @@ namespace Terminal.Gui {
 			return new MouseEvent () {
 				X = cev.X,
 				Y = cev.Y,
-				//Flags = MapCursesButton (cev.ButtonState)
 				Flags = mouseFlag
 			};
 		}
@@ -587,7 +549,6 @@ namespace Terminal.Gui {
 		{
 			int wch;
 			var code = Curses.get_wch (out wch);
-			//System.Diagnostics.Debug.WriteLine ($"code: {code}; wch: {wch}");
 			if (code == Curses.ERR)
 				return;
 
@@ -603,24 +564,23 @@ namespace Terminal.Gui {
 				}
 				if (wch == Curses.KeyMouse) {
 					Curses.getmouse (out Curses.MouseEvent ev);
-					//System.Diagnostics.Debug.WriteLine ($"ButtonState: {ev.ButtonState}; ID: {ev.ID}; X: {ev.X}; Y: {ev.Y}; Z: {ev.Z}");
 					mouseHandler (ToDriverMouse (ev));
 					return;
 				}
 				k = MapCursesKey (wch);
-				if (wch >= 277 && wch <= 288) { // Shift+(F1 - F12)
+				if (wch >= 277 && wch <= 288) {    
 					wch -= 12;
 					k = Key.ShiftMask | MapCursesKey (wch);
-				} else if (wch >= 289 && wch <= 300) { // Ctrl+(F1 - F12)
+				} else if (wch >= 289 && wch <= 300) {    
 					wch -= 24;
 					k = Key.CtrlMask | MapCursesKey (wch);
-				} else if (wch >= 301 && wch <= 312) { // Ctrl+Shift+(F1 - F12)
+				} else if (wch >= 301 && wch <= 312) {    
 					wch -= 36;
 					k = Key.CtrlMask | Key.ShiftMask | MapCursesKey (wch);
-				} else if (wch >= 313 && wch <= 324) { // Alt+(F1 - F12)
+				} else if (wch >= 313 && wch <= 324) {    
 					wch -= 48;
 					k = Key.AltMask | MapCursesKey (wch);
-				} else if (wch >= 325 && wch <= 327) { // Shift+Alt+(F1 - F3)
+				} else if (wch >= 325 && wch <= 327) {    
 					wch -= 60;
 					k = Key.ShiftMask | Key.AltMask | MapCursesKey (wch);
 				}
@@ -630,7 +590,6 @@ namespace Terminal.Gui {
 				return;
 			}
 
-			// Special handling for ESC, we want to try to catch ESC+letter to simulate alt-letter as well as Alt-Fkey
 			if (wch == 27) {
 				Curses.timeout (200);
 
@@ -642,8 +601,6 @@ namespace Terminal.Gui {
 				if (code == 0) {
 					KeyEvent key;
 
-					// The ESC-number handling, debatable.
-					// Simulates the AltMask itself by pressing Alt + Space.
 					if (wch2 == (int)Key.Space) {
 						k = Key.AltMask;
 					} else if (wch2 - (int)Key.Space >= (uint)Key.A && wch2 - (int)Key.Space <= (uint)Key.Z) {
@@ -663,46 +620,45 @@ namespace Terminal.Gui {
 								c [c.Length - 1] = wch2;
 							}
 						}
-						if (c [0] == 49 && c [1] == 59 && c [2] == 55 && c [3] >= 80 && c [3] <= 83) { // Ctrl+Alt+(F1 - F4)
+						if (c [0] == 49 && c [1] == 59 && c [2] == 55 && c [3] >= 80 && c [3] <= 83) {    
 							wch2 = c [3] + 185;
 							k = Key.CtrlMask | Key.AltMask | MapCursesKey (wch2);
-						} else if (c [0] == 49 && c [2] == 59 && c [3] == 55 && c [4] == 126 && c [1] >= 53 && c [1] <= 57) { // Ctrl+Alt+(F5 - F8)
+						} else if (c [0] == 49 && c [2] == 59 && c [3] == 55 && c [4] == 126 && c [1] >= 53 && c [1] <= 57) {    
 							wch2 = c [1] == 53 ? c [1] + 216 : c [1] + 215;
 							k = Key.CtrlMask | Key.AltMask | MapCursesKey (wch2);
-						} else if (c [0] == 50 && c [2] == 59 && c [3] == 55 && c [4] == 126 && c [1] >= 48 && c [1] <= 52) { // Ctrl+Alt+(F9 - F12)
+						} else if (c [0] == 50 && c [2] == 59 && c [3] == 55 && c [4] == 126 && c [1] >= 48 && c [1] <= 52) {    
 							wch2 = c [1] < 51 ? c [1] + 225 : c [1] + 224;
 							k = Key.CtrlMask | Key.AltMask | MapCursesKey (wch2);
-						} else if (c [0] == 49 && c [1] == 59 && c [2] == 56 && c [3] >= 80 && c [3] <= 83) { // Ctrl+Shift+Alt+(F1 - F4)
+						} else if (c [0] == 49 && c [1] == 59 && c [2] == 56 && c [3] >= 80 && c [3] <= 83) {    
 							wch2 = c [3] + 185;
 							k = Key.CtrlMask | Key.ShiftMask | Key.AltMask | MapCursesKey (wch2);
-						} else if (c [0] == 49 && c [2] == 59 && c [3] == 56 && c [4] == 126 && c [1] >= 53 && c [1] <= 57) { // Ctrl+Shift+Alt+(F5 - F8)
+						} else if (c [0] == 49 && c [2] == 59 && c [3] == 56 && c [4] == 126 && c [1] >= 53 && c [1] <= 57) {    
 							wch2 = c [1] == 53 ? c [1] + 216 : c [1] + 215;
 							k = Key.CtrlMask | Key.ShiftMask | Key.AltMask | MapCursesKey (wch2);
-						} else if (c [0] == 50 && c [2] == 59 && c [3] == 56 && c [4] == 126 && c [1] >= 48 && c [1] <= 52) {  // Ctrl+Shift+Alt+(F9 - F12)
+						} else if (c [0] == 50 && c [2] == 59 && c [3] == 56 && c [4] == 126 && c [1] >= 48 && c [1] <= 52) {     
 							wch2 = c [1] < 51 ? c [1] + 225 : c [1] + 224;
 							k = Key.CtrlMask | Key.ShiftMask | Key.AltMask | MapCursesKey (wch2);
-						} else if (c [0] == 49 && c [1] == 59 && c [2] == 52 && c [3] == 83) {  // Shift+Alt+(F4)
+						} else if (c [0] == 49 && c [1] == 59 && c [2] == 52 && c [3] == 83) {   
 							wch2 = 268;
 							k = Key.ShiftMask | Key.AltMask | MapCursesKey (wch2);
-						} else if (c [0] == 49 && c [2] == 59 && c [3] == 52 && c [4] == 126 && c [1] >= 53 && c [1] <= 57) {  // Shift+Alt+(F5 - F8)
+						} else if (c [0] == 49 && c [2] == 59 && c [3] == 52 && c [4] == 126 && c [1] >= 53 && c [1] <= 57) {     
 							wch2 = c [1] < 55 ? c [1] + 216 : c [1] + 215;
 							k = Key.ShiftMask | Key.AltMask | MapCursesKey (wch2);
-						} else if (c [0] == 50 && c [2] == 59 && c [3] == 52 && c [4] == 126 && c [1] >= 48 && c [1] <= 52) {  // Shift+Alt+(F9 - F12)
+						} else if (c [0] == 50 && c [2] == 59 && c [3] == 52 && c [4] == 126 && c [1] >= 48 && c [1] <= 52) {     
 							wch2 = c [1] < 51 ? c [1] + 225 : c [1] + 224;
 							k = Key.ShiftMask | Key.AltMask | MapCursesKey (wch2);
-						} else if (c [0] == 54 && c [1] == 59 && c [2] == 56 && c [3] == 126) {  // Shift+Ctrl+Alt+KeyNPage
+						} else if (c [0] == 54 && c [1] == 59 && c [2] == 56 && c [3] == 126) {   
 							k = Key.ShiftMask | Key.CtrlMask | Key.AltMask | Key.PageDown;
-						} else if (c [0] == 53 && c [1] == 59 && c [2] == 56 && c [3] == 126) {  // Shift+Ctrl+Alt+KeyPPage
+						} else if (c [0] == 53 && c [1] == 59 && c [2] == 56 && c [3] == 126) {   
 							k = Key.ShiftMask | Key.CtrlMask | Key.AltMask | Key.PageUp;
-						} else if (c [0] == 49 && c [1] == 59 && c [2] == 56 && c [3] == 72) {  // Shift+Ctrl+Alt+KeyHome
+						} else if (c [0] == 49 && c [1] == 59 && c [2] == 56 && c [3] == 72) {   
 							k = Key.ShiftMask | Key.CtrlMask | Key.AltMask | Key.Home;
-						} else if (c [0] == 49 && c [1] == 59 && c [2] == 56 && c [3] == 70) {  // Shift+Ctrl+Alt+KeyEnd
+						} else if (c [0] == 49 && c [1] == 59 && c [2] == 56 && c [3] == 70) {   
 							k = Key.ShiftMask | Key.CtrlMask | Key.AltMask | Key.End;
 						} else {
 							k = MapCursesKey (wch2);
 						}
 					} else {
-						// Unfortunately there are no way to differentiate Ctrl+Alt+alfa and Ctrl+Shift+Alt+alfa.
 						if (((Key)wch2 & Key.CtrlMask) != 0) {
 							keyModifiers.Ctrl = true;
 						}
@@ -730,7 +686,6 @@ namespace Terminal.Gui {
 				keyDownHandler (new KeyEvent (k, MapKeyModifiers (k)));
 				keyHandler (new KeyEvent (k, MapKeyModifiers (k)));
 			} else {
-				// Unfortunately there are no way to differentiate Ctrl+alfa and Ctrl+Shift+alfa.
 				k = (Key)wch;
 				if (wch == 0) {
 					k = Key.CtrlMask | Key.Space;
@@ -745,14 +700,6 @@ namespace Terminal.Gui {
 				keyHandler (new KeyEvent (k, MapKeyModifiers (k)));
 				keyUpHandler (new KeyEvent (k, MapKeyModifiers (k)));
 			}
-			// Cause OnKeyUp and OnKeyPressed. Note that the special handling for ESC above 
-			// will not impact KeyUp.
-			// This is causing ESC firing even if another keystroke was handled.
-			//if (wch == Curses.KeyTab) {
-			//	keyUpHandler (new KeyEvent (MapCursesKey (wch), keyModifiers));
-			//} else {
-			//	keyUpHandler (new KeyEvent ((Key)wch, keyModifiers));
-			//}
 		}
 
 		Action<KeyEvent> keyHandler;
@@ -760,7 +707,6 @@ namespace Terminal.Gui {
 
 		public override void PrepareToRun (MainLoop mainLoop, Action<KeyEvent> keyHandler, Action<KeyEvent> keyDownHandler, Action<KeyEvent> keyUpHandler, Action<MouseEvent> mouseHandler)
 		{
-			// Note: Curses doesn't support keydown/up events and thus any passed keyDown/UpHandlers will never be called
 			Curses.timeout (0);
 			this.keyHandler = keyHandler;
 			this.mouseHandler = mouseHandler;
@@ -788,21 +734,13 @@ namespace Terminal.Gui {
 				return;
 
 			try {
-				//Set cursor key to application.
-				//Console.Out.Write ("\x1b[?1h");
-				//Console.Out.Flush ();
-
 				window = Curses.initscr ();
 			} catch (Exception e) {
 				Console.WriteLine ("Curses failed to initialize, the exception is: " + e);
 			}
 
-			// Ensures that all procedures are performed at some previous closing.
 			Curses.doupdate ();
 
-			// 
-			// We are setting Invisible as default so we could ignore XTerm DECSUSR setting
-			//
 			switch (Curses.curs_set (0)) {
 			case 0:
 				currentCursorVisibility = initialCursorVisibility = CursorVisibility.Invisible;
@@ -842,23 +780,6 @@ namespace Terminal.Gui {
 			if (reportableMouseEvents.HasFlag (Curses.Event.ReportMousePosition))
 				StartReportingMouseMoves ();
 
-			//HLine = Curses.ACS_HLINE;
-			//VLine = Curses.ACS_VLINE;
-			//Stipple = Curses.ACS_CKBOARD;
-			//Diamond = Curses.ACS_DIAMOND;
-			//ULCorner = Curses.ACS_ULCORNER;
-			//LLCorner = Curses.ACS_LLCORNER;
-			//URCorner = Curses.ACS_URCORNER;
-			//LRCorner = Curses.ACS_LRCORNER;
-			//LeftTee = Curses.ACS_LTEE;
-			//RightTee = Curses.ACS_RTEE;
-			//TopTee = Curses.ACS_TTEE;
-			//BottomTee = Curses.ACS_BTEE;
-			//RightArrow = Curses.ACS_RARROW;
-			//LeftArrow = Curses.ACS_LARROW;
-			//UpArrow = Curses.ACS_UARROW;
-			//DownArrow = Curses.ACS_DARROW;
-
 			Colors.TopLevel = new ColorScheme ();
 			Colors.Base = new ColorScheme ();
 			Colors.Dialog = new ColorScheme ();
@@ -882,11 +803,6 @@ namespace Terminal.Gui {
 				Colors.Base.HotFocus = MakeColor (Color.BrightBlue, Color.Gray);
 				Colors.Base.Disabled = MakeColor (Color.DarkGray, Color.Blue);
 
-				// Focused,
-				//    Selected, Hot: Yellow on Black
-				//    Selected, text: white on black
-				//    Unselected, hot: yellow on cyan
-				//    unselected, text: same as unfocused
 				Colors.Menu.Normal = MakeColor (Color.White, Color.DarkGray);
 				Colors.Menu.Focus = MakeColor (Color.White, Color.Black);
 				Colors.Menu.HotNormal = MakeColor (Color.BrightYellow, Color.DarkGray);
@@ -938,9 +854,6 @@ namespace Terminal.Gui {
 			contents = new int [Rows, Cols, 3];
 			for (int row = 0; row < Rows; row++) {
 				for (int col = 0; col < Cols; col++) {
-					//Curses.move (row, col);
-					//Curses.attrset (Colors.TopLevel.Normal);
-					//Curses.addch ((int)(uint)' ');
 					contents [row, col, 0] = ' ';
 					contents [row, col, 1] = Colors.TopLevel.Normal;
 					contents [row, col, 2] = 0;
@@ -977,7 +890,6 @@ namespace Terminal.Gui {
 			case Color.Gray:
 				return Curses.COLOR_WHITE;
 			case Color.DarkGray:
-				//return Curses.COLOR_BLACK | Curses.A_BOLD;
 				return Curses.COLOR_GRAY;
 			case Color.BrightBlue:
 				return Curses.COLOR_BLUE | Curses.A_BOLD | Curses.COLOR_GRAY;
@@ -1039,7 +951,6 @@ namespace Terminal.Gui {
 		public override Attribute MakeAttribute (Color fore, Color back)
 		{
 			var f = MapColor (fore);
-			//return MakeColor ((short)(f & 0xffff), (short)MapColor (back)) | ((f & Curses.A_BOLD) != 0 ? Curses.A_BOLD : 0);
 			return MakeColor ((short)(f & 0xffff), (short)MapColor (back));
 		}
 
@@ -1066,21 +977,12 @@ namespace Terminal.Gui {
 			Console.Out.Flush ();
 		}
 
-		//int lastMouseInterval;
-		//bool mouseGrabbed;
-
 		public override void UncookMouse ()
 		{
-			//if (mouseGrabbed)
-			//	return;
-			//lastMouseInterval = Curses.mouseinterval (0);
-			//mouseGrabbed = true;
 		}
 
 		public override void CookMouse ()
 		{
-			//mouseGrabbed = false;
-			//Curses.mouseinterval (lastMouseInterval);
 		}
 
 		public override Attribute GetAttribute ()
@@ -1088,7 +990,6 @@ namespace Terminal.Gui {
 			return currentAttribute;
 		}
 
-		/// <inheritdoc/>
 		public override bool GetCursorVisibility (out CursorVisibility visibility)
 		{
 			visibility = CursorVisibility.Invisible;
@@ -1101,7 +1002,6 @@ namespace Terminal.Gui {
 			return true;
 		}
 
-		/// <inheritdoc/>
 		public override bool SetCursorVisibility (CursorVisibility visibility)
 		{
 			if (initialCursorVisibility.HasValue == false)
@@ -1119,7 +1019,6 @@ namespace Terminal.Gui {
 			return true;
 		}
 
-		/// <inheritdoc/>
 		public override bool EnsureCursorVisibility ()
 		{
 			return false;
@@ -1199,8 +1098,6 @@ namespace Terminal.Gui {
 					suspendSignal = 18;
 					break;
 				case "Linux":
-					// TODO: should fetch the machine name and
-					// if it is MIPS return 24
 					suspendSignal = 20;
 					break;
 				case "Solaris":
@@ -1216,10 +1113,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Suspends the process by sending SIGTSTP to itself
-		/// </summary>
-		/// <returns>The suspend.</returns>
 		static public bool Suspend ()
 		{
 			int signal = GetSuspendSignal ();
@@ -1244,7 +1137,6 @@ namespace Terminal.Gui {
 				var result = BashRunner.Run ("which xclip", runCurses: false);
 				return result.FileExists ();
 			} catch (Exception) {
-				// Permissions issue.
 				return false;
 			}
 		}
@@ -1253,7 +1145,6 @@ namespace Terminal.Gui {
 		{
 			var tempFileName = System.IO.Path.GetTempFileName ();
 			try {
-				// BashRunner.Run ($"xsel -o --clipboard > {tempFileName}");
 				BashRunner.Run ($"xclip -selection clipboard -o > {tempFileName}");
 				return System.IO.File.ReadAllText (tempFileName);
 			} finally {
@@ -1263,15 +1154,6 @@ namespace Terminal.Gui {
 
 		protected override void SetClipboardDataImpl (string text)
 		{
-			// var tempFileName = System.IO.Path.GetTempFileName ();
-			// System.IO.File.WriteAllText (tempFileName, text);
-			// try {
-			// 	// BashRunner.Run ($"cat {tempFileName} | xsel -i --clipboard");
-			// 	BashRunner.Run ($"cat {tempFileName} | xclip -selection clipboard");
-			// } finally {
-			// 	System.IO.File.Delete (tempFileName);
-			// }
-
 			BashRunner.Run ("xclip -selection clipboard -i", false, text);
 		}
 	}
@@ -1448,12 +1330,6 @@ namespace Terminal.Gui {
 				return false;
 			}
 
-			//var result = BashRunner.Run ("which powershell.exe");
-			//if (!result.FileExists ()) {
-			//	return false;
-			//}
-			//result = BashRunner.Run ("which clip.exe");
-			//return result.FileExists ();
 		}
 
 		protected override string GetClipboardDataImpl ()
@@ -1510,17 +1386,6 @@ namespace Terminal.Gui {
 				}
 			}
 
-			//using (var clipExe = new System.Diagnostics.Process {
-			//	StartInfo = new System.Diagnostics.ProcessStartInfo {
-			//		FileName = "clip.exe",
-			//		RedirectStandardInput = true
-			//	}
-			//}) {
-			//	clipExe.Start ();
-			//	clipExe.StandardInput.Write (text);
-			//	clipExe.StandardInput.Close ();
-			//	clipExe.WaitForExit ();
-			//}
 		}
 	}
 }

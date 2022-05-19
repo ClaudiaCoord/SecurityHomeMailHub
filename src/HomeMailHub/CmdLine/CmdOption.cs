@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using System;
 using System.IO;
 using System.Linq;
@@ -80,10 +85,24 @@ namespace HomeMailHub.CmdLine
                         if (string.IsNullOrWhiteSpace(opt))
                             continue;
 
-                        //object val;
-                        //opt = opt.ToLowerInvariant();
-                        //if (Enum.TryParse(opt, out val)) // prop.PropertyType.GetType()
-                        //prop.SetValue(clz, val);
+#                       if NET5_0_OR_GREATER
+                        object val;
+                        opt = opt.ToLowerInvariant();
+                        if (Enum.TryParse(prop.PropertyType.GetType(), opt, out val))
+                            prop.SetValue(clz, val);
+#                       elif NET48
+                        try {
+                            TypeInfo ti = prop.PropertyType.GetTypeInfo();
+                            if ((ti != default) && ti.IsEnum) {
+                                Type type = ti.AsType();
+                                opt = NormalizeEnumName(opt);
+                                if (Enum.IsDefined(type, opt)) {
+                                    object val = Enum.Parse(type, opt, true);
+                                    prop.SetValue(clz, val);
+                                }
+                            }
+                        } catch { }
+#                       endif
                     }
                     else if (!string.IsNullOrWhiteSpace(attr.FileStringFormat))
                     {
@@ -162,7 +181,7 @@ namespace HomeMailHub.CmdLine
                     else
                     {
                         CmdOptionException.Create(
-                            new Exception($"{nameof(Parse)}: {Properties.Resources.E1}: {key}/{prop.PropertyType}"));
+                            new Exception($"{nameof(Parse)}: {Properties.Resources.CMD_LINE_E1}: {key}/{prop.PropertyType}"));
                     }
                 }
                 catch (Exception e) when (e is CmdOptionException) { throw; }
@@ -214,7 +233,7 @@ namespace HomeMailHub.CmdLine
         private static string CheckValidPath(string s, bool isfile = true)
         {
             if (string.IsNullOrWhiteSpace(s))
-                throw new NullReferenceException(Properties.Resources.E2);
+                throw new NullReferenceException(Properties.Resources.CMD_LINE_E2);
 
             string name,
                    src = s.Trim(new char[] { '"', ' ', Path.DirectorySeparatorChar })
@@ -229,7 +248,7 @@ namespace HomeMailHub.CmdLine
                 char[] test = Path.GetInvalidPathChars();
                 foreach (char c in test)
                     if (name.Contains(c))
-                        throw new InvalidCastException(string.Format(Properties.Resources.E3, c, name));
+                        throw new InvalidCastException(string.Format(Properties.Resources.CMD_LINE_E3, c, name));
             }
 
             if (!isfile)
@@ -241,9 +260,21 @@ namespace HomeMailHub.CmdLine
                 char[] test = Path.GetInvalidFileNameChars();
                 foreach (char c in test)
                     if (name.Contains(c))
-                        throw new InvalidCastException(string.Format(Properties.Resources.E4, c, name));
+                        throw new InvalidCastException(string.Format(Properties.Resources.CMD_LINE_E4, c, name));
             }
             return src;
+        }
+
+        private static string NormalizeEnumName(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s))
+                return string.Empty;
+            if (s.Length == 1)
+                return char.IsUpper(s[0]) ? s : char.ToUpper(s[0]).ToString();
+            if (char.IsUpper(s[0]))
+                return s;
+            s = s.ToLowerInvariant();
+            return char.ToUpper(s[0]) + s.Substring(1, s.Length - 1);
         }
         #endregion
     }

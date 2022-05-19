@@ -129,6 +129,9 @@
   <data name="BTN_CHECKALL" xml:space="preserve">
     <value>П_роверить Все</value>
   </data>
+  <data name="BTN_CHECKSTOP" xml:space="preserve">
+    <value>_Остановить проверку</value>
+  </data>
   <data name="BTN_CLEAR" xml:space="preserve">
     <value>_Очистить</value>
   </data>
@@ -217,7 +220,7 @@
     <value>Позволить другим открывать используемый сокет</value>
   </data>
   <data name="CHKBOX_SMTPFAKEIP" xml:space="preserve">
-    <value>Всегда добавлять поддельный IP-адрес в заголовки (SMTP)</value>
+    <value>Всегда добавлять поддельный IP-адрес в заголовки сообщения (SMTP)</value>
   </data>
   <data name="CHKBOX_SMTPPGPCRYPT" xml:space="preserve">
     <value>Зашифровать текст письма PGP, если доступно</value>
@@ -225,20 +228,35 @@
   <data name="CHKBOX_SMTPPGPSIGN" xml:space="preserve">
     <value>Заверять подпись письма PGP, если доступно</value>
   </data>
-  <data name="E1" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_E1" xml:space="preserve">
+    <value>Неподдерживаемый тип конфигурации</value>
   </data>
-  <data name="E2" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_E2" xml:space="preserve">
+    <value>пустое имя файла</value>
   </data>
-  <data name="E3" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_E3" xml:space="preserve">
+    <value>символ '{0}' не может примяться в пути к файлу: {1}</value>
   </data>
-  <data name="E4" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_E4" xml:space="preserve">
+    <value>символ '{0}' не может примяться в названии файла: {1}</value>
   </data>
-  <data name="E5" xml:space="preserve">
-    <value />
+  <data name="CMD_LINE_H1" xml:space="preserve">
+    <value>Помощь, список ключей</value>
+  </data>
+  <data name="CMD_LINE_H2" xml:space="preserve">
+    <value>Выбор языка интерфейса (En|Ru)</value>
+  </data>
+  <data name="CMD_LINE_H3" xml:space="preserve">
+    <value>Включить все журналы</value>
+  </data>
+  <data name="CMD_LINE_H4" xml:space="preserve">
+    <value>Не запускать службу POP3</value>
+  </data>
+  <data name="CMD_LINE_H5" xml:space="preserve">
+    <value>Не запускать службу SMTP</value>
+  </data>
+  <data name="CMD_LINE_H6" xml:space="preserve">
+    <value>Использывать тип прокси (Http,Https,Sock4,Sock5,SshSock5)</value>
   </data>
   <data name="GUIACCOUNT_FMT1" xml:space="preserve">
     <value>_{0} все {1} аккаунты</value>
@@ -302,6 +320,9 @@
   </data>
   <data name="GUIMESSAGE_FMT3" xml:space="preserve">
     <value>{0} - сообщений : {1}</value>
+  </data>
+  <data name="GUIMESSAGE_FMT4" xml:space="preserve">
+    <value>Есть удаленные {0} сообщения , их можно восстановить</value>
   </data>
   <data name="GUIMESSAGE_TITLE1" xml:space="preserve">
     <value>Почтовые сообщения</value>
@@ -429,6 +450,21 @@
   <data name="MENU_DELETE" xml:space="preserve">
     <value>_Удалить</value>
   </data>
+  <data name="MENU_DELETEALL" xml:space="preserve">
+    <value>_Удалить все сообщения</value>
+  </data>
+  <data name="MENU_DELETECONFIRM" xml:space="preserve">
+    <value>Показывать предупреждение о _удалении сообщения</value>
+  </data>
+  <data name="MENU_DELETEMENU" xml:space="preserve">
+    <value>_Удаление</value>
+  </data>
+  <data name="MENU_FMT_DELETECLEAR" xml:space="preserve">
+    <value>_Окочательно удалить сообщения: {0}</value>
+  </data>
+  <data name="MENU_FMT_UNDELETE" xml:space="preserve">
+    <value>_Восстановить сообщения: {0}</value>
+  </data>
   <data name="MENU_FMT_VERSIONNEW" xml:space="preserve">
     <value>Текущая версия {0}, новая версия {1}, открыть страницу с обновлениями?</value>
   </data>
@@ -477,6 +513,15 @@
   <data name="MENU_MENU" xml:space="preserve">
     <value>_Меню</value>
   </data>
+  <data name="MENU_MSGSREADALL" xml:space="preserve">
+    <value>_Пометить все прочитанными</value>
+  </data>
+  <data name="MENU_OPENMSGFROM" xml:space="preserve">
+    <value>Открыть _сообщение в ..</value>
+  </data>
+  <data name="MENU_OPENURI" xml:space="preserve">
+    <value>_Открыть с помощью ..</value>
+  </data>
   <data name="MENU_PROXYCHECK" xml:space="preserve">
     <value>Проверка прокси серверов запущена</value>
   </data>
@@ -522,11 +567,32 @@
   <data name="MENU_SETTINGS" xml:space="preserve">
     <value>_Настройки</value>
   </data>
+  <data name="MENU_SORT" xml:space="preserve">
+    <value>_Сортировка</value>
+  </data>
+  <data name="MENU_SORTDATE" xml:space="preserve">
+    <value>По _дате сообщений</value>
+  </data>
+  <data name="MENU_SORTDOWN" xml:space="preserve">
+    <value>От _меньшего к большему</value>
+  </data>
+  <data name="MENU_SORTFROM" xml:space="preserve">
+    <value>По _имени отправителя</value>
+  </data>
+  <data name="MENU_SORTSUBJ" xml:space="preserve">
+    <value>По _теме сообщений</value>
+  </data>
+  <data name="MENU_SORTUP" xml:space="preserve">
+    <value>От _большего к меньшему</value>
+  </data>
   <data name="MENU_SSHACCOUNT" xml:space="preserve">
     <value>Выбрать _SSH аккаунт</value>
   </data>
   <data name="MENU_SSHSELECT" xml:space="preserve">
     <value>SSH аккаунт выбран</value>
+  </data>
+  <data name="MENU_UNDELETECONFIRM" xml:space="preserve">
+    <value>Показывать предупреждение о возможном восстановлении _сообщений</value>
   </data>
   <data name="MENU_VERSIONCHECK" xml:space="preserve">
     <value>Проверка новой версии</value>
@@ -576,7 +642,10 @@
   <data name="TAG_CLIENTS" xml:space="preserve">
     <value>Почтовые клиенты</value>
   </data>
-  <data name="TAG_CLIENTSMAILPERIOD" xml:space="preserve">
+  <data name="TAG_CLIENTSMAILPERIODHOURS" xml:space="preserve">
+    <value>Интервал проверки почты в часах</value>
+  </data>
+  <data name="TAG_CLIENTSMAILPERIODMIN" xml:space="preserve">
     <value>Период проверки почты в минутах</value>
   </data>
   <data name="TAG_CLIENTSTIMEOUT" xml:space="preserve">
@@ -593,6 +662,15 @@
   </data>
   <data name="TAG_DISABLE" xml:space="preserve">
     <value>Отключено</value>
+  </data>
+  <data name="TAG_DT_DATE" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="TAG_DT_NUM" xml:space="preserve">
+    <value>№</value>
+  </data>
+  <data name="TAG_DT_SUBJ" xml:space="preserve">
+    <value>Тема</value>
   </data>
   <data name="TAG_ENABLE" xml:space="preserve">
     <value>Включено</value>
@@ -632,6 +710,9 @@
   </data>
   <data name="TAG_MESSAGE" xml:space="preserve">
     <value>Сообщение</value>
+  </data>
+  <data name="TAG_MSGREADING" xml:space="preserve">
+    <value>Прочитано</value>
   </data>
   <data name="TAG_NAME" xml:space="preserve">
     <value>Имя:</value>

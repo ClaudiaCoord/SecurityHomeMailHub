@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -33,7 +39,13 @@ namespace SecyrityMail.MailAccounts
         public override UserAccount Find(string login) {
             if (Items.Count == 0)
                 return default;
-            return (from i in Items where i.Login == login && i.Enable select i).FirstOrDefault();
+            return (from i in Items where (i.Login.Equals(login) || i.Email.Equals(login)) && i.Enable select i).FirstOrDefault();
+        }
+
+        public UserAccount FindFromEmail(string login) {
+            if (Items.Count == 0)
+                return default;
+            return (from i in Items where ((i.Login.Contains('@') && i.Login.Equals(login)) || i.Email.Equals(login)) && i.Enable select i).FirstOrDefault();
         }
 
         public async Task<bool> Save(bool isbackup = false) => await Save(this, isbackup);

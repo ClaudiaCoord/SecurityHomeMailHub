@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -46,7 +52,7 @@ namespace SecyrityMail.Proxy.SshProxy
                 AccountSelected_ = value;
                 if ((AccountSelected_ != null) && AccountSelected_.IsExpired)
                     OnCallEvent(MailEventId.DateExpired,
-                        $"{GetTag(nameof(SshAccount))}/{AccountSelected_.Login}", DateTime.Now - AccountSelected_.Expired);
+                        $"{GetTag("Account")}/{AccountSelected_.Login}", DateTime.Now - AccountSelected_.Expired);
                 OnPropertyChanged(nameof(AccountSelected), nameof(IsAccountSelected));
             }
         }
@@ -111,7 +117,7 @@ namespace SecyrityMail.Proxy.SshProxy
 
                     OnCallEvent(
                         (ProxySsh == default) ? MailEventId.EndCall : MailEventId.BeginCall,
-                        $"{GetTag(nameof(SshAccount))}/{AccountSelected.Login}");
+                        $"{GetTag("Account")}/{AccountSelected.Login}");
 
                     if (IsAccountRunning) {
                         int ver = (AccountSelected.Type == ProxyType.SshSock4) ? 4 :
@@ -164,7 +170,7 @@ namespace SecyrityMail.Proxy.SshProxy
                 if ((list != null) && (list.Count > 0))
                     foreach (SshAccount acc in list)
                         OnCallEvent(MailEventId.DateExpired,
-                            $"{GetTag(nameof(SshAccount))}/{acc.Login}", DateTime.Now - acc.Expired);
+                            $"{GetTag("Account")}/{acc.Login}", DateTime.Now - acc.Expired);
 
                 if (proxyType == ProxyType.None)
                     list = (from i in Items where !i.IsExpired && !i.IsEmpty && i.Enable select i).ToList();
@@ -179,7 +185,7 @@ namespace SecyrityMail.Proxy.SshProxy
                 }
                 if (!IsAccountSelected)
                     OnCallEvent(MailEventId.NotFound,
-                        $"{GetTag(nameof(SshAccounts))}/{nameof(RandomSelect)}");
+                        $"{GetTag("Account")}/{nameof(RandomSelect)}");
                 return IsAccountSelected;
             });
 

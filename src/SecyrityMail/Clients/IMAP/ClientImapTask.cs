@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Threading.Tasks;
 using MailKit;
@@ -17,10 +23,13 @@ namespace SecyrityMail.Clients.IMAP
         string user = string.Empty;
         readonly InitClientSession session;
         readonly EventHandler<EventActionArgs> evRoot;
+        readonly MessagesCacheOpener cacheOpener;
+
         public ClientImapTask(InitClientSession s, EventHandler<EventActionArgs> a) {
             LogTag = nameof(ClientImap);
             session = s; evRoot = a;
             this.SubscribeProxyEvent(evRoot);
+            cacheOpener = CacheOpener.Build(this.GetType());
         }
         ~ClientImapTask() {
             Global.Instance.Log.Add(nameof(ClientImapTask), $"Imap client for {user} end");
@@ -54,8 +63,8 @@ namespace SecyrityMail.Clients.IMAP
                     Global.Instance.ImapClientStat.ImapLastMessageReceive = inbox.Count;
                     Global.Instance.ImapClientStat.ImapLastMessageRecent = inbox.Recent;
 
-                    MailMessages msgs = await Global.Instance.MessagesManager.Open(account.Email)
-                                        .ConfigureAwait(false);
+                    MailMessages msgs = await cacheOpener.Open(account.Email)
+                                                         .ConfigureAwait(false);
 
                     for (int i = 0; i < inbox.Count; i++) {
 
@@ -103,7 +112,7 @@ namespace SecyrityMail.Clients.IMAP
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Receive), ex); }
                 finally {
                     account.CurrentAction = AccountUsing.None;
-                    Global.Instance.MessagesManager.Close(account.Email);
+                    await cacheOpener.Close(account.Email).ConfigureAwait(false);
                 }
                 return false;
             });

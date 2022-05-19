@@ -1,7 +1,13 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/HomeMailHub
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MimeKit;
@@ -37,15 +43,14 @@ namespace HomeMailHub.Gui
             try {
                 if (val == default) return;
                 InterfaceMapping m = type.GetInterfaceMap(typeof(IDisposable));
-                MethodInfo mi = type.GetMethod(nameof(IDisposable.Dispose));
+                MethodInfo mi = type.GetMethod(nameof(IDisposable.Dispose), new Type[0]);
                 if ((mi != default) && (m.TargetMethods.Length > 0) && (mi == m.TargetMethods[0])) {
-#if DEBUG
+#                   if DEBUG
                     System.Diagnostics.Debug.WriteLine($"{type.Name} - {name}");
-#endif
+#                   endif
                     try { ((IDisposable)val).Dispose(); } catch { }
                 }
-            }
-            catch { }
+            } catch { }
         }
 
         public static async Task<MenuItem[]> LoadMenuUrls(this string s) =>
@@ -102,8 +107,8 @@ namespace HomeMailHub.Gui
                             $"{RES.UTILS_TXT3}, {RES.UTILS_ABORT}", RES.TAG_OK));
                         return new ReadMessageData();
                     }
-                    MimeMessage mmsg = await MimeKit.MimeMessage.LoadAsync(f.FullName)
-                                                                        .ConfigureAwait(false);
+                    MimeMessage mmsg = await MimeMessage.LoadAsync(f.FullName)
+                                                        .ConfigureAwait(false);
                     if (mmsg == null) {
                         Application.MainLoop.Invoke(() =>
                             _ = MessageBox.ErrorQuery(50, 7,
@@ -166,6 +171,16 @@ namespace HomeMailHub.Gui
         public static ustring GetListTitle(this string a, string b, int i) =>
             string.Format("{0}{1} : {2}", string.IsNullOrWhiteSpace(a) ? "" : $"{a} - ", b, i);
 
+        public static string HumanizeClassName(this string s) {
+
+            if (string.IsNullOrWhiteSpace(s)) return string.Empty;
+            if (s.IndexOf(' ') != -1) return s;
+            StringBuilder sb = new();
+            for (int i = 0; i < s.Length; i++)
+                sb.Append(((i > 0) && char.IsUpper(s[i])) ? $" {s[i]}" : s[i]);
+            return sb.ToString();
+        }
+
         public static void BrowseUri(this Uri uri) {
             try {
                 System.Diagnostics.Process.Start(uri.AbsoluteUri);
@@ -175,8 +190,7 @@ namespace HomeMailHub.Gui
         public static void BrowseFile(this string s) {
             try {
                 System.Diagnostics.Process.Start(s);
-            }
-            catch (Exception ex) { Global.Instance.Log.Add(nameof(BrowseFile), ex); }
+            } catch (Exception ex) { Global.Instance.Log.Add(nameof(BrowseFile), ex); }
         }
 
         public static void StatusBarError(this Exception ex) => StatusBarText(ex.Message);

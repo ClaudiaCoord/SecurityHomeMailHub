@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.IO;
 using System.Net;
@@ -26,6 +32,7 @@ namespace SecyrityMail.Servers.POP3
         RETR,
         LIST,
         LOGIN,
+        PLAIN,
         DELE,
         NOOP,
         UIDL,
@@ -47,6 +54,7 @@ namespace SecyrityMail.Servers.POP3
         MailMessages storage = default;
         FileStream fslog = default;
         CredentialsData data = new();
+        MessagesCacheOpener cacheOpener;
 
         public bool IsDeleteAllMessages { get; set; } = false;
         public bool IsLog { get; set; } = false;
@@ -57,6 +65,7 @@ namespace SecyrityMail.Servers.POP3
         public Stream Stream => stream;
         private Action<MailEvent> UnsubsribeEvent;
         private Action<EndPoint> AddAuthFilter;
+        private Pop3Command LastCommand { get; set; } = Pop3Command.NOOP;
 
         public Pop3Session(TcpClient tcpClient, Action<MailEvent> unsubsribe, Action<EndPoint> afilter, TokenSafe t) {
             UnsubsribeEvent = unsubsribe;
@@ -83,6 +92,9 @@ namespace SecyrityMail.Servers.POP3
 
             if ((tcpClient == null) || !tcpClient.Connected)
                 throw new Exception(nameof(TcpClient));
+
+            cacheOpener = CacheOpener.Build(this.GetType());
+
             if (IsLog)
                 fslog = new FileStream(
                     Path.Combine(logpath,
@@ -158,7 +170,7 @@ namespace SecyrityMail.Servers.POP3
             finally {
 
                 if ((storage != default) && (data != default) && !string.IsNullOrWhiteSpace(data.UserAccount.Email))
-                    Global.Instance.MessagesManager.Close(data.UserAccount.Email);
+                    await cacheOpener.Close(data.UserAccount.Email);
 
                 OnCallEvent(MailEventId.EndCall, "POP3-IN");
                 UnsubsribeEvent.Invoke(this);
@@ -195,20 +207,30 @@ namespace SecyrityMail.Servers.POP3
             }
             if (!Enum.TryParse(scmd[0], true, out Pop3Command cmd))
             {
-                await stream.SendClient(Pop3ResponseId.NotSupport.Pop3Response(), fslog)
-                      .ConfigureAwait(false);
-                return;
+                if (LastCommand == Pop3Command.PLAIN)
+                    cmd = LastCommand;
+                else {
+                    await stream.SendClient(Pop3ResponseId.NotSupport.Pop3Response(), fslog)
+                                .ConfigureAwait(false);
+                    return;
+                }
             }
             switch (cmd) {
                 case Pop3Command.HELP:
                 case Pop3Command.CAPA:
-                case Pop3Command.AUTH:
+                case Pop3Command.STLS:
                 case Pop3Command.NOOP:
-                case Pop3Command.QUIT:
-                case Pop3Command.STLS: break;
+                case Pop3Command.QUIT: break;
+                case Pop3Command.AUTH: {
+                        if ((scmd.Length >= 2) &&
+                            Enum.TryParse(scmd[1], true, out Pop3Command cmd2) && (cmd2 == Pop3Command.PLAIN))
+                            cmd = LastCommand = Pop3Command.PLAIN;
+                        break;
+                    }
                 case Pop3Command.APOP:
                 case Pop3Command.USER:
                 case Pop3Command.PASS:
+                case Pop3Command.PLAIN:
                 case Pop3Command.LOGIN: {
                         if (data.IsAuthorize) {
                             await stream.SendClient(Pop3ResponseId.AlreadyLogged.Pop3Response(), fslog)
@@ -297,14 +319,34 @@ namespace SecyrityMail.Servers.POP3
                             if (cmd == Pop3Command.PASS)
                                 _ = await BuildMessageList().ConfigureAwait(false);
                             await stream.SendClient(Pop3ResponseId.AcceptedArgs.Pop3Response(scmd[0].Trim()), fslog)
-                                  .ConfigureAwait(false);
-                        }
-                        else {
+                                        .ConfigureAwait(false);
+                            AuthToEvent(cmd);
+                        } else {
                             await stream.SendClient(Pop3ResponseId.WrongAccount.Pop3Response(scmd[0].Trim()), fslog)
-                                  .ConfigureAwait(false);
-                            AddAuthFilter.Invoke(IpEndPoint);
+                                        .ConfigureAwait(false);
+                            WrongAuthToEvent(scmd);
                             Dispose();
                         }
+                        break;
+                    }
+                case Pop3Command.PLAIN:
+                    {
+                        if (scmd.Length == 2) { 
+                            await stream.SendClient(Pop3ResponseId.Ok.Pop3Response(), fslog)
+                                        .ConfigureAwait(false);
+                            break;
+                        } else if ((!data.IsAuthorize) && data.PlainCredentials(scmd[0])) {
+                            _ = await BuildMessageList().ConfigureAwait(false);
+                            await stream.SendClient(Pop3ResponseId.AcceptedArgs.Pop3Response(), fslog)
+                                        .ConfigureAwait(false);
+                            AuthToEvent(cmd);
+                        } else {
+                            await stream.SendClient(Pop3ResponseId.WrongAccount.Pop3Response(scmd[0].Trim()), fslog)
+                                        .ConfigureAwait(false);
+                            WrongAuthToEvent(scmd);
+                            Dispose();
+                        }
+                        LastCommand = Pop3Command.NOOP;
                         break;
                     }
                 case Pop3Command.APOP:
@@ -312,26 +354,27 @@ namespace SecyrityMail.Servers.POP3
                         if ((scmd.Length < 3) ||
                             string.IsNullOrWhiteSpace(scmd[1]) || string.IsNullOrWhiteSpace(scmd[2])) {
                                 await stream.SendClient(Pop3ResponseId.ErrorArgs.Pop3Response(scmd[0].Trim()), fslog)
-                                  .ConfigureAwait(false);
+                                            .ConfigureAwait(false);
                             break;
                         }
                         if (!data.LoginCredentials(CredentialsCheckId.Login, scmd[1]) ||
                             !data.ApopCredentials(SessionId, scmd[2])) {
                             await stream.SendClient(Pop3ResponseId.WrongAccount.Pop3Response(scmd[0].Trim()), fslog)
                                   .ConfigureAwait(false);
-                            AddAuthFilter.Invoke(IpEndPoint);
+                            WrongAuthToEvent(scmd);
                             Dispose();
                             break;
                         }
                         _ = await BuildMessageList().ConfigureAwait(false);
                         await ParseCommand_(Pop3Command.STAT_EXTENDED, scmd)
                               .ConfigureAwait(false);
+                        AuthToEvent(cmd);
                         break;
                     }
                 case Pop3Command.AUTH:
                     {
                         await stream.SendClient(Pop3ResponseId.AuthCap.Pop3Response(), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.STAT:
@@ -352,10 +395,10 @@ namespace SecyrityMail.Servers.POP3
                         string s = await CalculateMessages().ConfigureAwait(false);
                         if (string.IsNullOrEmpty(s))
                             await stream.SendClient(Pop3ResponseId.Error.Pop3Response(), fslog)
-                                  .ConfigureAwait(false);
+                                        .ConfigureAwait(false);
                         else
                             await stream.SendClient(s, fslog)
-                                  .ConfigureAwait(false);
+                                        .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.STAT_EXTENDED:
@@ -363,10 +406,10 @@ namespace SecyrityMail.Servers.POP3
                         string s = await CalculateMessages(Pop3Command.STAT_EXTENDED).ConfigureAwait(false);
                         if (string.IsNullOrEmpty(s))
                             await stream.SendClient(Pop3ResponseId.Error.Pop3Response(), fslog)
-                                  .ConfigureAwait(false);
+                                        .ConfigureAwait(false);
                         else
                             await stream.SendClient(s, fslog)
-                                  .ConfigureAwait(false);
+                                        .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.LIST:
@@ -385,14 +428,14 @@ namespace SecyrityMail.Servers.POP3
                               .ConfigureAwait(false);
                         _ = await stream.RunCommand(
                             CmdLIST_All.Function, storage, scmd, () => Pop3ResponseId.NoMessageArgs.Pop3Response(storage.Counts), fslog)
-                            .ConfigureAwait(false);
+                                       .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.LIST_ONE_INTERNAL:
                     {
                         _ = await stream.RunCommand(
                             CmdLIST_One.Function, storage, scmd, () => Pop3ResponseId.NoMessageArgs.Pop3Response(storage.Counts), fslog)
-                            .ConfigureAwait(false);
+                                       .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.DELE:
@@ -430,55 +473,67 @@ namespace SecyrityMail.Servers.POP3
                     {
                         _ = await stream.RunCommand(
                             CmdUIDL_All.Function, storage, scmd, () => Pop3ResponseId.NoMessageArgs.Pop3Response(storage.Counts), fslog)
-                            .ConfigureAwait(false);
+                                       .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.UIDL_ONE_INTERNAL:
                     {
                         _ = await stream.RunCommand(
                             CmdUIDL_One.Function, storage, scmd, () => Pop3ResponseId.NoMessageArgs.Pop3Response(storage.Counts), fslog)
-                            .ConfigureAwait(false);
+                                       .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.HELP:
                     {
                         string [] ss = Enum.GetNames(typeof(Pop3Command));
                         await stream.SendClient(Pop3ResponseId.HelpArgs.Pop3Response(string.Join(",", ss)), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.NOOP:
                     {
                         await stream.SendClient(Pop3ResponseId.Ok.Pop3Response(), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.RSET:
                     {
                         if (storage != default)
-                            storage.UnDelete();
+                            _ = await storage.UnDelete().ConfigureAwait(false);
                         data.ClearCredentials();
                         await stream.SendClient(Pop3ResponseId.Reset.Pop3Response(), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
                         break;
                     }
                 case Pop3Command.QUIT:
                     {
                         await stream.SendClient(Pop3ResponseId.LogOut.Pop3Response(), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
 
                         if (IsDeleteAllMessages && (storage != default))
-                            await storage.SafeDelete().ConfigureAwait(false);
+                            await storage.ClearDeleted().ConfigureAwait(false);
                         Dispose();
                         break;
                     }
                 default:
                     {
                         await stream.SendClient(Pop3ResponseId.NotSupport.Pop3Response(), fslog)
-                              .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
                         break;
                     }
             }
+        }
+        private void AuthToEvent(Pop3Command cmd) {
+            string ip = (IpEndPoint == default) ? "" : IpEndPoint.ToString();
+            OnCallEvent(MailEventId.UserAuth, $"Auth {cmd}: {data.UserAccount.Email}/{ip}", data.UserAccount);
+        }
+        private void WrongAuthToEvent(string [] ss) {
+            string ip = string.Empty;
+            if (IpEndPoint != default) {
+                AddAuthFilter.Invoke(IpEndPoint);
+                ip = IpEndPoint.ToString();
+            }
+            OnCallEvent(MailEventId.UserAuth, $"Auth BAD: {ip}", string.Join(",", ss));
         }
         #endregion
 
@@ -505,8 +560,8 @@ namespace SecyrityMail.Servers.POP3
                         if (!data.IsAuthorize || !data.UserAccount.IsRootPath)
                             break;
 
-                        storage = await Global.Instance.MessagesManager.Open(data.UserAccount.Email)
-                                                                       .ConfigureAwait(false);
+                        storage = await cacheOpener.Open(data.UserAccount.Email)
+                                                   .ConfigureAwait(false);
                         if (storage == default)
                             break;
                         return true;

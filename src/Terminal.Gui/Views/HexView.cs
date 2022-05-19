@@ -1,39 +1,8 @@
-﻿//
-// HexView.cs: A hexadecimal viewer
-//
-// TODO:
-// - Support searching and highlighting of the search result
-// - Bug showing the last line
-// 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace Terminal.Gui {
-	/// <summary>
-	/// An hex viewer and editor <see cref="View"/> over a <see cref="System.IO.Stream"/>
-	/// </summary>
-	/// <remarks>
-	/// <para>
-	/// <see cref="HexView"/> provides a hex editor on top of a seekable <see cref="Stream"/> with the left side showing an hex
-	/// dump of the values in the <see cref="Stream"/> and the right side showing the contents (filtered to 
-	/// non-control sequence ASCII characters).    
-	/// </para>
-	/// <para>
-	/// Users can switch from one side to the other by using the tab key.  
-	/// </para>
-	/// <para>
-	/// To enable editing, set <see cref="AllowEdits"/> to true. When <see cref="AllowEdits"/> is true 
-	/// the user can make changes to the hexadecimal values of the <see cref="Stream"/>. Any changes are tracked
-	/// in the <see cref="Edits"/> property (a <see cref="SortedDictionary{TKey, TValue}"/>) indicating 
-	/// the position where the changes were made and the new values. A convenience method, <see cref="ApplyEdits"/>
-	/// will apply the edits to the <see cref="Stream"/>.
-	/// </para>
-	/// <para>
-	/// Control the first byte shown by setting the <see cref="DisplayStart"/> property 
-	/// to an offset in the stream.
-	/// </para>
-	/// </remarks>
 	public class HexView : View {
 		SortedDictionary<long, byte> edits = new SortedDictionary<long, byte> ();
 		Stream source;
@@ -48,10 +17,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Initializes a <see cref="HexView"/> class using <see cref="LayoutStyle.Computed"/> layout.
-		/// </summary>
-		/// <param name="source">The <see cref="Stream"/> to view and edit as hex, this <see cref="Stream"/> must support seeking, or an exception will be thrown.</param>
 		public HexView (Stream source) : base ()
 		{
 			Source = source;
@@ -59,7 +24,6 @@ namespace Terminal.Gui {
 			leftSide = true;
 			firstNibble = true;
 
-			// Things this view knows how to do
 			AddCommand (Command.Left, () => MoveLeft ());
 			AddCommand (Command.Right, () => MoveRight ());
 			AddCommand (Command.LineDown, () => MoveDown (bytesPerLine));
@@ -74,7 +38,6 @@ namespace Terminal.Gui {
 			AddCommand (Command.StartOfPage, () => MoveUp (bytesPerLine * ((int)(position - displayStart) / bytesPerLine)));
 			AddCommand (Command.EndOfPage, () => MoveDown (bytesPerLine * (Frame.Height - 1 - ((int)(position - displayStart) / bytesPerLine))));
 
-			// Default keybindings for this view
 			AddKeyBinding (Key.CursorLeft, Command.Left);
 			AddKeyBinding (Key.CursorRight, Command.Right);
 			AddKeyBinding (Key.CursorDown, Command.LineDown);
@@ -95,25 +58,12 @@ namespace Terminal.Gui {
 			AddKeyBinding (Key.CursorDown | Key.CtrlMask, Command.EndOfPage);
 		}
 
-		/// <summary>
-		/// Initializes a <see cref="HexView"/> class using <see cref="LayoutStyle.Computed"/> layout.
-		/// </summary>
 		public HexView () : this (source: new MemoryStream ()) { }
 
-		/// <summary>
-		/// Event to be invoked when an edit is made on the <see cref="Stream"/>.
-		/// </summary>
 		public event Action<KeyValuePair<long, byte>> Edited;
 
-		/// <summary>
-		/// Event to be invoked when the position and cursor position changes.
-		/// </summary>
 		public event Action<HexViewEventArgs> PositionChanged;
 
-		/// <summary>
-		/// Sets or gets the <see cref="Stream"/> the <see cref="HexView"/> is operating on; the stream must support seeking (<see cref="Stream.CanSeek"/> == true).
-		/// </summary>
-		/// <value>The source.</value>
 		public Stream Source {
 			get => source;
 			set {
@@ -142,10 +92,6 @@ namespace Terminal.Gui {
 			SetNeedsDisplay ();
 		}
 
-		/// <summary>
-		/// Sets or gets the offset into the <see cref="Stream"/> that will displayed at the top of the <see cref="HexView"/>
-		/// </summary>
-		/// <value>The display start.</value>
 		public long DisplayStart {
 			get => displayStart;
 			set {
@@ -166,26 +112,17 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <inheritdoc/>
 		public override Rect Frame {
 			get => base.Frame;
 			set {
 				base.Frame = value;
 
-				// Small buffers will just show the position, with the bsize field value (4 bytes)
 				bytesPerLine = bsize;
 				if (value.Width - displayWidth > 17)
 					bytesPerLine = bsize * ((value.Width - displayWidth) / 18);
 			}
 		}
 
-		//
-		// This is used to support editing of the buffer on a peer List<>, 
-		// the offset corresponds to an offset relative to DisplayStart, and
-		// the buffer contains the contents of a screenful of data, so the 
-		// offset is relative to the buffer.
-		//
-		// 
 		byte GetData (byte [] buffer, int offset, out bool edited)
 		{
 			var pos = DisplayStart + offset;
@@ -197,7 +134,6 @@ namespace Terminal.Gui {
 			return buffer [offset];
 		}
 
-		///<inheritdoc/>
 		public override void Redraw (Rect bounds)
 		{
 			Attribute currentAttribute;
@@ -275,7 +211,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		///<inheritdoc/>
 		public override void PositionCursor ()
 		{
 			var delta = (int)(position - displayStart);
@@ -422,7 +357,6 @@ namespace Terminal.Gui {
 			return true;
 		}
 
-		/// <inheritdoc/>
 		public override bool ProcessKey (KeyEvent keyEvent)
 		{
 			var result = InvokeKeybindings (keyEvent);
@@ -432,7 +366,6 @@ namespace Terminal.Gui {
 			if (!AllowEdits)
 				return false;
 
-			// Ignore control characters and other special keys
 			if (keyEvent.Key < Key.Space || keyEvent.Key > Key.CharMask)
 				return false;
 
@@ -470,24 +403,16 @@ namespace Terminal.Gui {
 				return false;
 		}
 
-		/// <summary>
-		/// Method used to invoke the <see cref="Edited"/> event passing the <see cref="KeyValuePair{TKey, TValue}"/>.
-		/// </summary>
-		/// <param name="keyValuePair">The key value pair.</param>
 		public virtual void OnEdited (KeyValuePair<long, byte> keyValuePair)
 		{
 			Edited?.Invoke (keyValuePair);
 		}
 
-		/// <summary>
-		/// Method used to invoke the <see cref="PositionChanged"/> event passing the <see cref="HexViewEventArgs"/> arguments.
-		/// </summary>
 		public virtual void OnPositionChanged ()
 		{
 			PositionChanged?.Invoke (new HexViewEventArgs (Position, CursorPosition, BytesPerLine));
 		}
 
-		/// <inheritdoc/>
 		public override bool MouseEvent (MouseEvent me)
 		{
 			if (!me.Flags.HasFlag (MouseFlags.Button1Clicked) && !me.Flags.HasFlag (MouseFlags.Button1DoubleClicked)
@@ -541,28 +466,12 @@ namespace Terminal.Gui {
 			return true;
 		}
 
-		/// <summary>
-		/// Gets or sets whether this <see cref="HexView"/> allow editing of the <see cref="Stream"/> 
-		/// of the underlying <see cref="Stream"/>.
-		/// </summary>
-		/// <value><c>true</c> if allow edits; otherwise, <c>false</c>.</value>
 		public bool AllowEdits { get; set; } = true;
 
-		/// <summary>
-		/// Gets a <see cref="SortedDictionary{TKey, TValue}"/> describing the edits done to the <see cref="HexView"/>. 
-		/// Each Key indicates an offset where an edit was made and the Value is the changed byte.
-		/// </summary>
-		/// <value>The edits.</value>
 		public IReadOnlyDictionary<long, byte> Edits => edits;
 
-		/// <summary>
-		/// Gets the current character position starting at one, related to the <see cref="Stream"/>.
-		/// </summary>
 		public long Position => position + 1;
 
-		/// <summary>
-		/// Gets the current cursor position starting at one for both, line and column.
-		/// </summary>
 		public Point CursorPosition {
 			get {
 				var delta = (int)position;
@@ -573,16 +482,8 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// The bytes length per line.
-		/// </summary>
 		public int BytesPerLine => bytesPerLine;
 
-		/// <summary>
-		/// This method applies and edits made to the <see cref="Stream"/> and resets the 
-		/// contents of the <see cref="Edits"/> property.
-		/// </summary>
-		/// <param name="stream">If provided also applies the changes to the passed <see cref="Stream"/></param>.
 		public void ApplyEdits (Stream stream = null)
 		{
 			foreach (var kv in edits) {
@@ -599,10 +500,6 @@ namespace Terminal.Gui {
 			SetNeedsDisplay ();
 		}
 
-		/// <summary>
-		/// This method discards the edits made to the <see cref="Stream"/> by resetting the 
-		/// contents of the <see cref="Edits"/> property.
-		/// </summary>
 		public void DiscardEdits ()
 		{
 			edits = new SortedDictionary<long, byte> ();
@@ -610,9 +507,6 @@ namespace Terminal.Gui {
 
 		private CursorVisibility desiredCursorVisibility = CursorVisibility.Default;
 
-		/// <summary>
-		/// Get / Set the wished cursor when the field is focused
-		/// </summary>
 		public CursorVisibility DesiredCursorVisibility {
 			get => desiredCursorVisibility;
 			set {
@@ -624,7 +518,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		///<inheritdoc/>
 		public override bool OnEnter (View view)
 		{
 			Application.Driver.SetCursorVisibility (DesiredCursorVisibility);
@@ -632,30 +525,12 @@ namespace Terminal.Gui {
 			return base.OnEnter (view);
 		}
 
-		/// <summary>
-		/// Defines the event arguments for <see cref="PositionChanged"/> event.
-		/// </summary>
 		public class HexViewEventArgs : EventArgs {
-			/// <summary>
-			/// Gets the current character position starting at one, related to the <see cref="Stream"/>.
-			/// </summary>
 			public long Position { get; private set; }
-			/// <summary>
-			/// Gets the current cursor position starting at one for both, line and column.
-			/// </summary>
 			public Point CursorPosition { get; private set; }
 
-			/// <summary>
-			/// The bytes length per line.
-			/// </summary>
 			public int BytesPerLine { get; private set; }
 
-			/// <summary>
-			/// Initializes a new instance of <see cref="HexViewEventArgs"/>
-			/// </summary>
-			/// <param name="pos">The character position.</param>
-			/// <param name="cursor">The cursor position.</param>
-			/// <param name="lineLength">Line bytes length.</param>
 			public HexViewEventArgs (long pos, Point cursor, int lineLength)
 			{
 				Position = pos;

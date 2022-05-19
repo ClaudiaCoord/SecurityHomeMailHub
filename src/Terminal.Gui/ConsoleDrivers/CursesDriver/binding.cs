@@ -1,61 +1,10 @@
-//
-// TODO:
-// * FindNCurses needs to remove the old probing code
-// * Removal of that proxy code
-// * Need to implement reading pointers with the new API
-// * Can remove the manual Dlopen features
-// * initscr() diagnostics based on DLL can be fixed
-//
-// binding.cs.in: Core binding for curses.
-//
-// This file attempts to call into ncurses without relying on Mono's
-// dllmap, so it will work with .NET Core.  This means that it needs
-// two sets of bindings, one for "ncurses" which works on OSX, and one
-// that works against "libncursesw.so.5" which is what you find on
-// assorted Linux systems.
-//
-// Additionally, I do not want to rely on an external native library
-// which is why all this pain to bind two separate ncurses is here.
-//
-// Authors:
-//   Miguel de Icaza (miguel.de.icaza@gmail.com)
-//
-// Copyright (C) 2007 Novell (http://www.novell.com)
-//
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-// 
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
 using System;
 using System.Runtime.InteropServices;
 
 namespace Unix.Terminal {
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable CS1591          
 
 	public partial class Curses {
-		//[StructLayout (LayoutKind.Sequential)]
-		//public struct winsize {
-		//	public ushort ws_row;
-		//	public ushort ws_col;
-		//	public ushort ws_xpixel;   /* unused */
-		//	public ushort ws_ypixel;   /* unused */
-		//};
-
 		[StructLayout (LayoutKind.Sequential)]
 		public struct MouseEvent {
 			public short ID;
@@ -67,18 +16,12 @@ namespace Unix.Terminal {
 		static Window main_window;
 		static IntPtr curses_handle, curscr_ptr, lines_ptr, cols_ptr;
 
-		// If true, uses the DllImport into "ncurses", otherwise "libncursesw.so.5"
-		//static bool use_naked_driver;
-
 		static UnmanagedLibrary curses_library;
 		static NativeMethods methods;
 
 
 		[DllImport ("libc")]
 		public extern static int setlocale (int cate, [MarshalAs (UnmanagedType.LPStr)] string locale);
-
-		//[DllImport ("libc")]
-		//public extern static int ioctl (int fd, int cmd, out winsize argp);
 
 		static void LoadMethods ()
 		{
@@ -103,7 +46,6 @@ namespace Unix.Terminal {
 			setlocale (LC_ALL, "");
 			FindNCurses ();
 
-			// Prevents the terminal from being locked after exiting.
 			reset_shell_mode ();
 
 			main_window = new Window (methods.initscr ());
@@ -132,10 +74,6 @@ namespace Unix.Terminal {
 			}
 		}
 
-		//
-		// Returns true if the window changed since the last invocation, as a
-		// side effect, the Lines and Cols properties are updated
-		//
 		public static bool CheckWinChange ()
 		{
 			int l, c;
@@ -145,11 +83,6 @@ namespace Unix.Terminal {
 			if (l == 1 || l != lines || c != cols) {
 				lines = l;
 				cols = c;
-				//if (l <= 0 || c <= 0) {
-				//	Console.Out.Write ($"\x1b[8;50;{c}t");
-				//	Console.Out.Flush ();
-				//	return false;
-				//}
 				return true;
 			}
 			return false;
@@ -163,12 +96,6 @@ namespace Unix.Terminal {
 
 		static char [] r = new char [1];
 
-		//
-		// Have to wrap the native addch, as it can not
-		// display unicode characters, we have to use addstr
-		// for that.   but we need addch to render special ACS
-		// characters
-		//
 		public static int addch (int ch)
 		{
 			if (ch < 127 || ch > 0xffff)
@@ -206,26 +133,6 @@ namespace Unix.Terminal {
 			lines = Marshal.ReadInt32 (lines_ptr);
 			cols = Marshal.ReadInt32 (cols_ptr);
 
-			//int cmd;
-			//if (UnmanagedLibrary.IsMacOSPlatform) {
-			//	cmd = TIOCGWINSZ_MAC;
-			//} else {
-			//	cmd = TIOCGWINSZ;
-			//}
-
-			//if (ioctl (1, cmd, out winsize ws) == 0) {
-			//	lines = ws.ws_row;
-			//	cols = ws.ws_col;
-
-			//	if (lines == Lines && cols == Cols) {
-			//		return;
-			//	}
-
-			//	resizeterm (lines, cols);
-			//} else {
-			//	lines = Lines;
-			//	cols = Cols;
-			//}
 		}
 
 		public static Event mousemask (Event newmask, out Event oldmask)
@@ -236,7 +143,6 @@ namespace Unix.Terminal {
 			return ret;
 		}
 
-		// We encode ESC + char (what Alt-char generates) as 0x2000 + char
 		public const int KeyAlt = 0x2000;
 
 		static public int IsAlt (int key)
@@ -252,9 +158,6 @@ namespace Unix.Terminal {
 		public static int UseDefaultColors () => methods.use_default_colors ();
 		public static int ColorPairs => methods.COLOR_PAIRS ();
 
-		//
-		// The proxy methods to call into each version
-		//
 		static public int endwin () => methods.endwin ();
 		static public bool isendwin () => methods.isendwin ();
 		static public int cbreak () => methods.cbreak ();
@@ -287,11 +190,9 @@ namespace Unix.Terminal {
 		static public int doupdate () => methods.doupdate ();
 		static public int wrefresh (IntPtr win) => methods.wrefresh (win);
 		static public int redrawwin (IntPtr win) => methods.redrawwin (win);
-		//static public int wredrawwin (IntPtr win, int beg_line, int num_lines) => methods.wredrawwin (win, beg_line, num_lines);
 		static public int wnoutrefresh (IntPtr win) => methods.wnoutrefresh (win);
 		static public int move (int line, int col) => methods.move (line, col);
 		static public int curs_set (int visibility) => methods.curs_set (visibility);
-		//static public int addch (int ch) => methods.addch (ch);
 		static public int addwstr (string s) => methods.addwstr (s);
 		static public int wmove (IntPtr win, int line, int col) => methods.wmove (win, line, col);
 		static public int waddch (IntPtr win, int ch) => methods.waddch (win, ch);
@@ -323,9 +224,9 @@ namespace Unix.Terminal {
 		static public int resetty () => methods.resetty ();
 	}
 
-#pragma warning disable RCS1102 // Make class static.
+#pragma warning disable RCS1102    
 	internal class Delegates {
-#pragma warning restore RCS1102 // Make class static.
+#pragma warning restore RCS1102    
 		public delegate IntPtr initscr ();
 		public delegate int endwin ();
 		public delegate bool isendwin ();
@@ -359,7 +260,6 @@ namespace Unix.Terminal {
 		public delegate int doupdate ();
 		public delegate int wrefresh (IntPtr win);
 		public delegate int redrawwin (IntPtr win);
-		//public delegate int wredrawwin (IntPtr win, int beg_line, int num_lines);
 		public delegate int wnoutrefresh (IntPtr win);
 		public delegate int move (int line, int col);
 		public delegate int curs_set (int visibility);
@@ -430,7 +330,6 @@ namespace Unix.Terminal {
 		public readonly Delegates.doupdate doupdate;
 		public readonly Delegates.wrefresh wrefresh;
 		public readonly Delegates.redrawwin redrawwin;
-		//public readonly Delegates.wredrawwin wredrawwin;
 		public readonly Delegates.wnoutrefresh wnoutrefresh;
 		public readonly Delegates.move move;
 		public readonly Delegates.curs_set curs_set;
@@ -503,7 +402,6 @@ namespace Unix.Terminal {
 			doupdate = lib.GetNativeMethodDelegate<Delegates.doupdate> ("doupdate");
 			wrefresh = lib.GetNativeMethodDelegate<Delegates.wrefresh> ("wrefresh");
 			redrawwin = lib.GetNativeMethodDelegate<Delegates.redrawwin> ("redrawwin");
-			//wredrawwin = lib.GetNativeMethodDelegate<Delegates.wredrawwin> ("wredrawwin");
 			wnoutrefresh = lib.GetNativeMethodDelegate<Delegates.wnoutrefresh> ("wnoutrefresh");
 			move = lib.GetNativeMethodDelegate<Delegates.move> ("move");
 			curs_set = lib.GetNativeMethodDelegate<Delegates.curs_set> ("curs_set");
@@ -540,5 +438,5 @@ namespace Unix.Terminal {
 			resetty = lib.GetNativeMethodDelegate<Delegates.resetty> ("resetty");
 		}
 	}
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning restore CS1591          
 }

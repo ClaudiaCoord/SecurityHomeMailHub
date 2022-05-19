@@ -1,15 +1,4 @@
-﻿// 
-// FileDialog.cs: File system dialogs for open and save
-//
-// TODO:
-//   * Add directory selector
-//   * Implement subclasses
-//   * Figure out why message text does not show
-//   * Remove the extra space when message does not show
-//   * Use a line separator to show the file listing, so we can use same colors as the rest
-//   * DirListView: Add mouse support
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using NStack;
 using System.IO;
@@ -52,7 +41,6 @@ namespace Terminal.Gui {
 			try {
 				dirInfo = new DirectoryInfo (value == null ? directory.ToString () : value.ToString ());
 
-				// Dispose of the old watcher
 				watcher?.Dispose ();
 
 				watcher = new FileSystemWatcher (dirInfo.FullName);
@@ -110,7 +98,6 @@ namespace Terminal.Gui {
 				_disposedValue = true;
 			}
 
-			// Call base class implementation.
 			base.Dispose (disposing);
 		}
 
@@ -482,13 +469,10 @@ namespace Terminal.Gui {
 			} else {
 				OnSelectionChanged ();
 				if (canChooseFiles) {
-					// Ensures that at least one file is selected.
 					if (FilePaths.Count == 0)
 						PerformMultipleSelection ();
-					// Let the OK handler take it over
 					return true;
 				}
-				// No files allowed, do not let the default handler take it.
 			}
 			return false;
 		}
@@ -557,7 +541,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		///<inheritdoc/>
 		public override bool OnEnter (View view)
 		{
 			Application.Driver.SetCursorVisibility (CursorVisibility.Invisible);
@@ -566,9 +549,6 @@ namespace Terminal.Gui {
 		}
 	}
 
-	/// <summary>
-	/// Base class for the <see cref="OpenDialog"/> and the <see cref="SaveDialog"/>
-	/// </summary>
 	public class FileDialog : Dialog {
 		Button prompt, cancel;
 		Label nameFieldLabel, message, nameDirLabel;
@@ -576,45 +556,18 @@ namespace Terminal.Gui {
 		internal DirListView dirListView;
 		ComboBox cmbAllowedTypes;
 
-		/// <summary>
-		/// Initializes a new <see cref="FileDialog"/>.
-		/// </summary>
 		public FileDialog () : this (title: string.Empty, prompt: string.Empty,
 			nameFieldLabel: string.Empty, message: string.Empty)
 		{ }
 
-		/// <summary>
-		/// Initializes a new instance of <see cref="FileDialog"/>
-		/// </summary>
-		/// <param name="title">The title.</param>
-		/// <param name="prompt">The prompt.</param>
-		/// <param name="nameFieldLabel">The name of the file field label..</param>
-		/// <param name="message">The message.</param>
-		/// <param name="allowedTypes">The allowed types.</param>
 		public FileDialog (ustring title, ustring prompt, ustring nameFieldLabel, ustring message, List<string> allowedTypes = null)
 			: this (title, prompt, ustring.Empty, nameFieldLabel, message, allowedTypes) { }
 
-		/// <summary>
-		/// Initializes a new instance of <see cref="FileDialog"/>
-		/// </summary>
-		/// <param name="title">The title.</param>
-		/// <param name="prompt">The prompt.</param>
-		/// <param name="message">The message.</param>
-		/// <param name="allowedTypes">The allowed types.</param>
 		public FileDialog (ustring title, ustring prompt, ustring message, List<string> allowedTypes)
 			: this (title, prompt, ustring.Empty, message, allowedTypes) { }
 
-		/// <summary>
-		/// Initializes a new instance of <see cref="FileDialog"/>
-		/// </summary>
-		/// <param name="title">The title.</param>
-		/// <param name="prompt">The prompt.</param>
-		/// <param name="nameDirLabel">The name of the directory field label.</param>
-		/// <param name="nameFieldLabel">The name of the file field label..</param>
-		/// <param name="message">The message.</param>
-		/// <param name="allowedTypes">The allowed types.</param>
 		public FileDialog (ustring title, ustring prompt, ustring nameDirLabel, ustring nameFieldLabel, ustring message,
-			List<string> allowedTypes = null) : base (title)//, Driver.Cols - 20, Driver.Rows - 5, null)
+			List<string> allowedTypes = null) : base (title)       
 		{
 			this.message = new Label (message) {
 				X = 1,
@@ -722,7 +675,6 @@ namespace Terminal.Gui {
 			Width = Dim.Percent (80);
 			Height = Dim.Percent (80);
 
-			// On success, we will set this to false.
 			canceled = true;
 
 			KeyPress += (e) => {
@@ -740,23 +692,12 @@ namespace Terminal.Gui {
 
 		internal bool canceled;
 
-		///<inheritdoc/>
 		public override void WillPresent ()
 		{
 			base.WillPresent ();
 			dirListView.SetFocus ();
 		}
 
-		//protected override void Dispose (bool disposing)
-		//{
-		//	message?.Dispose ();
-		//	base.Dispose (disposing);
-		//}
-
-		/// <summary>
-		/// Gets or sets the prompt label for the <see cref="Button"/> displayed to the user
-		/// </summary>
-		/// <value>The prompt.</value>
 		public ustring Prompt {
 			get => prompt.Text;
 			set {
@@ -764,10 +705,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the name of the directory field label.
-		/// </summary>
-		/// <value>The name of the directory field label.</value>
 		public ustring NameDirLabel {
 			get => nameDirLabel.Text;
 			set {
@@ -775,10 +712,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the name field label.
-		/// </summary>
-		/// <value>The name field label.</value>
 		public ustring NameFieldLabel {
 			get => nameFieldLabel.Text;
 			set {
@@ -786,10 +719,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the message displayed to the user, defaults to nothing
-		/// </summary>
-		/// <value>The message.</value>
 		public ustring Message {
 			get => message.Text;
 			set {
@@ -797,22 +726,10 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets a value indicating whether this <see cref="FileDialog"/> can create directories.
-		/// </summary>
-		/// <value><c>true</c> if can create directories; otherwise, <c>false</c>.</value>
 		public bool CanCreateDirectories { get; set; }
 
-		/// <summary>
-		/// Gets or sets a value indicating whether this <see cref="FileDialog"/> is extension hidden.
-		/// </summary>
-		/// <value><c>true</c> if is extension hidden; otherwise, <c>false</c>.</value>
 		public bool IsExtensionHidden { get; set; }
 
-		/// <summary>
-		/// Gets or sets the directory path for this panel
-		/// </summary>
-		/// <value>The directory path.</value>
 		public ustring DirectoryPath {
 			get => dirEntry.Text;
 			set {
@@ -821,25 +738,13 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// The array of filename extensions allowed, or null if all file extensions are allowed.
-		/// </summary>
-		/// <value>The allowed file types.</value>
 		public string [] AllowedFileTypes {
 			get => dirListView.AllowedFileTypes;
 			set => dirListView.AllowedFileTypes = value;
 		}
 
-		/// <summary>
-		/// Gets or sets a value indicating whether this <see cref="FileDialog"/> allows the file to be saved with a different extension
-		/// </summary>
-		/// <value><c>true</c> if allows other file types; otherwise, <c>false</c>.</value>
 		public bool AllowsOtherFileTypes { get; set; }
 
-		/// <summary>
-		/// The File path that is currently shown on the panel
-		/// </summary>
-		/// <value>The absolute file path for the file path entered.</value>
 		public ustring FilePath {
 			get => dirListView.MakePath (nameEntry.Text.ToString ());
 			set {
@@ -847,44 +752,15 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Check if the dialog was or not canceled.
-		/// </summary>
 		public bool Canceled { get => canceled; }
 	}
 
-	/// <summary>
-	///  The <see cref="SaveDialog"/> provides an interactive dialog box for users to pick a file to 
-	///  save.
-	/// </summary>
-	/// <remarks>
-	/// <para>
-	///   To use, create an instance of <see cref="SaveDialog"/>, and pass it to
-	///   <see cref="Application.Run(Func{Exception, bool})"/>. This will run the dialog modally,
-	///   and when this returns, the <see cref="FileName"/>property will contain the selected file name or 
-	///   null if the user canceled. 
-	/// </para>
-	/// </remarks>
 	public class SaveDialog : FileDialog {
-		/// <summary>
-		/// Initializes a new <see cref="SaveDialog"/>.
-		/// </summary>
 		public SaveDialog () : this (title: string.Empty, message: string.Empty) { }
 
-		/// <summary>
-		/// Initializes a new <see cref="SaveDialog"/>.
-		/// </summary>
-		/// <param name="title">The title.</param>
-		/// <param name="message">The message.</param>
-		/// <param name="allowedTypes">The allowed types.</param>
 		public SaveDialog (ustring title, ustring message, List<string> allowedTypes = null)
 			: base (title, prompt: Strings.fdSave, nameFieldLabel: $"{Strings.fdSaveAs}:", message: message, allowedTypes) { }
 
-		/// <summary>
-		/// Gets the name of the file the user selected for saving, or null
-		/// if the user canceled the <see cref="SaveDialog"/>.
-		/// </summary>
-		/// <value>The name of the file.</value>
 		public ustring FileName {
 			get {
 				if (canceled)
@@ -894,57 +770,17 @@ namespace Terminal.Gui {
 		}
 	}
 
-	/// <summary>
-	/// The <see cref="OpenDialog"/>provides an interactive dialog box for users to select files or directories.
-	/// </summary>
-	/// <remarks>
-	/// <para>
-	///   The open dialog can be used to select files for opening, it can be configured to allow
-	///   multiple items to be selected (based on the AllowsMultipleSelection) variable and
-	///   you can control whether this should allow files or directories to be selected.
-	/// </para>
-	/// <para>
-	///   To use, create an instance of <see cref="OpenDialog"/>, and pass it to
-	///   <see cref="Application.Run(Func{Exception, bool})"/>. This will run the dialog modally,
-	///   and when this returns, the list of files will be available on the <see cref="FilePaths"/> property.
-	/// </para>
-	/// <para>
-	/// To select more than one file, users can use the spacebar, or control-t.
-	/// </para>
-	/// </remarks>
 	public class OpenDialog : FileDialog {
 		OpenMode openMode;
 
-		/// <summary>
-		/// Determine which <see cref="System.IO"/> type to open.
-		/// </summary>
 		public enum OpenMode {
-			/// <summary>
-			/// Opens only file or files.
-			/// </summary>
 			File,
-			/// <summary>
-			/// Opens only directory or directories.
-			/// </summary>
 			Directory,
-			/// <summary>
-			/// Opens files and directories.
-			/// </summary>
 			Mixed
 		}
 
-		/// <summary>
-		/// Initializes a new <see cref="OpenDialog"/>.
-		/// </summary>
 		public OpenDialog () : this (title: string.Empty, message: string.Empty) { }
 
-		/// <summary>
-		/// Initializes a new <see cref="OpenDialog"/>.
-		/// </summary>
-		/// <param name="title">The title.</param>
-		/// <param name="message">The message.</param>
-		/// <param name="allowedTypes">The allowed types.</param>
-		/// <param name="openMode">The open mode.</param>
 		public OpenDialog (ustring title, ustring message, List<string> allowedTypes = null, OpenMode openMode = OpenMode.File) : base (title,
 			prompt: openMode == OpenMode.File ? Strings.fdOpen : openMode == OpenMode.Directory ? Strings.fdSelectFolder : Strings.fdSelectMixed,
 			nameFieldLabel: Strings.fdOpen, message: message, allowedTypes)
@@ -967,10 +803,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets a value indicating whether this <see cref="Terminal.Gui.OpenDialog"/> can choose files.
-		/// </summary>
-		/// <value><c>true</c> if can choose files; otherwise, <c>false</c>.  Defaults to <c>true</c></value>
 		public bool CanChooseFiles {
 			get => dirListView.canChooseFiles;
 			set {
@@ -979,10 +811,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets a value indicating whether this <see cref="OpenDialog"/> can choose directories.
-		/// </summary>
-		/// <value><c>true</c> if can choose directories; otherwise, <c>false</c> defaults to <c>false</c>.</value>
 		public bool CanChooseDirectories {
 			get => dirListView.canChooseDirectories;
 			set {
@@ -991,10 +819,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets a value indicating whether this <see cref="OpenDialog"/> allows multiple selection.
-		/// </summary>
-		/// <value><c>true</c> if allows multiple selection; otherwise, <c>false</c>, defaults to false.</value>
 		public bool AllowsMultipleSelection {
 			get => dirListView.allowsMultipleSelection;
 			set {
@@ -1006,10 +830,6 @@ namespace Terminal.Gui {
 			}
 		}
 
-		/// <summary>
-		/// Returns the selected files, or an empty list if nothing has been selected
-		/// </summary>
-		/// <value>The file paths.</value>
 		public IReadOnlyList<string> FilePaths {
 			get => dirListView.FilePaths;
 		}

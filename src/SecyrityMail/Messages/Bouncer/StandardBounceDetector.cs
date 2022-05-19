@@ -1,4 +1,10 @@
-﻿using MimeKit;
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+using MimeKit;
 
 namespace SecyrityMail.Messages.Bouncer
 {

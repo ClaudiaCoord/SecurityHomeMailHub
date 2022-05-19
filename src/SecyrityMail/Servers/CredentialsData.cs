@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -201,7 +207,7 @@ namespace SecyrityMail.Servers
                     if ((bytes == default) || (bytes.Length == 0))
                         break;
 
-                    string s = UTF8Encoding.UTF8.GetString(bytes);
+                    string s = Encoding.UTF8.GetString(bytes);
                     if (string.IsNullOrEmpty(s))
                         break;
                     string[] ss = s.Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);

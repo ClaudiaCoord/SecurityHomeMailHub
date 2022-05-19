@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -111,23 +117,23 @@ namespace SecyrityMail.MailAddress
             }
         }
 
-        public async Task<bool> Load() =>
-            await Load(Global.GetRootFile(Global.DirectoryPlace.Root, FileName));
+        public async Task<bool> Load(bool isbackup = false) =>
+            await Load(Global.GetRootFile(Global.DirectoryPlace.Root, FileName), isbackup);
 
-        public async Task<bool> Load(string path) =>
+        public async Task<bool> Load(string path, bool isbackup) =>
             await Task.Run(() => {
                 try {
-                    AddressesBook ab = path.DeserializeFromFile<AddressesBook>();
+                    AddressesBook ab = path.BasePathFile(isbackup).DeserializeFromFile<AddressesBook>();
                     return Copy(ab);
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Load), ex); }
                 return false;
             });
 
-        public async Task<bool> Save() =>
-            await Save(Global.GetRootFile(Global.DirectoryPlace.Root, FileName));
+        public async Task<bool> Save(bool isbackup = false) =>
+            await Save(Global.GetRootFile(Global.DirectoryPlace.Root, FileName), isbackup);
 
-        public async Task<bool> Save(string path) =>
+        public async Task<bool> Save(string path, bool isbackup) =>
             await Task.Run(() => {
                 try {
                     List<AddressEntry> items = Items.Distinct().ToList();
@@ -135,7 +141,7 @@ namespace SecyrityMail.MailAddress
                     lock (__lock) {
                         Items.Clear();
                         Items.AddRange(items);
-                        path.SerializeToFile<AddressesBook>(this);
+                        path.BasePathFile(isbackup).SerializeToFile<AddressesBook>(this);
                     }
                     isSaved = true;
                     return true;

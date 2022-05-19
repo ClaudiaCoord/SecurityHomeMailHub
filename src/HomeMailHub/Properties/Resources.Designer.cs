@@ -97,6 +97,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Stop Check.
+        /// </summary>
+        internal static string BTN_CHECKSTOP {
+            get {
+                return ResourceManager.GetString("BTN_CHECKSTOP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на _Clear.
         /// </summary>
         internal static string BTN_CLEAR {
@@ -385,47 +394,92 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на .
+        ///   Ищет локализованную строку, похожую на Unsupported configuration type.
         /// </summary>
-        internal static string E1 {
+        internal static string CMD_LINE_E1 {
             get {
-                return ResourceManager.GetString("E1", resourceCulture);
+                return ResourceManager.GetString("CMD_LINE_E1", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на .
+        ///   Ищет локализованную строку, похожую на empty filename.
         /// </summary>
-        internal static string E2 {
+        internal static string CMD_LINE_E2 {
             get {
-                return ResourceManager.GetString("E2", resourceCulture);
+                return ResourceManager.GetString("CMD_LINE_E2", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на .
+        ///   Ищет локализованную строку, похожую на character &apos;{0}&apos; cannot be accepted in file path: {1}.
         /// </summary>
-        internal static string E3 {
+        internal static string CMD_LINE_E3 {
             get {
-                return ResourceManager.GetString("E3", resourceCulture);
+                return ResourceManager.GetString("CMD_LINE_E3", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на .
+        ///   Ищет локализованную строку, похожую на character &apos;{0}&apos; cannot be used in file name: {1}.
         /// </summary>
-        internal static string E4 {
+        internal static string CMD_LINE_E4 {
             get {
-                return ResourceManager.GetString("E4", resourceCulture);
+                return ResourceManager.GetString("CMD_LINE_E4", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на .
+        ///   Ищет локализованную строку, похожую на Help, list of keys.
         /// </summary>
-        internal static string E5 {
+        internal static string CMD_LINE_H1 {
             get {
-                return ResourceManager.GetString("E5", resourceCulture);
+                return ResourceManager.GetString("CMD_LINE_H1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Interface language selection (En|Ru).
+        /// </summary>
+        internal static string CMD_LINE_H2 {
+            get {
+                return ResourceManager.GetString("CMD_LINE_H2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Enable all logs.
+        /// </summary>
+        internal static string CMD_LINE_H3 {
+            get {
+                return ResourceManager.GetString("CMD_LINE_H3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Do not start POP3 service.
+        /// </summary>
+        internal static string CMD_LINE_H4 {
+            get {
+                return ResourceManager.GetString("CMD_LINE_H4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Do not start SMTP service.
+        /// </summary>
+        internal static string CMD_LINE_H5 {
+            get {
+                return ResourceManager.GetString("CMD_LINE_H5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Use proxy type (Http,Https,Sock4,Sock5,SshSock5).
+        /// </summary>
+        internal static string CMD_LINE_H6 {
+            get {
+                return ResourceManager.GetString("CMD_LINE_H6", resourceCulture);
             }
         }
         
@@ -615,6 +669,15 @@ namespace HomeMailHub.Properties {
         internal static string GUIMESSAGE_FMT3 {
             get {
                 return ResourceManager.GetString("GUIMESSAGE_FMT3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на There are {0} messages deleted, they can be restored.
+        /// </summary>
+        internal static string GUIMESSAGE_FMT4 {
+            get {
+                return ResourceManager.GetString("GUIMESSAGE_FMT4", resourceCulture);
             }
         }
         
@@ -997,6 +1060,51 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Delete all messages.
+        /// </summary>
+        internal static string MENU_DELETEALL {
+            get {
+                return ResourceManager.GetString("MENU_DELETEALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Show message _deletion warning.
+        /// </summary>
+        internal static string MENU_DELETECONFIRM {
+            get {
+                return ResourceManager.GetString("MENU_DELETECONFIRM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Delete.
+        /// </summary>
+        internal static string MENU_DELETEMENU {
+            get {
+                return ResourceManager.GetString("MENU_DELETEMENU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Permanently delete messages: {0}.
+        /// </summary>
+        internal static string MENU_FMT_DELETECLEAR {
+            get {
+                return ResourceManager.GetString("MENU_FMT_DELETECLEAR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Undelete messages: {0}.
+        /// </summary>
+        internal static string MENU_FMT_UNDELETE {
+            get {
+                return ResourceManager.GetString("MENU_FMT_UNDELETE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Current version {0}, new version {1}, open the update page?.
         /// </summary>
         internal static string MENU_FMT_VERSIONNEW {
@@ -1141,6 +1249,33 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Mark All Read.
+        /// </summary>
+        internal static string MENU_MSGSREADALL {
+            get {
+                return ResourceManager.GetString("MENU_MSGSREADALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Open message in ...
+        /// </summary>
+        internal static string MENU_OPENMSGFROM {
+            get {
+                return ResourceManager.GetString("MENU_OPENMSGFROM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _To open with ...
+        /// </summary>
+        internal static string MENU_OPENURI {
+            get {
+                return ResourceManager.GetString("MENU_OPENURI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Proxy check started.
         /// </summary>
         internal static string MENU_PROXYCHECK {
@@ -1276,6 +1411,60 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Sorting.
+        /// </summary>
+        internal static string MENU_SORT {
+            get {
+                return ResourceManager.GetString("MENU_SORT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на From _date.
+        /// </summary>
+        internal static string MENU_SORTDATE {
+            get {
+                return ResourceManager.GetString("MENU_SORTDATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на From _smallest to largest.
+        /// </summary>
+        internal static string MENU_SORTDOWN {
+            get {
+                return ResourceManager.GetString("MENU_SORTDOWN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на By _sender&apos;s name.
+        /// </summary>
+        internal static string MENU_SORTFROM {
+            get {
+                return ResourceManager.GetString("MENU_SORTFROM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на From _subject.
+        /// </summary>
+        internal static string MENU_SORTSUBJ {
+            get {
+                return ResourceManager.GetString("MENU_SORTSUBJ", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на From _largest to smallest.
+        /// </summary>
+        internal static string MENU_SORTUP {
+            get {
+                return ResourceManager.GetString("MENU_SORTUP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Select _SSH account.
         /// </summary>
         internal static string MENU_SSHACCOUNT {
@@ -1290,6 +1479,15 @@ namespace HomeMailHub.Properties {
         internal static string MENU_SSHSELECT {
             get {
                 return ResourceManager.GetString("MENU_SSHSELECT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Show message _recovery messages.
+        /// </summary>
+        internal static string MENU_UNDELETECONFIRM {
+            get {
+                return ResourceManager.GetString("MENU_UNDELETECONFIRM", resourceCulture);
             }
         }
         
@@ -1438,11 +1636,20 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Mail check interval in hours.
+        /// </summary>
+        internal static string TAG_CLIENTSMAILPERIODHOURS {
+            get {
+                return ResourceManager.GetString("TAG_CLIENTSMAILPERIODHOURS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Mail check period in minutes.
         /// </summary>
-        internal static string TAG_CLIENTSMAILPERIOD {
+        internal static string TAG_CLIENTSMAILPERIODMIN {
             get {
-                return ResourceManager.GetString("TAG_CLIENTSMAILPERIOD", resourceCulture);
+                return ResourceManager.GetString("TAG_CLIENTSMAILPERIODMIN", resourceCulture);
             }
         }
         
@@ -1488,6 +1695,33 @@ namespace HomeMailHub.Properties {
         internal static string TAG_DISABLE {
             get {
                 return ResourceManager.GetString("TAG_DISABLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на DATE.
+        /// </summary>
+        internal static string TAG_DT_DATE {
+            get {
+                return ResourceManager.GetString("TAG_DT_DATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Num.
+        /// </summary>
+        internal static string TAG_DT_NUM {
+            get {
+                return ResourceManager.GetString("TAG_DT_NUM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Subject.
+        /// </summary>
+        internal static string TAG_DT_SUBJ {
+            get {
+                return ResourceManager.GetString("TAG_DT_SUBJ", resourceCulture);
             }
         }
         
@@ -1596,6 +1830,15 @@ namespace HomeMailHub.Properties {
         internal static string TAG_MESSAGE {
             get {
                 return ResourceManager.GetString("TAG_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Reading.
+        /// </summary>
+        internal static string TAG_MSGREADING {
+            get {
+                return ResourceManager.GetString("TAG_MSGREADING", resourceCulture);
             }
         }
         

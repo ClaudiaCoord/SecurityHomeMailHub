@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -81,7 +87,7 @@ namespace SecyrityMail.Vpn
             if (!a.IsPropertyChanged())
                 return;
             if (a.IsTypeOf<VpnEngine>())
-                switch (a.Src) {
+                switch (a.Text) {
                     case "VPNReady": IsVpnReady = true; break;
                     case "VPNKeypair": IsVpnBegin = true; break;
                     case "VPNStarting":

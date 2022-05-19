@@ -1,9 +1,14 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.Threading.Tasks;
 using MailKit.Net.Pop3;
 using MimeKit;
-using SecyrityMail.Clients.IMAP;
 using SecyrityMail.Data;
 using SecyrityMail.MailAccounts;
 using SecyrityMail.Messages;
@@ -17,11 +22,13 @@ namespace SecyrityMail.Clients.POP3
         string user = string.Empty;
         readonly InitClientSession session;
         readonly EventHandler<EventActionArgs> evRoot;
+        readonly MessagesCacheOpener cacheOpener;
 
         public ClientPop3Task(InitClientSession s, EventHandler<EventActionArgs> a) {
             LogTag = nameof(ClientPop3);
             session = s; evRoot = a;
             this.SubscribeProxyEvent(evRoot);
+            cacheOpener = CacheOpener.Build(this.GetType());
         }
         ~ClientPop3Task() {
             Global.Instance.Log.Add(nameof(ClientPop3Task), $"Pop3 client for {user} end");
@@ -49,7 +56,7 @@ namespace SecyrityMail.Clients.POP3
                         client.Disconnected += Client_Disconnected;
                     } catch { }
 
-                    MailMessages msgs = await Global.Instance.MessagesManager.Open(account.Email)
+                    MailMessages msgs = await cacheOpener.Open(account.Email)
                                         .ConfigureAwait(false);
 
                     Global.Instance.Pop3ClientStat.Pop3LastMessageTotal += client.Count;
@@ -96,7 +103,7 @@ namespace SecyrityMail.Clients.POP3
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Receive), ex); }
                 finally {
                     account.CurrentAction = AccountUsing.None;
-                    Global.Instance.MessagesManager.Close(account.Email);
+                    await cacheOpener.Close(account.Email).ConfigureAwait(false);
                 }
                 return false;
             });

@@ -122,6 +122,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="app.manifest" />
+    <None Include="SecurityMailTunnel.licenseheader" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VpnWireGuard\VpnWireGuard.csproj">

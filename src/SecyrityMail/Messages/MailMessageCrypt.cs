@@ -1,4 +1,10 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
 using System.IO;
 using System.Linq;
@@ -11,7 +17,7 @@ using SecyrityMail.Data;
 
 namespace SecyrityMail.Messages
 {
-    internal class MailMessageCrypt
+    public class MailMessageCrypt
     {
         public bool CheckSigned(MimeMessage mmsg) => (mmsg != null) ? mmsg.Body is MultipartSigned : true;
         public bool CheckCrypted(MimeMessage mmsg) => (mmsg != null) ? mmsg.Body is MultipartEncrypted : true;

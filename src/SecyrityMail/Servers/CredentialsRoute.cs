@@ -1,6 +1,11 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
+
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,6 +28,7 @@ namespace SecyrityMail.Servers
         private bool isDeliveryLocal_ = false;
         private int toIndex_ = 0;
         private Func<Tuple<MailAccounts.UserAccount, string>> GetAccount = () => default;
+        private MessagesCacheOpener cacheOpener { get; set; } = default(MessagesCacheOpener);
 
         public List<Tuple<bool, Global.DirectoryPlace, Tuple<string, string>, string, bool>> MailOutList = new();
         public List<Tuple<string, string>> ToList { get; } = new();
@@ -32,9 +38,15 @@ namespace SecyrityMail.Servers
             set => ToList.Add(new("", value));
         }
 
-        public CredentialsRoute(Func<Tuple<MailAccounts.UserAccount,string>> func) => GetAccount = func;
-        public CredentialsRoute(MailAccounts.UserAccount acc) => GetAccount = () => 
-            new Tuple<MailAccounts.UserAccount,string>(acc, Global.GetUserDirectory(acc.Email));
+        public CredentialsRoute(Func<Tuple<MailAccounts.UserAccount, string>> func) {
+            GetAccount = func;
+            cacheOpener = CacheOpener.Build(this.GetType());
+        }
+        public CredentialsRoute(MailAccounts.UserAccount acc) {
+            GetAccount = () =>
+                new Tuple<MailAccounts.UserAccount, string>(acc, Global.GetUserDirectory(acc.Email));
+            cacheOpener = CacheOpener.Build(this.GetType());
+        }
 
         #region Check message delivery to local address
         public bool CheckToLocalDelivery(string to, string oto)
@@ -45,7 +57,7 @@ namespace SecyrityMail.Servers
             MailAccounts.UserAccount account;
 
             if (!string.IsNullOrWhiteSpace(to)) {
-                account = Global.Instance.FindAccount(to);
+                account = Global.Instance.FindFromEmail(to);
                 if ((account != null) && !account.IsEmptyCredentials) {
                     SetLocalDelivery(to);
                     MailOutList.Add(
@@ -54,7 +66,7 @@ namespace SecyrityMail.Servers
                 }
             }
             if (!string.IsNullOrWhiteSpace(oto)) {
-                account = Global.Instance.FindAccount(oto);
+                account = Global.Instance.FindFromEmail(oto);
                 if ((account != null) && !account.IsEmptyCredentials) {
                     SetLocalDelivery(oto);
                     MailOutList.Add(
@@ -133,8 +145,7 @@ namespace SecyrityMail.Servers
                             mmsg.To.Clear();
                             mmsg.To.Add(new MailboxAddress(t.Item3.Item1, t.Item3.Item2));
 
-                            bool isDeliveryOutMessage = t.Item1 || (t.Item2 == Global.DirectoryPlace.Error);
-                            if (isDeliveryOutMessage)
+                            if (t.Item1 || (t.Item2 == Global.DirectoryPlace.Error))
                                 msg = await LocalDelivery(t.Item2, t.Item4, t.Item3.Item2, mmsg, t.Item5)
                                             .ConfigureAwait(false);
                             else
@@ -143,7 +154,8 @@ namespace SecyrityMail.Servers
 
                             if (msg != null)
                                 act.Invoke(
-                                    isDeliveryOutMessage ? MailEventId.DeliveryLocalMessage : MailEventId.DeliveryOutMessage,
+                                    (t.Item2 == Global.DirectoryPlace.Error) ? MailEventId.DeliveryErrorMessage :
+                                        (t.Item1 ? MailEventId.DeliveryLocalMessage : MailEventId.DeliveryOutMessage),
                                     $"{t.Item3.Item1} {t.Item3.Item2}", msg);
                         }
                         return MessageStoreReturn.MessageDelivered;
@@ -164,8 +176,8 @@ namespace SecyrityMail.Servers
         private async Task<MailMessage> LocalDelivery(
             Global.DirectoryPlace place, string rootpath, string email, MimeMessage mmsg, bool autodecrypt) {
             try {
-                MailMessages msgs = await Global.Instance.MessagesManager.Open(email)
-                                                               .ConfigureAwait(false);
+                MailMessages msgs = await cacheOpener.Open(email)
+                                                     .ConfigureAwait(false);
                 if (msgs == null)
                     return default(MailMessage);
 
@@ -182,7 +194,7 @@ namespace SecyrityMail.Servers
                 return msg;
             }
             catch (Exception ex) { Global.Instance.Log.Add(nameof(LocalDelivery), ex); }
-            finally { Global.Instance.MessagesManager.Close(email); }
+            finally { await cacheOpener.Close(email).ConfigureAwait(false); }
             return default(MailMessage);
         }
 
@@ -229,7 +241,7 @@ namespace SecyrityMail.Servers
                         continue;
 
                     Tuple<string, string> x = new Tuple<string, string>(a.Item1, a.Item2);
-                    MailAccounts.UserAccount account = Global.Instance.FindAccount(x.Item2);
+                    MailAccounts.UserAccount account = Global.Instance.FindFromEmail(x.Item2);
 
                     if ((account != null) && string.IsNullOrWhiteSpace(x.Item1) && !string.IsNullOrWhiteSpace(account.Name))
                         x = new Tuple<string, string>(account.Name, account.Email);

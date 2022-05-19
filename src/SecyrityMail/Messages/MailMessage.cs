@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * Git: https://github.com/ClaudiaCoord/SecurityHomeMailHub/tree/main/src/SecyrityMail
+ * Copyright (c) 2022 СС
+ * License MIT.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -37,12 +42,16 @@ namespace SecyrityMail.Messages
         public string MsgId { get; set; } = string.Empty;
         [XmlElement("size")]
         public long Size { get; set; } = 0L;
+        [XmlElement("from")]
+        public string From { get; set; } = string.Empty;
         [XmlElement("subj")]
         public string Subj { get; set; } = string.Empty;
         [XmlElement("path")]
         public string FilePath { get; set; } = string.Empty;
         [XmlElement("folder")]
         public Global.DirectoryPlace Folder { get; set; } = Global.DirectoryPlace.None;
+        [XmlElement("isread")]
+        public bool IsRead { get; set; } = false;
 
         [XmlElement("date")]
         public DateTime DateSerialize { get; set; } = DateTime.MinValue;
@@ -53,12 +62,13 @@ namespace SecyrityMail.Messages
         }
         public MailMessage() { }
 
-        public void Set(int id, string mid, string subj, string file) =>
-            Set(id, mid, subj, new FileInfo(file));
+        public void Set(int id, string mid, string from, string subj, string file) =>
+            Set(id, mid, from, subj, new FileInfo(file));
 
-        public void Set(int id, string mid, string subj, FileInfo file)
+        public void Set(int id, string mid, string from, string subj, FileInfo file)
         {
             Id = id;
+            From = from;
             Subj = subj;
             MsgId = mid;
             Size = file.Length;
@@ -75,6 +85,7 @@ namespace SecyrityMail.Messages
 
             Id = msg.Id = count;
             Size = msg.Size;
+            From = msg.From;
             Subj = msg.Subj;
             Date = msg.Date;
             MsgId = msg.MsgId;
@@ -100,7 +111,8 @@ namespace SecyrityMail.Messages
                         await mmsg.WriteToAsync(file.FullName);
                         file.Refresh();
                     }
-                    Set(count, mmsg.MessageId, mmsg.Subject, file);
+                    string from = ((mmsg.From == null) || (mmsg.From.Count == 0)) ? string.Empty : mmsg.From.ToString();
+                    Set(count, mmsg.MessageId, from, mmsg.Subject, file);
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(LoadAndCreate), ex); return null; }
                 finally {
@@ -161,6 +173,7 @@ namespace SecyrityMail.Messages
                         return null;
 
                     Id     = count;
+                    From   = ((mmsg.From == null) || (mmsg.From.Count == 0)) ? string.Empty : mmsg.From.ToString();
                     Subj   = (mmsg.Subject == null) ? string.Empty : mmsg.Subject;
                     Date   = mmsg.Date = GetOrCreateDateTimeOffset(mmsg.Date);
                     MsgId  = mmsg.MessageId = GetOrCreateMessageId(Global.Instance.Config.IsAlwaysNewMessageId ? string.Empty : mmsg.MessageId);
