@@ -47,3 +47,5 @@ README.*.*
 /docs/icons8-mail-ios-96.png
 /docs/icons8-mail-ios-favicons.zip
 /src/HomeMailHub/*.licenseheader
+/src/SecurityMailTunnel/*.licenseheader
+/src/VpnWireGuard/*.licenseheader
