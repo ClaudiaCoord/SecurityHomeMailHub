@@ -182,41 +182,52 @@ namespace SecyrityMail.Messages
                     switch (place)
                     {
                         case Global.DirectoryPlace.Msg: {
+                                bool iscrypted = false,
+                                     iscrypt = false;
                                 try {
-                                    bool isdecrypt = false;
-
                                     if (mmsg.Headers != default) {
                                         mmsg.Headers.RemoveAll(HeaderId.DispositionNotificationTo);
                                         mmsg.Headers.RemoveAll(HeaderId.DispositionNotificationOptions);
                                         mmsg.Headers.Remove(XConfirmReadingToId);
                                         mmsg.Headers.Remove(HeaderId.ReturnReceiptTo);
                                     }
-                                    if (pgpauto && (mmsg.Body is MultipartEncrypted)) {
-                                        try {
-                                            MailMessageCrypt crypt = new();
-                                            isdecrypt = await crypt.Decrypt(mmsg);
-                                        } catch (Exception ex) {
-                                            Global.Instance.Log.Add(nameof(MailMessageCrypt.Decrypt), ex);
+                                    if (mmsg.Body is MultipartEncrypted) {
+                                        iscrypted = true;
+                                        if (pgpauto)
+                                            try {
+                                                MailMessageCrypt crypt = new();
+                                                iscrypt = await crypt.Decrypt(mmsg);
+                                                if (iscrypt)
+                                                    Subj += " (PGP decoded)";
+                                            }
+                                            catch (Exception ex) {
+                                                Global.Instance.Log.Add(nameof(MailMessageCrypt.Decrypt), ex);
+                                            }
+                                    }
+                                    if ((iscrypted && iscrypt) || !iscrypted) {
+
+                                        if (localdelivery && !string.IsNullOrWhiteSpace(mmsg.HtmlBody)) {
+
+                                            BodyBuilder builder = new();
+                                            IEnumerable<MimeEntity> attachs = mmsg.Attachments;
+                                            if (attachs != null)
+                                                foreach (var a in attachs)
+                                                    builder.Attachments.Add(a);
+
+                                            builder.HtmlBody = new ConverterHtmlToHtml().Convert(mmsg);
+                                            builder.TextBody = mmsg.TextBody;
+
+                                            mmsg.Body = builder.ToMessageBody();
                                         }
+                                        if (Global.Instance.Config.IsSaveAttachments)
+                                            await SaveAttachments(mmsg.Attachments, rootpath, mmsg.MessageId, mmsg.Date)
+                                                    .ConfigureAwait(false);
                                     }
-                                    if (!isdecrypt && localdelivery && !string.IsNullOrWhiteSpace(mmsg.HtmlBody)) {
-
-                                        BodyBuilder builder = new();
-                                        builder.HtmlBody = new ConverterHtmlToHtml().Convert(mmsg);
-                                        builder.TextBody = mmsg.TextBody;
-
-                                        IEnumerable<MimeEntity> attachs = mmsg.Attachments;
-                                        if (attachs != null)
-                                            foreach (var a in attachs)
-                                                builder.Attachments.Add(a);
-
-                                        mmsg.Body = builder.ToMessageBody();
-                                    }
-                                    if (Global.Instance.Config.IsSaveAttachments)
-                                        await SaveAttachments(mmsg.Attachments, rootpath, mmsg.MessageId, mmsg.Date)
-                                                .ConfigureAwait(false);
+}
+                                catch (Exception ex) { Global.Instance.Log.Add(place.ToString(), ex); }
+                                finally {
+                                    Global.Instance.Log.Add(nameof(MailMessageCrypt), $"PGP message {place}/'{mmsg.MessageId}' status: {iscrypted}/{iscrypt}");
                                 }
-                                catch (Exception ex) { Global.Instance.Log.Add(nameof(MimeMessage.HtmlBody), ex); }
                                 break;
                             }
                         case Global.DirectoryPlace.Error: {
@@ -249,10 +260,11 @@ namespace SecyrityMail.Messages
                                         MessageId = GetOrCreateMessageId(string.Empty)
                                     };
                                 }
-                                catch (Exception ex) { Global.Instance.Log.Add(nameof(MessageDeliveryStatus), ex); }
+                                catch (Exception ex) { Global.Instance.Log.Add(place.ToString(), ex); }
                                 break;
                             }
                         case Global.DirectoryPlace.Out: {
+                                bool iscrypt = false;
                                 try {
                                     if (mmsg.Headers != default) {
                                         mmsg.Headers.RemoveAll(HeaderId.Cc);
@@ -275,13 +287,16 @@ namespace SecyrityMail.Messages
                                             Global.Instance.Config.IsSmtpAllOutPgpSign && !crypt.CheckSigned(mmsg)
                                         };
                                         if (b[0] && b[1])
-                                            await crypt.SignEncrypt(mmsg).ConfigureAwait(false);
+                                            iscrypt = await crypt.SignEncrypt(mmsg).ConfigureAwait(false);
                                         else if (b[0])
-                                            await crypt.Encrypt(mmsg).ConfigureAwait(false);
+                                            iscrypt = await crypt.Encrypt(mmsg).ConfigureAwait(false);
                                         else if (b[1])
-                                            await crypt.Sign(mmsg).ConfigureAwait(false);
+                                            iscrypt = await crypt.Sign(mmsg).ConfigureAwait(false);
                                     }
-                                    catch (Exception ex) { Global.Instance.Log.Add(nameof(MailMessageCrypt), ex); }
+                                    catch (Exception ex) { Global.Instance.Log.Add(place.ToString(), ex); }
+                                    finally {
+                                        Global.Instance.Log.Add(nameof(MailMessageCrypt), $"PGP message {place}/'{mmsg.MessageId}' status: {iscrypt}");
+                                    }
                                 }
                                 break;
                             }

@@ -4,7 +4,6 @@
  * License MIT.
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SecyrityMail.Messages
 {
-    internal class MailMessagesCache : IDisposable
+    internal class MessagesCache : IDisposable
     {
         private readonly object __lock = new object();
         private List<CacheOpenerData> UsingOpener { get; } = new();
@@ -29,7 +28,7 @@ namespace SecyrityMail.Messages
         public bool MessagesIsBusy => (Messages == default) ? false : Messages.IsBusy;
         public bool MessagesIsModify => (Messages == default) ? false : Messages.IsModify;
 
-        public MailMessagesCache() { }
+        public MessagesCache() { }
 
         public async Task<MailMessages> ReOpen(CacheOpenerData u, string email) =>
             await Task.Run(async () => {
@@ -76,7 +75,7 @@ namespace SecyrityMail.Messages
                     Tag, $"close messages cache from {Email}/{Count}/{CanClose} - {u.Type.Name}");
                 return CanClose;
             }
-            catch (Exception ex) { Global.Instance.Log.Add(nameof(MailMessagesCache), ex); }
+            catch (Exception ex) { Global.Instance.Log.Add(nameof(MessagesCache), ex); }
             return false;
         }
 

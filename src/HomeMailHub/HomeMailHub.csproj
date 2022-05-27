@@ -102,6 +102,7 @@
     <Compile Include="ConfigurationLoad.cs" />
     <Compile Include="ConfigurationSave.cs" />
     <Compile Include="Gui\GuiLinearLayot.cs" />
+    <Compile Include="Gui\GuiMessageForwardsDialog.cs" />
     <Compile Include="Gui\GuiProgressBar.cs" />
     <Compile Include="Gui\GuiProxyListWindow.cs" />
     <Compile Include="Gui\GuiRootMenuBar.cs" />
@@ -203,6 +204,10 @@
     <ContentWithTargetPath Include="Install\config\VpnAccounts.conf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>mail\VpnAccounts.conf</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\gpg4win-vanilla-2.2.0.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>dist\gpg4win-vanilla-2.2.0.exe</TargetPath>
     </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>

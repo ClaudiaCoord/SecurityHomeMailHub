@@ -12,6 +12,7 @@ using HomeMailHub.Gui.Dialogs;
 using MailKit.Security;
 using NStack;
 using SecyrityMail;
+using SecyrityMail.Data;
 using SecyrityMail.MailAccounts;
 using Terminal.Gui;
 using RES = HomeMailHub.Properties.Resources;
@@ -77,7 +78,8 @@ namespace HomeMailHub.Gui
 		private ComboBox tlsInText { get; set; } = default;
 		private ComboBox tlsOutText { get; set; } = default;
 		private CheckBox enableBox { get; set; } = default;
-		private RadioGroup mailInType { get; set; } = default;
+        private CheckBox pgpAutoBox { get; set; } = default;
+        private RadioGroup mailInType { get; set; } = default;
 
 		public Toplevel GetTop => GuiToplevel;
 
@@ -304,9 +306,19 @@ namespace HomeMailHub.Gui
 				Height = 1,
 				Checked = true
 			});
-			enableBox.Toggled += EnableBox_Toggled;
+            frameUser.Add(pgpAutoBox = new CheckBox(1, 0, RES.CHKBOX_PGPAUTODECRYPT)
+            {
+                X = labelOffset + 12,
+                Y = 10,
+                Width = 10,
+                Height = 1,
+                Checked = false,
+				Enabled = false
+            });
+            enableBox.Toggled += EnableBox_Toggled;
+            pgpAutoBox.Toggled += PgpAutoBox_Toggled;
 
-			frameUser.Add (buttonSave = new Button (10, 19, RES.BTN_SAVE) {
+            frameUser.Add (buttonSave = new Button (10, 19, RES.BTN_SAVE) {
                 X = layout[0].X,
                 Y = layout[0].Y,
                 AutoSize = layout[0].AutoSize,
@@ -426,7 +438,14 @@ namespace HomeMailHub.Gui
 								_ = await Global.Instance.Accounts.Save().ConfigureAwait(false);
 							} catch (Exception ex) { ex.StatusBarError(); }
 						}
-					})
+					}),
+                    new MenuItem (RES.MENU_GPGEXPORT, string.Empty, async () => {
+                        try {
+                            _ = await CryptGpgContext.ExportAccountToGpg(Properties.Settings.Default.PgpBinPath)
+													 .ConfigureAwait(false);
+                        } catch (Exception ex) { ex.StatusBarError(); }
+                    }, () => !string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpBinPath) &&
+							 !string.IsNullOrWhiteSpace(Global.Instance.Config.PgpPassword)),
 				}),
                 urlmenu
             });
@@ -481,7 +500,10 @@ namespace HomeMailHub.Gui
                 portInText.Text = "110";
                 portOutText.Text = "25";
 
-                enableBox.Checked = true;
+                enableBox.Checked = false;
+                pgpAutoBox.Checked = false;
+                enableBox.Enabled = false;
+                pgpAutoBox.Enabled = false;
                 tlsInText.SelectedItem = 0;
                 tlsOutText.SelectedItem = 0;
                 enableBox.Checked = true;
@@ -529,11 +551,17 @@ namespace HomeMailHub.Gui
 				loginText.Enabled =
 				passText.Enabled =
 				emailText.Enabled =
-				nameText.Enabled = !b;
+				nameText.Enabled =
+				pgpAutoBox.Enabled = !b;
                 ButtonsEnable(!b);
             });
 
-		private void ListView_OpenSelectedItem(ListViewItemEventArgs obj) => SelectedListItem(obj);
+		private void PgpAutoBox_Toggled(bool b) {
+			if (account != default)
+                account.IsPgpAutoDecrypt = !b;
+        }
+
+        private void ListView_OpenSelectedItem(ListViewItemEventArgs obj) => SelectedListItem(obj);
 		private void ListView_SelectedItemChanged(ListViewItemEventArgs obj) => SelectedListItem(obj);
 
 		private void SelectedListItem(ListViewItemEventArgs obj) {
@@ -595,8 +623,11 @@ namespace HomeMailHub.Gui
 				passText.Text = a.Pass;
 				emailText.Text = a.Email;
 				nameText.Text = a.Name;
+				pgpAutoBox.Checked = a.IsPgpAutoDecrypt;
+				pgpAutoBox.Enabled = true;
+                enableBox.Enabled = true;
 
-				enableBox.Checked = a.Enable;
+                enableBox.Checked = a.Enable;
 				EnableBox_Toggled(!a.Enable);
 				account = a;
                 ButtonsEnable(true);
@@ -661,8 +692,9 @@ namespace HomeMailHub.Gui
 			a.Pass = passText.Text.ToString();
 			a.EmailAddress = emailText.Text.ToString();
 			a.Enable = enableBox.Checked;
+            a.IsPgpAutoDecrypt = pgpAutoBox.Checked;
 
-			a.SmtpAddr = hostOutText.Text.ToString();
+            a.SmtpAddr = hostOutText.Text.ToString();
 			if (int.TryParse(portOutText.Text.ToString(), out int oport))
 				a.SmtpPort = oport;
 			a.SmtpSecure = SecureOptionsSelect(tlsOutText.SelectedItem);

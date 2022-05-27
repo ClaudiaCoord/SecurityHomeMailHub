@@ -33,6 +33,12 @@ namespace SecyrityMail.MailAddress
         [XmlElement("items")]
         public List<AddressEntry> Items { get; set; } = new();
 
+        [XmlIgnore]
+        public AddressEntry this[int i] { get => Items[i]; set => Items[i] = value; }
+
+        [XmlIgnore]
+        public int Count => Items.Count;
+
         public AddressesBook() => timer = new Timer(TimerCb, default, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         ~AddressesBook() => Dispose();
 

@@ -201,6 +201,9 @@
   <data name="CHKBOX_NOWARN" xml:space="preserve">
     <value>No warnings</value>
   </data>
+  <data name="CHKBOX_PGPAUTODECRYPT" xml:space="preserve">
+    <value>PGP auto decrypt</value>
+  </data>
   <data name="CHKBOX_POP3DELALL" xml:space="preserve">
     <value>Delete all messages</value>
   </data>
@@ -414,6 +417,9 @@
   <data name="GUIPROXY_TXT9" xml:space="preserve">
     <value>Clear this proxy list</value>
   </data>
+  <data name="GUISETTIGS_PGP_DIALOG" xml:space="preserve">
+    <value>Select the path to the GnuPG executables</value>
+  </data>
   <data name="GUISSH_TITLE1" xml:space="preserve">
     <value>SSH Accounts</value>
   </data>
@@ -440,6 +446,12 @@
   </data>
   <data name="MENU_ACTION" xml:space="preserve">
     <value>_Action</value>
+  </data>
+  <data name="MENU_ADDATTACH" xml:space="preserve">
+    <value>_Add attachments</value>
+  </data>
+  <data name="MENU_ATTACHDESC" xml:space="preserve">
+    <value>_Create a description of the attachments in the message</value>
   </data>
   <data name="MENU_CLOSE" xml:space="preserve">
     <value>_Close</value>
@@ -470,6 +482,9 @@
   </data>
   <data name="MENU_FMT_VERSIONOLD" xml:space="preserve">
     <value>Current version {0}, no updates</value>
+  </data>
+  <data name="MENU_GPGEXPORT" xml:space="preserve">
+    <value>_Export all accounts for GPG</value>
   </data>
   <data name="MENU_LIGHTTEXT" xml:space="preserve">
     <value>Brighter text in shapes</value>
@@ -512,6 +527,9 @@
   </data>
   <data name="MENU_MENU" xml:space="preserve">
     <value>_Menu</value>
+  </data>
+  <data name="MENU_MSGFORWARDS" xml:space="preserve">
+    <value>_Forwards</value>
   </data>
   <data name="MENU_MSGSREADALL" xml:space="preserve">
     <value>_Mark All Read</value>
@@ -681,6 +699,12 @@
   <data name="TAG_FMT_ACCESSRELOAD" xml:space="preserve">
     <value>Access list reloaded, total {0} entries</value>
   </data>
+  <data name="TAG_FMT_BODYATTACH" xml:space="preserve">
+    <value>I am sending you the following attachments: {0}</value>
+  </data>
+  <data name="TAG_FMT_BODYFORWARD" xml:space="preserve">
+    <value>Forwarded message from {0} - '{1}':</value>
+  </data>
   <data name="TAG_FMT_DELATTACH" xml:space="preserve">
     <value>Remove file '{0}' from attachments?</value>
   </data>
@@ -743,6 +767,12 @@
   </data>
   <data name="TAG_PASSWORD" xml:space="preserve">
     <value>Password:</value>
+  </data>
+  <data name="TAG_PATH" xml:space="preserve">
+    <value>Path:</value>
+  </data>
+  <data name="TAG_PGPWARN" xml:space="preserve">
+    <value>encryption works with gnuPG &lt;= 2.0.0</value>
   </data>
   <data name="TAG_PORT" xml:space="preserve">
     <value>Port:</value>

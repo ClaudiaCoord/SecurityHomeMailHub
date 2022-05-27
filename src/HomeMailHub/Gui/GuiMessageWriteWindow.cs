@@ -20,6 +20,9 @@ using SecyrityMail.Servers;
 using SecyrityMail.Utils;
 using Terminal.Gui;
 using RES = HomeMailHub.Properties.Resources;
+using GuiAttribute = Terminal.Gui.Attribute;
+using SecyrityMail.Messages;
+using System.Text;
 
 namespace HomeMailHub.Gui
 {
@@ -54,6 +57,8 @@ namespace HomeMailHub.Gui
         private Label subjLabel { get; set; } = default;
         private Label attachText { get; set; } = default;
         private Label attachLabel { get; set; } = default;
+        private Label cryptLabel { get; set; } = default;
+        private Label signLabel { get; set; } = default;
 
         private TextField toText { get; set; } = default;
         private TextField ccText { get; set; } = default;
@@ -66,6 +71,9 @@ namespace HomeMailHub.Gui
         private TextView msgText { get; set; } = default;
         private CheckBox warningBox { get; set; } = default;
 
+        private ColorScheme colorBageGreen { get; set; } = default;
+        private ColorScheme colorBageDisable { get; set; } = default;
+
         private bool [] sendWarning = new bool[] { false, false, false };
         private string selectedPath { get; set; } = string.Empty;
         private string selectedFrom { get; set; } = string.Empty;
@@ -74,6 +82,7 @@ namespace HomeMailHub.Gui
         private List<string> fromList = new();
         private List<string> attachList = new();
         private GuiLinearLayot linearLayot { get; } = new();
+        private MailMessageCrypt.Actions pgpAction { get; set; } = MailMessageCrypt.Actions.None;
         private int __lastTo = -1,
                     __lastCc = -1,
                     __lastBcc = -1;
@@ -89,15 +98,25 @@ namespace HomeMailHub.Gui
             GuiToplevel = GuiExtensions.CreteTop();
 
             linearLayot.Add("en", new List<GuiLinearData> {
+                new GuiLinearData(60, 5, true),
+                new GuiLinearData(68, 5, true),
                 new GuiLinearData(82, 5, true),
                 new GuiLinearData(92, 5, true),
                 new GuiLinearData(103, 5, true)
             });
             linearLayot.Add("ru", new List<GuiLinearData> {
+                new GuiLinearData(60, 5, true),
+                new GuiLinearData(68, 5, true),
                 new GuiLinearData(75, 5, true),
                 new GuiLinearData(87, 5, true),
                 new GuiLinearData(100, 5, true)
             });
+
+            GuiAttribute cdisable = Application.Driver.MakeAttribute(Color.Gray, Color.DarkGray);
+            GuiAttribute cgreen = Application.Driver.MakeAttribute(Color.White, Color.Green);
+
+            colorBageDisable = new ColorScheme() { Normal = cdisable, Focus = cdisable, HotFocus = cdisable, HotNormal = cdisable, Disabled = cdisable };
+            colorBageGreen = new ColorScheme() { Normal = cgreen, Focus = cgreen, HotFocus = cgreen, HotNormal = cgreen, Disabled = cgreen };
         }
         ~GuiMessageWriteWindow() => Dispose();
 
@@ -110,6 +129,7 @@ namespace HomeMailHub.Gui
         #region Init
         public GuiMessageWriteWindow Init(string s)
         {
+            int idx = 0;
             selectedPath = s;
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
@@ -224,23 +244,37 @@ namespace HomeMailHub.Gui
                 Visible = false,
                 ColorScheme = GuiApp.ColorDescription
             });
+            frameHeader.Add(cryptLabel = new Label(" Crypt ")
+            {
+                X = layout[idx].X,
+                Y = layout[idx].Y + addrow,
+                AutoSize = layout[idx++].AutoSize,
+                ColorScheme = colorBageDisable
+            });
+            frameHeader.Add(signLabel = new Label(" Sign ")
+            {
+                X = layout[idx].X,
+                Y = layout[idx].Y + addrow,
+                AutoSize = layout[idx++].AutoSize,
+                ColorScheme = colorBageDisable
+            });
             frameHeader.Add(buttonClose = new Button(10, 19, RES.BTN_CLOSE)
             {
-                X = layout[0].X,
-                Y = layout[0].Y + addrow,
-                AutoSize = layout[0].AutoSize
+                X = layout[idx].X,
+                Y = layout[idx].Y + addrow,
+                AutoSize = layout[idx++].AutoSize
             });
             frameHeader.Add(buttonAttach = new Button(10, 19, RES.BTN_ATTACH)
             {
-                X = layout[1].X,
-                Y = layout[1].Y + addrow,
-                AutoSize = layout[1].AutoSize
+                X = layout[idx].X,
+                Y = layout[idx].Y + addrow,
+                AutoSize = layout[idx++].AutoSize
             });
             frameHeader.Add(buttonSend = new Button(10, 19, RES.BTN_SEND)
             {
-                X = layout[2].X,
-                Y = layout[2].Y + addrow,
-                AutoSize = layout[2].AutoSize
+                X = layout[idx].X,
+                Y = layout[idx].Y + addrow,
+                AutoSize = layout[idx++].AutoSize
             });
             buttonClose.Clicked += () => {
                 Application.RequestStop();
@@ -262,6 +296,8 @@ namespace HomeMailHub.Gui
             buttonSend.Clicked += async () => {
                 await Send_().ConfigureAwait(false);
             };
+            signLabel.Clicked += () => SetPgpAction(MailMessageCrypt.Actions.Sign);
+            cryptLabel.Clicked += () => SetPgpAction(MailMessageCrypt.Actions.Encrypt);
 
             List<string> sugg = Global.Instance.EmailAddresses.GetSuggestionsList();
             if ((sugg != null) && (sugg.Count > 0)) {
@@ -303,12 +339,17 @@ namespace HomeMailHub.Gui
                 Width = Dim.Fill(),
                 Height = Dim.Fill(),
                 Multiline = true,
-                ReadOnly = false
+                ReadOnly = false,
+                WordWrap = true
             };
             frameMsg.Add(msgText);
             Add(frameMsg);
 
-            attachMenu = new MenuBarItem($"_{RES.TAG_ATTACH}", new MenuItem[0]);
+            attachItemsMenu = new MenuItem[] {
+                new MenuItem(
+                        RES.MENU_ADDATTACH, "", () => AddAttachFile())
+            };
+            attachMenu = new MenuBarItem($"_{RES.TAG_ATTACH}", attachItemsMenu);
             GuiMenu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
                     new MenuItem (RES.MENU_SEND, "", async () => {
@@ -352,6 +393,7 @@ namespace HomeMailHub.Gui
         private void WarningBox_Toggled(bool b) =>
             GuiApp.IsSendNoWarning = !b;
 
+        #region Load
         public async void Load() => _ = await Load_().ConfigureAwait(false);
 
         private async Task<bool> Load_() =>
@@ -394,7 +436,9 @@ namespace HomeMailHub.Gui
                 }
                 return true;
             });
+        #endregion
 
+        #region Send
         private async Task Send_() =>
             await Task.Run(async () => {
 
@@ -452,15 +496,55 @@ namespace HomeMailHub.Gui
                     mmsg.To.AddRange(tolist);
                     mmsg.From.AddRange(fromlist);
 
+                    bool iscrypt = false;
                     BodyBuilder builder = new();
-                    builder.HtmlBody = new ConverterTextToHtml().Convert(body);
                     builder.TextBody = body;
 
                     if (attachList.Count > 0)
                         foreach (string s in attachList)
                             builder.Attachments.Add(s, safe.Token);
 
-                    mmsg.Body = builder.ToMessageBody();
+                    switch (pgpAction) {
+                        case MailMessageCrypt.Actions.Sign: {
+                                try {
+                                    if (CryptGpgContext.CheckInstalled()) {
+                                        MailMessageCrypt crypt = new();
+                                        mmsg.Body = builder.ToMessageBody();
+                                        iscrypt = await crypt.Sign(mmsg, (ex) => PgpToLog(ex));
+                                    }
+                                } catch (Exception ex) { PgpToLog(ex); }
+                                break;
+                            }
+                        case MailMessageCrypt.Actions.Encrypt: {
+                                try {
+                                    if (CryptGpgContext.CheckInstalled()) {
+                                        MailMessageCrypt crypt = new();
+                                        mmsg.Body = builder.ToMessageBody();
+                                        iscrypt = await crypt.Encrypt(mmsg, (ex) => PgpToLog(ex));
+                                    }
+                                } catch (Exception ex) { PgpToLog(ex); }
+                                break;
+                            }
+                        case MailMessageCrypt.Actions.SignEncrypt: {
+                                try {
+                                    if (CryptGpgContext.CheckInstalled()) {
+                                        MailMessageCrypt crypt = new();
+                                        mmsg.Body = builder.ToMessageBody();
+                                        iscrypt = await crypt.SignEncrypt(mmsg, (ex) => PgpToLog(ex));
+                                    }
+                                } catch (Exception ex) { PgpToLog(ex); }
+                                break;
+                            }
+                        default: {
+                                builder.HtmlBody = new ConverterTextToHtml().Convert(body);
+                                mmsg.Body = builder.ToMessageBody();
+                                break;
+                            }
+                    }
+
+                    if (pgpAction != MailMessageCrypt.Actions.None)
+                        Global.Instance.Log.Add(nameof(MailMessageCrypt), $"PGP message {pgpAction}/'{mmsg.MessageId}' status: {iscrypt}");
+
                     UserAccount acc = Global.Instance.FindAccount(((MailboxAddress)fromlist[0]).Address);
 
                     if (acc == default)
@@ -482,6 +566,39 @@ namespace HomeMailHub.Gui
                 }
                 return SendReturn.None;
             });
+        #endregion
+
+        private void PgpToLog(Exception ex) { ex.StatusBarError(); Global.Instance.Log.Add("PGP Message", ex); }
+
+        private void SetPgpAction(MailMessageCrypt.Actions id) {
+            switch (id) {
+                case MailMessageCrypt.Actions.Sign: {
+                        pgpAction = (pgpAction == MailMessageCrypt.Actions.SignEncrypt) ? MailMessageCrypt.Actions.Encrypt :
+                            ((pgpAction == MailMessageCrypt.Actions.Encrypt) ?
+                                MailMessageCrypt.Actions.SignEncrypt :
+                                ((pgpAction == MailMessageCrypt.Actions.Sign) ?
+                                    MailMessageCrypt.Actions.None : MailMessageCrypt.Actions.Sign));
+                        signLabel.ColorScheme =
+                            ((pgpAction == MailMessageCrypt.Actions.SignEncrypt) || (pgpAction == MailMessageCrypt.Actions.Sign)) ?
+                                colorBageGreen : colorBageDisable;
+                        break;
+                    }
+                case MailMessageCrypt.Actions.Encrypt: {
+                        pgpAction = (pgpAction == MailMessageCrypt.Actions.SignEncrypt) ? MailMessageCrypt.Actions.Sign :
+                            ((pgpAction == MailMessageCrypt.Actions.Sign) ?
+                                MailMessageCrypt.Actions.SignEncrypt :
+                                ((pgpAction == MailMessageCrypt.Actions.Encrypt) ?
+                                    MailMessageCrypt.Actions.None : MailMessageCrypt.Actions.Encrypt));
+                        cryptLabel.ColorScheme =
+                            ((pgpAction == MailMessageCrypt.Actions.SignEncrypt) || (pgpAction == MailMessageCrypt.Actions.Encrypt)) ?
+                                colorBageGreen : colorBageDisable;
+                        break;
+                    }
+                case MailMessageCrypt.Actions.SignEncrypt: {
+                        break;
+                    }
+            }
+        }
 
         private void BuildAttachMenu() {
             try {
@@ -492,7 +609,7 @@ namespace HomeMailHub.Gui
                     return;
                 }
                 attachText.Text = attachList.Count.ToString();
-                attachItemsMenu = new MenuItem[attachList.Count + 2];
+                attachItemsMenu = new MenuItem[attachList.Count + 5];
                 int i = 0;
                 for (; i < attachList.Count; i++) {
                     string path = attachList[i];
@@ -501,8 +618,13 @@ namespace HomeMailHub.Gui
                             () => RemoveAttachFile(path));
                 }
                 attachItemsMenu[i++] = null;
+                attachItemsMenu[i++] = new MenuItem(
+                    RES.MENU_ADDATTACH, "", () => AddAttachFile());
+                attachItemsMenu[i++] = new MenuItem(
+                    RES.MENU_ATTACHDESC, "", () => DescriptionAttachFiles());
+                attachItemsMenu[i++] = null;
                 attachItemsMenu[i] = new MenuItem(
-                        RES.MENU_DELALLATTACH, "", () => RemoveAllAttachFile());
+                    RES.MENU_DELALLATTACH, "", () => RemoveAllAttachFile());
                 Application.MainLoop.Invoke(() => attachMenu.Children = attachItemsMenu);
             } catch (Exception ex) { ex.StatusBarError(); }
         }
@@ -521,7 +643,7 @@ namespace HomeMailHub.Gui
             });
         }
 
-        private void RemoveAllAttachFile() {
+        private void RemoveAllAttachFile() =>
             Application.MainLoop.Invoke(() => {
                 if (MessageBox.Query(50, 7,
                     RES.TAG_DELETE,
@@ -531,6 +653,39 @@ namespace HomeMailHub.Gui
                         BuildAttachMenu();
                     } catch (Exception ex) { ex.StatusBarError(); }
                 }
+            });
+
+        private void AddAttachFile() =>
+            Application.MainLoop.Invoke(() => {
+                GuiOpenDialog d = RES.GUIMAILWRITE_TEXT1.GuiOpenDialogs(true);
+                Application.Run(d);
+                if (!d.Canceled) {
+                    try {
+                        string[] ss = d.GuiReturnDialog();
+                        if (ss.Length > 0) {
+                            attachList.AddRange(ss);
+                            attachList = attachList.Distinct().ToList();
+                            BuildAttachMenu();
+                        }
+                    }
+                    catch (Exception ex) { ex.StatusBarError(); }
+                }
+            });
+
+        private void DescriptionAttachFiles() {
+            if (attachList.Count == 0) return;
+            StringBuilder sb = new();
+            sb.Append(msgText.Text);
+            sb.Append(Environment.NewLine);
+            sb.AppendFormat(
+                RES.TAG_FMT_BODYATTACH,
+                string.Join(", ", attachList.Select(x => Path.GetFileName(x))));
+            sb.Append(Environment.NewLine);
+
+            Application.MainLoop.Invoke(() => {
+                if (string.IsNullOrWhiteSpace(subjText.Text.ToString()))
+                    subjText.Text = string.Format(RES.TAG_FMT_BODYATTACH, attachList.Count);
+                msgText.Text = sb.ToString();
             });
         }
 

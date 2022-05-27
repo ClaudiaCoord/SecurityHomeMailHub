@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using HomeMailHub.CmdLine;
 using HomeMailHub.Gui;
 using SecyrityMail;
+using SecyrityMail.Data;
 using SecyrityMail.Utils;
 
 namespace HomeMailHub

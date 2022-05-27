@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using MimeKit;
 using MimeKit.Cryptography;
 using SecyrityMail;
+using SecyrityMail.Data;
 using SecyrityMail.Messages;
 using SecyrityMail.Utils;
 using Terminal.Gui;
@@ -303,7 +304,8 @@ namespace HomeMailHub.Gui
                 Width = Dim.Fill(),
                 Height = Dim.Fill(),
                 Multiline = true,
-                ReadOnly = true
+                ReadOnly = true,
+                WordWrap = true
             };
             frameMsg.Add(msgText);
             Add(frameMsg);
@@ -311,9 +313,14 @@ namespace HomeMailHub.Gui
             GuiMenu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
                     new MenuItem (RES.BTN_REPLAY, "", () => {
+                        msgText.SetFocus();
                         GuiApp.Get.LoadWindow(typeof(GuiMessageWriteWindow), selectedPath);
-                        Application.RequestStop();
                     }, null, null, Key.AltMask | Key.R),
+                    new MenuItem (RES.MENU_MSGFORWARDS, "", () => {
+                        GuiMessageForwardsDialog dlg = new GuiMessageForwardsDialog().Load(selectedPath);
+                        Application.Run(dlg);
+                        dlg.Dispose();
+                    }, null, null, Key.AltMask | Key.F),
                     new MenuItem (RES.MENU_OPENMSGFROM, "", () => selectedPath.BrowseFile(), null, null, Key.AltMask | Key.O),
                     null,
                     new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.Q)
@@ -338,14 +345,24 @@ namespace HomeMailHub.Gui
                     }
                     MimeMessage mmsg = rdata.Message;
 
+                    string folder = string.Empty;
+                    try {
+                        string[] ss = rdata.Info.DirectoryName.Split(
+                            new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                        if ((ss != null) && ss.Length > 4)
+                            folder = ss[ss.Length - 4];
+                    } catch { }
+
                     bool iscrypt = false,
                          isdecrypt = false;
 
                     if (mmsg.Body is MultipartEncrypted) {
                         iscrypt = true;
                         try {
-                            MailMessageCrypt crypt = new();
-                            isdecrypt = await crypt.Decrypt(mmsg);
+                            if (CryptGpgContext.CheckInstalled()) {
+                                MailMessageCrypt crypt = new();
+                                isdecrypt = await crypt.Decrypt(mmsg, (ex) => ex.StatusBarError());
+                            }
                         }
                         catch (Exception ex) {
                             Global.Instance.Log.Add(nameof(MailMessageCrypt.Decrypt), ex);
@@ -370,7 +387,7 @@ namespace HomeMailHub.Gui
                         sizeText.Text = rdata.Info.Length.Humanize();
                         msgIdText.Text = mmsg.MessageId;
                         fromText.Text = mmsg.From.ToString();
-                        frameHeader.Title = $"{RES.TAG_TO} {mmsg.To}";
+                        frameHeader.Title = $"{RES.TAG_FOLDER} {folder} - {RES.TAG_TO} {mmsg.To}";
 
                         textLabel.ColorScheme = b[0] ? colorEnable : colorDisable;
                         htmlLabel.ColorScheme = b[1] ? colorEnable : colorDisable;
@@ -380,20 +397,29 @@ namespace HomeMailHub.Gui
                         msgText.Text = messageBody[0];
                     });
                     try {
-                        if ((mmsg.Attachments != null) && (mmsg.Attachments.Count() > 0)) {
+
+                        if (((iscrypt && isdecrypt) || !iscrypt) &&
+                            (mmsg.Attachments != null) && (mmsg.Attachments.Count() > 0)) {
                             int n = 0;
                             MenuItem[] items = new MenuItem[mmsg.Attachments.Count()];
                             for (int i = 0; i < mmsg.Attachments.Count(); i++) {
 
+                                string name = string.Empty;
                                 MimeEntity a = mmsg.Attachments.ElementAt(i);
-                                if (a is MessagePart mep)
+                                if (a is MessagePart mep) {
+                                    if (!string.IsNullOrWhiteSpace(mep.ContentDisposition?.FileName))
+                                        name = Path.GetFileName(mep.ContentDisposition?.FileName);
+                                }
+                                else if (a is MimePart mip) {
+                                    if (!string.IsNullOrWhiteSpace(mip?.FileName))
+                                        name = Path.GetFileName(mip?.FileName);
+                                }
+                                else
+                                    continue;
+                                if (!string.IsNullOrWhiteSpace(name))
                                     items[n++] = new MenuItem(
-                                        Path.GetFileName(mep.ContentDisposition?.FileName).Replace('_', ' '), "",
-                                        () => BrowseAttachFile(selectedPath, mmsg.MessageId, mep.ContentDisposition?.FileName));
-                                else if (a is MimePart mip)
-                                    items[n++] = new MenuItem(
-                                        Path.GetFileName(mip?.FileName).Replace('_', ' '), "",
-                                        () => BrowseAttachFile(selectedPath, mmsg.MessageId, mip?.FileName));
+                                            name.Replace('_', ' '), "",
+                                            () => BrowseAttachFile(selectedPath, mmsg.MessageId, name));
                             }
                             if (n > 0) {
                                 Application.MainLoop.Invoke(() => {
@@ -465,6 +491,7 @@ namespace HomeMailHub.Gui
                                     break;
                                 }
                             case 100: {
+                                    pgpLabel.X = layout[1].X + 19;
                                     pgpLabel.Visible = true;
                                     break;
                                 }

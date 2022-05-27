@@ -4,7 +4,6 @@
  * License MIT.
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +12,11 @@ using System.Threading.Tasks;
 
 namespace SecyrityMail.Messages
 {
-    public class MailMessagesManager : IDisposable
+    public class MessagesCacheManager : IDisposable
     {
         private readonly object __lock = new object();
         private volatile Timer timer;
-        private List<MailMessagesCache> MessagesCache { get; } = new();
+        private List<MessagesCache> MessagesCache { get; } = new();
         private bool isCacheMessagesLog = false;
         public bool IsCacheMessagesLog {
             get => isCacheMessagesLog;
@@ -28,24 +27,24 @@ namespace SecyrityMail.Messages
         }
         public const string Tag = "Messages Manager";
 
-        public MailMessagesManager() =>
+        public MessagesCacheManager() =>
             timer = new(TimerCb, default, TimeSpan.FromSeconds(30.0), TimeSpan.FromSeconds(60.0));
-        ~MailMessagesManager() => Dispose();
+        ~MessagesCacheManager() => Dispose();
 
         private void TimerCb(object _) {
             if (MessagesCache.Count == 0) return;
             try {
                 for (int i = MessagesCache.Count - 1; 0 <= i; i--) {
-                    MailMessagesCache mscs;
+                    MessagesCache mscs;
                     lock (__lock)
                         mscs = MessagesCache[i];
                     if (mscs == null) continue;
 
                     if (IsCacheMessagesLog) {
                         Global.Instance.Log.Add(
-                            MailMessagesCache.Tag, $"   using: {mscs.UsingClass}");
+                            Messages.MessagesCache.Tag, $"   using: {mscs.UsingClass}");
                         Global.Instance.Log.Add(
-                            MailMessagesCache.Tag, "in cache: " +
+                            Messages.MessagesCache.Tag, "in cache: " +
                             $"{mscs.Email}/{mscs.Count}/{mscs.CanClose} = " +
                             $"{mscs.MessagesCount}/{mscs.MessagesIsModify}/{mscs.MessagesIsBusy}");
                     }
@@ -77,7 +76,7 @@ namespace SecyrityMail.Messages
         public  async Task<MailMessages> Open(CacheOpenerData u, string email) => await OpenCache(u, email, false);
         public  async Task<MailMessages> ReOpen(CacheOpenerData u, string email) => await OpenCache(u, email, true);
         private async Task<MailMessages> OpenCache(CacheOpenerData u, string email, bool isreload) {
-            MailMessagesCache mscs;
+            MessagesCache mscs;
             lock (__lock)
                 mscs = Find(email);
             if ((mscs == default) || mscs.IsEmpty) { isreload = false; mscs = new(); }
@@ -93,7 +92,7 @@ namespace SecyrityMail.Messages
         }
 
         public void Close(CacheOpenerData u, string email) {
-            MailMessagesCache mscs;
+            MessagesCache mscs;
             lock (__lock)
                 mscs = Find(email);
             if (mscs != default) {
@@ -109,7 +108,7 @@ namespace SecyrityMail.Messages
         public void Close(CacheOpenerData u) {
             lock (__lock) {
                 for (int i = MessagesCache.Count - 1; 0 <= i; i--) {
-                    MailMessagesCache mscs = MessagesCache[i];
+                    MessagesCache mscs = MessagesCache[i];
                     if (mscs == default) continue;
                     if (mscs.Close(u)) {
                         MessagesCache.Remove(mscs);
@@ -119,7 +118,7 @@ namespace SecyrityMail.Messages
             }
         }
 
-        private MailMessagesCache Find(string email) =>
+        private MessagesCache Find(string email) =>
             (from i in MessagesCache where i.Email.Equals(email) select i).FirstOrDefault();
     }
 }

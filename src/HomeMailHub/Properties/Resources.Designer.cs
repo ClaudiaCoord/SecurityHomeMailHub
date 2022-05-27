@@ -313,6 +313,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на PGP auto decrypt.
+        /// </summary>
+        internal static string CHKBOX_PGPAUTODECRYPT {
+            get {
+                return ResourceManager.GetString("CHKBOX_PGPAUTODECRYPT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Delete all messages.
         /// </summary>
         internal static string CHKBOX_POP3DELALL {
@@ -952,6 +961,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Select the path to the GnuPG executables.
+        /// </summary>
+        internal static string GUISETTIGS_PGP_DIALOG {
+            get {
+                return ResourceManager.GetString("GUISETTIGS_PGP_DIALOG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на SSH Accounts.
         /// </summary>
         internal static string GUISSH_TITLE1 {
@@ -1029,6 +1047,24 @@ namespace HomeMailHub.Properties {
         internal static string MENU_ACTION {
             get {
                 return ResourceManager.GetString("MENU_ACTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Add attachments.
+        /// </summary>
+        internal static string MENU_ADDATTACH {
+            get {
+                return ResourceManager.GetString("MENU_ADDATTACH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Create a description of the attachments in the message.
+        /// </summary>
+        internal static string MENU_ATTACHDESC {
+            get {
+                return ResourceManager.GetString("MENU_ATTACHDESC", resourceCulture);
             }
         }
         
@@ -1119,6 +1155,15 @@ namespace HomeMailHub.Properties {
         internal static string MENU_FMT_VERSIONOLD {
             get {
                 return ResourceManager.GetString("MENU_FMT_VERSIONOLD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Export all accounts for GPG.
+        /// </summary>
+        internal static string MENU_GPGEXPORT {
+            get {
+                return ResourceManager.GetString("MENU_GPGEXPORT", resourceCulture);
             }
         }
         
@@ -1245,6 +1290,15 @@ namespace HomeMailHub.Properties {
         internal static string MENU_MENU {
             get {
                 return ResourceManager.GetString("MENU_MENU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Forwards.
+        /// </summary>
+        internal static string MENU_MSGFORWARDS {
+            get {
+                return ResourceManager.GetString("MENU_MSGFORWARDS", resourceCulture);
             }
         }
         
@@ -1753,6 +1807,24 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на I am sending you the following attachments: {0}.
+        /// </summary>
+        internal static string TAG_FMT_BODYATTACH {
+            get {
+                return ResourceManager.GetString("TAG_FMT_BODYATTACH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Forwarded message from {0} - &apos;{1}&apos;:.
+        /// </summary>
+        internal static string TAG_FMT_BODYFORWARD {
+            get {
+                return ResourceManager.GetString("TAG_FMT_BODYFORWARD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Remove file &apos;{0}&apos; from attachments?.
         /// </summary>
         internal static string TAG_FMT_DELATTACH {
@@ -1938,6 +2010,24 @@ namespace HomeMailHub.Properties {
         internal static string TAG_PASSWORD {
             get {
                 return ResourceManager.GetString("TAG_PASSWORD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Path:.
+        /// </summary>
+        internal static string TAG_PATH {
+            get {
+                return ResourceManager.GetString("TAG_PATH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на encryption works with gnuPG &lt;= 2.0.0.
+        /// </summary>
+        internal static string TAG_PGPWARN {
+            get {
+                return ResourceManager.GetString("TAG_PGPWARN", resourceCulture);
             }
         }
         

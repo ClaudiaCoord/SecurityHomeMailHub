@@ -293,13 +293,12 @@ namespace HomeMailHub.Gui
             buttonReply.Clicked += () => {
                 if (dataTable.IsEmpty || string.IsNullOrEmpty(selectedPath))
                     return;
-                GuiApp.Get.LoadWindow(typeof(GuiMessageWriteWindow), selectedPath);
+                LocalLauncher<GuiMessageWriteWindow>();
             };
             buttonOpen.Clicked += () => {
                 if (dataTable.IsEmpty || string.IsNullOrEmpty(selectedPath))
                     return;
-                GuiApp.Get.LoadWindow(typeof(GuiMessageReadWindow), selectedPath);
-                SetMessageReading();
+                LocalLauncher<GuiMessageReadWindow>();
             };
             sortTitle.SelectedItemChanged += SortTitle_SelectedItemChanged;
             readingBox.Toggled += ReadingBox_Toggled;
@@ -418,10 +417,8 @@ namespace HomeMailHub.Gui
                 MailMessage msg = dataTable.Get(obj.Row);
                 if (msg == null) return;
                 Update(msg, obj.Row);
-                if (!string.IsNullOrEmpty(selectedPath)) {
-                    GuiApp.Get.LoadWindow(typeof(GuiMessageReadWindow), selectedPath);
-                    SetMessageReading();
-                }
+                if (!string.IsNullOrEmpty(selectedPath))
+                    LocalLauncher<GuiMessageReadWindow>();
             }
         }
 
@@ -437,9 +434,8 @@ namespace HomeMailHub.Gui
 
         private void TableView_KeyUp(KeyEventEventArgs obj) {
             if ((obj != null) && (obj.KeyEvent.Key == Key.Enter) && !string.IsNullOrEmpty(selectedPath)) {
-                System.Diagnostics.Debug.WriteLine(obj.KeyEvent.Key);
-                GuiApp.Get.LoadWindow(typeof(GuiMessageReadWindow), selectedPath);
-                SetMessageReading();
+                if (!string.IsNullOrEmpty(selectedPath))
+                    LocalLauncher<GuiMessageReadWindow>();
             }
         }
 
@@ -551,5 +547,14 @@ namespace HomeMailHub.Gui
             });
         private bool SortEnable(TableSort ts) =>
             !dataTable.IsEmpty && (dataTable.SortDirection != ts);
+
+        private void LocalLauncher<T>() {
+            Type type = typeof(T);
+            tableView.KeyUp -= TableView_KeyUp;
+            GuiApp.Get.LoadWindow(type, selectedPath);
+            if (type == typeof(GuiMessageReadWindow))
+                SetMessageReading();
+            tableView.KeyUp += TableView_KeyUp;
+        }
     }
 }

@@ -10,12 +10,23 @@ using System.Linq;
 using System.Reflection;
 using HomeMailHub.Gui.Dialogs;
 using Terminal.Gui;
+using RES = HomeMailHub.Properties.Resources;
 
-namespace HomeMailHub.Gui {
+namespace HomeMailHub.Gui
+{
 
-	public static class GuiExtensions {
-		public static GuiOpenDialog GuiOpenDialogs (this string s, bool ismulti = false, string [] ext = default) {
-			return new GuiOpenDialog ("Open", s) {
+    public static class GuiExtensions {
+        public static GuiOpenDialog GuiOpenDialogs(this string s, string path, string[] ext = default) {
+            return new GuiOpenDialog(RES.BTN_OPEN, s) {
+                AllowedFileTypes = ext,
+                AllowsMultipleSelection = false,
+				CanChooseDirectories = true,
+                CanChooseFiles = false,
+                DirectoryPath = path
+            };
+        }
+        public static GuiOpenDialog GuiOpenDialogs (this string s, bool ismulti = false, string [] ext = default) {
+			return new GuiOpenDialog (RES.BTN_OPEN, s) {
 				AllowedFileTypes = ext,
 				AllowsMultipleSelection = ismulti,
 				CanChooseFiles = true,
@@ -24,7 +35,7 @@ namespace HomeMailHub.Gui {
 		}
 		public static GuiSaveDialog GuiSaveDialogs (this string s, string [] ext = default)
 		{
-			return new GuiSaveDialog ("Save", s) {
+			return new GuiSaveDialog (RES.BTN_SAVE, s) {
 				AllowedFileTypes = ext,
 				DirectoryPath = GetLocalPath(),
 			};

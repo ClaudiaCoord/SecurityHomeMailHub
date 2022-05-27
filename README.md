@@ -16,6 +16,8 @@ Secure, anonymous, domestic home mail hub `MTA` / `MUA`
  Collecting mail from external servers is carried out via the `POP3`, `IMAP`, `SMTP`, supports `SSL` / `TLS` encryption, `STARTSSL`.
 
  Supports anonymous mode consisting of a set of measures to determine the difficulty sender / recipient when sending and receiving mail from external servers.
+
+![Home security mail fetch hub 0](docs/img/banner.png)  
  
 ### Built-in encryption is:
  - `VPN` client Wireguard,

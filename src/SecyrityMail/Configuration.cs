@@ -113,7 +113,7 @@ namespace SecyrityMail
 
             if (!b) return false;
             _pgpOnce = true;
-            _pgpOnceCheck = CryptPGContext.CheckInstalled();
+            _pgpOnceCheck = CryptGpgContext.CheckInstalled();
             return _pgpOnceCheck;
         }
 

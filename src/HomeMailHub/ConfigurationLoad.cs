@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using SecyrityMail;
-using SecyrityMail.Data;
 using SecyrityMail.Proxy;
 
 namespace HomeMailHub

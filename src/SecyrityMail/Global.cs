@@ -183,7 +183,7 @@ namespace SecyrityMail
 
         #region Mail Task/Manager
         public FetchMailTask Tasks { get; } = new();
-        public MailMessagesManager MessagesManager { get; } = new();
+        public MessagesCacheManager MessagesManager { get; } = new();
         public ImapClientStat ImapClientStat { get; } = new();
         public Pop3ClientStat Pop3ClientStat { get; } = new();
         public SmtpClientStat SmtpClientStat { get; } = new();
@@ -251,6 +251,7 @@ namespace SecyrityMail
             Root,       // Root directory
             Proxy,      // Proxy configuration directory
             Vpn,        // VPN configuration directory
+            Export,     // Export other data..
             None        // -*-
         }
 
@@ -334,6 +335,7 @@ namespace SecyrityMail
                        DirectoryPlace.Out => GetPartDirectory_(rootacc, plogin, place, default),
                        DirectoryPlace.Root => GetPartDirectory_(rootacc, plogin, DirectoryPlace.None, default),
                        DirectoryPlace.Log => place.ToString(),
+                       DirectoryPlace.Export => place.ToString(),
                        _ => string.Empty
                    };
             if (string.IsNullOrWhiteSpace(path))
@@ -341,6 +343,9 @@ namespace SecyrityMail
             return Global.GetRootDirectory(path);
         }
         #endregion
+
+        public static string GetRootDirectory(DirectoryPlace place) =>
+            GetRootDirectory(place.ToString());
 
         public static string GetRootDirectory(string expath = default)
         {

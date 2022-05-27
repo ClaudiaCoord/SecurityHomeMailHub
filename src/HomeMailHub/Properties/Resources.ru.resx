@@ -201,6 +201,9 @@
   <data name="CHKBOX_NOWARN" xml:space="preserve">
     <value>Без предупреждений</value>
   </data>
+  <data name="CHKBOX_PGPAUTODECRYPT" xml:space="preserve">
+    <value>Автоматически расшифровывать PGP</value>
+  </data>
   <data name="CHKBOX_POP3DELALL" xml:space="preserve">
     <value>Принудительно удалять все сообщения</value>
   </data>
@@ -414,6 +417,9 @@
   <data name="GUIPROXY_TXT9" xml:space="preserve">
     <value>Очистить текущий список прокси серверов</value>
   </data>
+  <data name="GUISETTIGS_PGP_DIALOG" xml:space="preserve">
+    <value>Выберите путь к исполняемым файлам GnuPG</value>
+  </data>
   <data name="GUISSH_TITLE1" xml:space="preserve">
     <value>SSH Учетные записи</value>
   </data>
@@ -440,6 +446,12 @@
   </data>
   <data name="MENU_ACTION" xml:space="preserve">
     <value>_Операции</value>
+  </data>
+  <data name="MENU_ADDATTACH" xml:space="preserve">
+    <value>_Добавить вложение</value>
+  </data>
+  <data name="MENU_ATTACHDESC" xml:space="preserve">
+    <value>_Создать описание вложений в сообщении</value>
   </data>
   <data name="MENU_CLOSE" xml:space="preserve">
     <value>_Закрыть</value>
@@ -470,6 +482,9 @@
   </data>
   <data name="MENU_FMT_VERSIONOLD" xml:space="preserve">
     <value>Текущая версия {0}, обновлений нет</value>
+  </data>
+  <data name="MENU_GPGEXPORT" xml:space="preserve">
+    <value>_Экспортировать все учетные записи для GPG</value>
   </data>
   <data name="MENU_LIGHTTEXT" xml:space="preserve">
     <value>_Более яркий текст в формах</value>
@@ -512,6 +527,9 @@
   </data>
   <data name="MENU_MENU" xml:space="preserve">
     <value>_Меню</value>
+  </data>
+  <data name="MENU_MSGFORWARDS" xml:space="preserve">
+    <value>_Переслать</value>
   </data>
   <data name="MENU_MSGSREADALL" xml:space="preserve">
     <value>_Пометить все прочитанными</value>
@@ -681,6 +699,12 @@
   <data name="TAG_FMT_ACCESSRELOAD" xml:space="preserve">
     <value>Список доступа перезагружен, всего {0} записей</value>
   </data>
+  <data name="TAG_FMT_BODYATTACH" xml:space="preserve">
+    <value>Посылаю вам следующие вложенные файлы: {0}</value>
+  </data>
+  <data name="TAG_FMT_BODYFORWARD" xml:space="preserve">
+    <value>Пересылаемое сообщение от {0} - '{1}':</value>
+  </data>
   <data name="TAG_FMT_DELATTACH" xml:space="preserve">
     <value>Удалить файл '{0}' из вложений?</value>
   </data>
@@ -733,7 +757,7 @@
     <value>Отключить</value>
   </data>
   <data name="TAG_OK" xml:space="preserve">
-    <value>Ok</value>
+    <value>Да</value>
   </data>
   <data name="TAG_ON" xml:space="preserve">
     <value>Включить</value>
@@ -746,6 +770,12 @@
   </data>
   <data name="TAG_PASSWORD" xml:space="preserve">
     <value>Пароль:</value>
+  </data>
+  <data name="TAG_PATH" xml:space="preserve">
+    <value>Путь:</value>
+  </data>
+  <data name="TAG_PGPWARN" xml:space="preserve">
+    <value>шифрование работает с gnuPG &lt;= 2.0.0</value>
   </data>
   <data name="TAG_PORT" xml:space="preserve">
     <value>Порт:</value>

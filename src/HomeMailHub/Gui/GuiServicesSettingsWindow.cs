@@ -9,8 +9,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using HomeMailHub.Gui.Dialogs;
 using NStack;
 using SecyrityMail;
 using Terminal.Gui;
@@ -41,6 +43,8 @@ namespace HomeMailHub.Gui
         private Label portSmtpLabel { get; set; } = default;
         private Label idleSmtpLabel { get; set; } = default;
         private Label pgpPassLabel { get; set; } = default;
+        private Label pgpPathLabel { get; set; } = default;
+        private Label pgpWarnLabel { get; set; } = default;
         private Label forbidenRouteLabel { get; set; } = default;
         private Label forbidenEntryLabel { get; set; } = default;
         private Label spamCheckCountLabel { get; set; } = default;
@@ -56,6 +60,7 @@ namespace HomeMailHub.Gui
         private TextField portSmtpText { get; set; } = default;
         private TextField idleSmtpText { get; set; } = default;
         private TextField pgpPassText  { get; set; } = default;
+        private TextField pgpPathText { get; set; } = default;
         private TextField ForbidenRouteText { get; set; } = default;
         private TextField forbidenEntryText { get; set; } = default;
         private TextField entrySelectText { get; set; } = default;
@@ -119,17 +124,17 @@ namespace HomeMailHub.Gui
             adapters.Add("*");
 
             linearLayot.Add("en", new List<GuiLinearData> {
-                new GuiLinearData(21, 14, true),
-                new GuiLinearData(30, 14, true),
-                new GuiLinearData(38, 14, true),
+                new GuiLinearData(21, 13, true),
+                new GuiLinearData(30, 13, true),
+                new GuiLinearData(38, 13, true),
                 new GuiLinearData(30, 8, true),
                 new GuiLinearData(39, 8, true),
                 new GuiLinearData(47, 8, true)
             });
             linearLayot.Add("ru", new List<GuiLinearData> {
-                new GuiLinearData(8,  14, true),
-                new GuiLinearData(24, 14, true),
-                new GuiLinearData(37, 14, true),
+                new GuiLinearData(8,  13, true),
+                new GuiLinearData(24, 13, true),
+                new GuiLinearData(37, 13, true),
                 new GuiLinearData(17, 8, true),
                 new GuiLinearData(33, 8, true),
                 new GuiLinearData(46, 8, true)
@@ -431,7 +436,7 @@ namespace HomeMailHub.Gui
                 Border = new Border { BorderStyle = BorderStyle.None }
             };
             #region Secure Left
-            frameSecureLeft = new FrameView(new Rect(0, 0, 52, 5), "PGP")
+            frameSecureLeft = new FrameView(new Rect(0, 0, 52, 6), "PGP")
             {
                 X = 1,
                 Y = 0
@@ -439,18 +444,43 @@ namespace HomeMailHub.Gui
             frameSecureLeft.Add(pgpPassLabel = new Label(RES.TAG_PASSWORD)
             {
                 X = 1,
-                Y = 1,
+                Y = 0,
                 AutoSize = true
             });
             frameSecureLeft.Add(pgpPassText = new TextField(Global.Instance.Config.PgpPassword)
             {
                 X = labelOffset,
-                Y = 1,
+                Y = 0,
                 Width = 38,
                 Height = 1,
                 ColorScheme = GuiApp.ColorField
             });
+            frameSecureLeft.Add(pgpPathLabel = new Label(RES.TAG_PATH)
+            {
+                X = 1,
+                Y = 2,
+                AutoSize = true
+            });
+            frameSecureLeft.Add(pgpPathText = new TextField(Properties.Settings.Default.PgpBinPath)
+            {
+                X = labelOffset,
+                Y = 2,
+                Width = 38,
+                Height = 1,
+                ReadOnly = true,
+                ColorScheme = GuiApp.ColorField
+            });
+            frameSecureLeft.Add(pgpWarnLabel = new Label(RES.TAG_PGPWARN)
+            {
+                X = labelOffset,
+                Y = 3,
+                AutoSize = true,
+                ColorScheme = GuiApp.ColorDescription
+            });
             pgpPassText.TextChanged += PgpPassText_TextChanged;
+            pgpPathText.TextChanged += PgpPathText_TextChanged;
+            pgpPathText.MouseClick  += PgpPathText_MouseClick;
+            pgpWarnLabel.Clicked    += PgpWarnLabel_Clicked;
             frameSecure.Add(frameSecureLeft);
             #endregion
 
@@ -539,10 +569,10 @@ namespace HomeMailHub.Gui
             #endregion
 
             #region Secure Forbiden Entry
-            frameSecureEntry = new FrameView(new Rect(0, 0, 52, 17), RES.TAG_BANNEDIPLIST)
+            frameSecureEntry = new FrameView(new Rect(0, 0, 52, 16), RES.TAG_BANNEDIPLIST)
             {
                 X = 1,
-                Y = 5
+                Y = 6
             };
             frameSecureEntry.Add(entrySelectType = new RadioGroup(new ustring[] { $" {RES.TAG_FORBIDDEN} ", $" {RES.TAG_ALLOWED} " })
             {
@@ -558,7 +588,7 @@ namespace HomeMailHub.Gui
             {
                 X = 37,
                 Y = 1,
-                Width = 11,
+                Width = 10,
                 Height = 1,
                 ColorScheme = EntryTypeColor()
             });
@@ -567,20 +597,20 @@ namespace HomeMailHub.Gui
                 X = 1,
                 Y = 3,
                 Width = Dim.Fill() - 2,
-                Height = 8,
+                Height = 7,
                 AllowsMarking = true,
                 AllowsMultipleSelection = false
             });
             frameSecureEntry.Add(forbidenEntryLabel = new Label(RES.TAG_HOST)
             {
                 X = 1,
-                Y = 12,
+                Y = 11,
                 AutoSize = true
             });
             frameSecureEntry.Add(forbidenEntryText = new TextField(string.Empty)
             {
                 X = 6,
-                Y = 12,
+                Y = 11,
                 Width = 42,
                 Height = 1,
                 ColorScheme = GuiApp.ColorField
@@ -837,9 +867,37 @@ namespace HomeMailHub.Gui
         private void PgpPassText_TextChanged(ustring s) =>
             Global.Instance.Config.PgpPassword = s.ToString();
 
+        private void PgpPathText_TextChanged(ustring s) =>
+            Properties.Settings.Default.PgpBinPath = s.ToString();
+
         private void HostBox_SelectedItemChanged(ListViewItemEventArgs a) {
             if ((a != null) && (a.Item > 0) && !string.IsNullOrWhiteSpace(a.Value as string))
                 Global.Instance.Config.ServicesInterfaceName = a.Value.ToString();
+        }
+
+        private void PgpWarnLabel_Clicked() {
+            Path.Combine(
+                Path.GetDirectoryName(
+                    Assembly.GetEntryAssembly().Location),
+                "dist", "gpg4win-vanilla-2.2.0.exe").BrowseFile();
+        }
+
+        private void PgpPathText_MouseClick(MouseEventArgs obj) {
+            if (obj.MouseEvent.Flags == MouseFlags.Button1Clicked) {
+                GuiOpenDialog d = RES.GUISETTIGS_PGP_DIALOG.GuiOpenDialogs(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
+                Application.Run(d);
+                if (!d.Canceled) {
+                    try {
+                        string[] ss = d.GuiReturnDialog();
+                        if (ss.Length > 0) {
+                            pgpPathText.Text = ss[0];
+                            Properties.Settings.Default.PgpBinPath = ss[0];
+                        }
+                    } catch (Exception ex) { ex.StatusBarError(); }
+                }
+                obj.Handled = true;
+            }
         }
 
         private void ButtonPop3Action_Clicked()
@@ -932,8 +990,7 @@ namespace HomeMailHub.Gui
         private void EnableImapClientMessagePurge_Toggled(bool b) =>
             Global.Instance.Config.IsImapClientMessagePurge = !b;
 
-        private void Toggled(bool b, bool state, Action act)
-        {
+        private void Toggled(bool b, bool state, Action act) {
             if (state)
                 act.Invoke();
 

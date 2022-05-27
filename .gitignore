@@ -49,3 +49,4 @@ README.*.*
 /src/HomeMailHub/*.licenseheader
 /src/SecurityMailTunnel/*.licenseheader
 /src/VpnWireGuard/*.licenseheader
+/src/lib/GnuPG-2.3.4
