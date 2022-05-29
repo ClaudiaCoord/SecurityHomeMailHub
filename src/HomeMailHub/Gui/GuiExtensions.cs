@@ -30,17 +30,22 @@ namespace HomeMailHub.Gui
 				AllowedFileTypes = ext,
 				AllowsMultipleSelection = ismulti,
 				CanChooseFiles = true,
-				DirectoryPath = GetLocalPath(),
+				DirectoryPath = GetLocalPath()
 			};
 		}
-		public static GuiSaveDialog GuiSaveDialogs (this string s, string [] ext = default)
-		{
+		public static GuiSaveDialog GuiSaveDialogs (this string s, string [] ext = default) {
 			return new GuiSaveDialog (RES.BTN_SAVE, s) {
 				AllowedFileTypes = ext,
-				DirectoryPath = GetLocalPath(),
+				DirectoryPath = GetLocalPath()
 			};
 		}
-		public static string [] GuiReturnDialog (this IFileDialog d)
+        public static GuiSaveDialog GuiSaveDialogs(this string s, string path, string[] ext = default) {
+            return new GuiSaveDialog(RES.BTN_SAVE, s) {
+                AllowedFileTypes = ext,
+                DirectoryPath = path
+            };
+        }
+        public static string [] GuiReturnDialog (this IFileDialog d)
 		{
 			if (d == null)
 				return new string [0];

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using MimeKit;
 using MimeKit.Cryptography;
 using SecyrityMail;
-using SecyrityMail.Data;
+using SecyrityMail.GnuPG;
 using SecyrityMail.Messages;
 using SecyrityMail.Utils;
 using Terminal.Gui;
@@ -52,7 +52,9 @@ namespace HomeMailHub.Gui
 
         private FrameView frameHeader { get; set; } = default;
         private FrameView frameMsg { get; set; } = default;
+        private FrameView frameInfo { get; set; } = default;
         private TextView msgText { get; set; } = default;
+        private TextView infoText { get; set; } = default;
         private ColorScheme colorEnable { get; set; } = default;
         private ColorScheme colorDisable { get; set; } = default;
         private ColorScheme colorBageRed { get; set; } = default;
@@ -126,16 +128,45 @@ namespace HomeMailHub.Gui
             selectedPath = s;
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
-            frameHeader = new FrameView(new Rect(0, 0, 116, 7), "+")
+            frameHeader = new FrameView("+")
             {
                 X = 1,
-                Y = 1
+                Y = 1,
+                Width = 116,
+                Height = 7,
             };
-            frameMsg = new FrameView(new Rect(0, 0, 116, 18), RES.TAG_MESSAGE)
+            frameInfo = new FrameView(RES.TAG_HEADERS)
+            {
+                X = Pos.Right(frameHeader),
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = 7
+            };
+            frameMsg = new FrameView(RES.TAG_MESSAGE)
             {
                 X = 1,
-                Y = 8
+                Y = 8,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill()
             };
+
+            #region infoText
+            infoText = new TextView()
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
+                Multiline = true,
+                ReadOnly = true,
+                WordWrap = false,
+                ColorScheme = GuiApp.ColorDescription
+            };
+            frameInfo.Add(infoText);
+            Add(frameInfo);
+            #endregion
+
+            #region frameHeader
             frameHeader.Add(msgIdLabel = new Label("MsgId: ")
             {
                 X = 1,
@@ -278,6 +309,24 @@ namespace HomeMailHub.Gui
                 Y = layout[idx].Y,
                 AutoSize = layout[idx++].AutoSize
             });
+            Add(frameHeader);
+            #endregion
+
+            #region frameMsg
+            msgText = new TextView()
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
+                Multiline = true,
+                ReadOnly = true,
+                WordWrap = true
+            };
+            frameMsg.Add(msgText);
+            Add(frameMsg);
+            #endregion
+
             buttonClose.Clicked += () => Application.RequestStop();
             buttonSource.Clicked += () =>
             {
@@ -295,20 +344,6 @@ namespace HomeMailHub.Gui
                     buttonSource.Text = RES.BTN_SOURCE;
                 }
             };
-            Add(frameHeader);
-
-            msgText = new TextView()
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(),
-                Height = Dim.Fill(),
-                Multiline = true,
-                ReadOnly = true,
-                WordWrap = true
-            };
-            frameMsg.Add(msgText);
-            Add(frameMsg);
 
             GuiMenu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
@@ -544,8 +579,12 @@ namespace HomeMailHub.Gui
                         byte[] buffer = new byte[size];
                         fs.Seek(0, SeekOrigin.Begin);
                         int idx = await fs.ReadAsync(buffer, 0, (int)size).ConfigureAwait(false);
-                        if (idx > 0)
+                        if (idx > 0) {
                             messageBody[1] = Encoding.UTF8.GetString(buffer, 0, idx);
+                            int x = messageBody[1].IndexOf("\r\n\r\n");
+                            if (x > 0)
+                                infoText.Text = messageBody[1].Substring(0, x);
+                        }
                     } catch (Exception ex) {
                         ex.StatusBarError();
                         Global.Instance.Log.Add("Read Raw Message", ex);

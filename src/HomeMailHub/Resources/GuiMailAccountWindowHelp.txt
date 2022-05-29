@@ -1,0 +1,34 @@
+A mail account can be either local or designed to work with external mail providers.
+
+Local mail account:
+A local mail account can have any arbitrary domain, even not necessarily registered, for example:
+myname@local.my, myname@my.local, my@microsoft.com, etc.
+To use a local mail account, you must fill in the fields: login, password and name.
+
+
+External mail account:
+The mail account for external mail services must include completed POP3 or IMAP and SMTP blocks.
+Complete filling of all blocks for external providers is not necessary.
+Credentials for filling in these blocks must be clarified with the mail provider.
+
+
+POP3 or IMAP blocks:
+If the block is full, it will be possible to receive mail from an external mail account, otherwise not. Filling in servers and their parameters is only possible for one POP3 or IMAP protocol.
+
+SMTP block:
+If the block is filled, mail from this account addressed to external email recipients will be sent through the specified external server, otherwise, the sent mail will be transferred to the Error folder.
+
+Login, password and email address must match the account of the external mail provider, they will be used when receiving or sending mail.
+If the login is not an email address, then you need to fill in the value of the email field, otherwise, filling in the email field is optional.
+
+
+PGP Encryption Keys:
+For any account it is possible to create a pair of PGP keys that will encrypt, decrypt and sign your email messages.
+
+The "Decrypt incoming messages" option is used if you are using an email client that does not support PGP encryption. In this case, the received mail messages are decrypted and are available to the mail client in decrypted form.
+
+In the general settings of the application, in the "Services / Settings of mail services" section, it is also necessary to enable the general rules for encrypting and decrypting mail messages. With general encryption rules enabled, if you send an unencrypted message, the message will be encrypted with the recipient's keys, if available, before being sent to the final recipient.
+
+Exporting a public PGP key:
+You can export a public key for distribution to your mail recipients either by clicking the "Export" button in the "PGP Keys" panel or via the menu. Share your public key with your friends or publish it online so everyone can send you emails with end-to-end encryption!
+The public key is required for mutual end-to-end encryption of mail traffic between subscribers, you must transfer your own public key to the participant in the correspondence, and he will transfer his public key to you.

@@ -45,6 +45,7 @@ namespace HomeMailHub
         public bool IsSharingSocket { get; set; }
         public bool IsAccessIpWhiteList { get; set; }
         public string PgpPassword { get; set; }
+        public string PgpKeyHost { get; set; }
         public double Pop3ClientIdle { get; set; }
         public int Pop3ServicePort { get; set; }
         public ProxyType ProxyType { get; set; }
@@ -116,6 +117,7 @@ namespace HomeMailHub
             IsSharingSocket = Properties.Settings.Default.IsSharingSocket;
             IsAccessIpWhiteList = Properties.Settings.Default.IsAccessIpWhiteList;
             PgpPassword = string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpPassword) ? string.Empty : Properties.Settings.Default.PgpPassword;
+            PgpKeyHost = string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpKeyHost) ? string.Empty : Properties.Settings.Default.PgpKeyHost;
 
             CheckMailPeriod = (!double.IsNaN(Properties.Settings.Default.CheckMailPeriod) &&
                 (Properties.Settings.Default.CheckMailPeriod > 0.0) && (Properties.Settings.Default.CheckMailPeriod < 721.0)) ?

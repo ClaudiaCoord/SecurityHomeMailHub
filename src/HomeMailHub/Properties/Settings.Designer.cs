@@ -596,5 +596,28 @@ namespace HomeMailHub.Properties {
                 this["PgpBinPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PgpKeyHost {
+            get {
+                return ((string)(this["PgpKeyHost"]));
+            }
+            set {
+                this["PgpKeyHost"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection SignaturesText {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["SignaturesText"]));
+            }
+            set {
+                this["SignaturesText"] = value;
+            }
+        }
     }
 }

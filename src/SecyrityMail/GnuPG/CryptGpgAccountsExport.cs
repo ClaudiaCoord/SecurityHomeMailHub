@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using SecyrityMail.MailAccounts;
 
-namespace SecyrityMail.Data
+namespace SecyrityMail.GnuPG
 {
     [Serializable]
     [DesignerCategory("code")]

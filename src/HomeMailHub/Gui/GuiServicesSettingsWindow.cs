@@ -35,6 +35,7 @@ namespace HomeMailHub.Gui
         private Button buttonForbidenEntryAdd { get; set; } = default;
         private Button buttonForbidenEntrySort { get; set; } = default;
         private Button buttonForbidenEntryDelete { get; set; } = default;
+        private Button buttonOpenPgInstal { get; set; } = default;
 
         private Label hostPop3Label { get; set; } = default;
         private Label portPop3Label { get; set; } = default;
@@ -43,6 +44,7 @@ namespace HomeMailHub.Gui
         private Label portSmtpLabel { get; set; } = default;
         private Label idleSmtpLabel { get; set; } = default;
         private Label pgpPassLabel { get; set; } = default;
+        private Label pgpServLabel { get; set; } = default;
         private Label pgpPathLabel { get; set; } = default;
         private Label pgpWarnLabel { get; set; } = default;
         private Label forbidenRouteLabel { get; set; } = default;
@@ -51,6 +53,11 @@ namespace HomeMailHub.Gui
         private Label spamClientIdleLabel { get; set; } = default;
         private Label idleClientsLabel { get; set; } = default;
         private Label checkMailClientsLabel { get; set; } = default;
+        private Label helpClientsText { get; set; } = default;
+        private Label helpSecureText { get; set; } = default;
+        private Label helpPgpText { get; set; } = default;
+        private Label helpPop3Text { get; set; } = default;
+        private Label helpSmtpText { get; set; } = default;
 
         private ComboBox hostPop3Box { get; set; } = default;
         private ComboBox hostSmtpBox { get; set; } = default;
@@ -60,6 +67,7 @@ namespace HomeMailHub.Gui
         private TextField portSmtpText { get; set; } = default;
         private TextField idleSmtpText { get; set; } = default;
         private TextField pgpPassText  { get; set; } = default;
+        private TextField pgpServText { get; set; } = default;
         private TextField pgpPathText { get; set; } = default;
         private TextField ForbidenRouteText { get; set; } = default;
         private TextField forbidenEntryText { get; set; } = default;
@@ -107,6 +115,14 @@ namespace HomeMailHub.Gui
         private FrameView frameSecureEntry { get; set; } = default;
         private FrameView frameClients { get; set; } = default;
         private FrameView frameClientsLeft { get; set; } = default;
+        private FrameView framePgp { get; set; } = default;
+        private FrameView framePgpLeft { get; set; } = default;
+        private FrameView framePgpHelp { get; set; } = default;
+        private FrameView frameSecureHelp { get; set; } = default;
+        private FrameView frameClientsHelp { get; set; } = default;
+        private FrameView framePOP3Help { get; set; } = default;
+        private FrameView frameSMTPHelp { get; set; } = default;
+
         private RadioGroup entrySelectType { get; set; } = default;
 
         private List<string> adapters = new();
@@ -124,20 +140,28 @@ namespace HomeMailHub.Gui
             adapters.Add("*");
 
             linearLayot.Add("en", new List<GuiLinearData> {
-                new GuiLinearData(21, 13, true),
-                new GuiLinearData(30, 13, true),
-                new GuiLinearData(38, 13, true),
-                new GuiLinearData(30, 8, true),
-                new GuiLinearData(39, 8, true),
-                new GuiLinearData(47, 8, true)
+                new GuiLinearData(2,  1, true),
+                new GuiLinearData(6,  1, true),
+                new GuiLinearData(21, 3, true),
+                new GuiLinearData(30, 3, true),
+                new GuiLinearData(38, 3, true),
+                new GuiLinearData(2,  1, true),
+                new GuiLinearData(6,  1, true),
+                new GuiLinearData(30, 3, true),
+                new GuiLinearData(39, 3, true),
+                new GuiLinearData(47, 3, true)
             });
             linearLayot.Add("ru", new List<GuiLinearData> {
-                new GuiLinearData(8,  13, true),
-                new GuiLinearData(24, 13, true),
-                new GuiLinearData(37, 13, true),
-                new GuiLinearData(17, 8, true),
-                new GuiLinearData(33, 8, true),
-                new GuiLinearData(46, 8, true)
+                new GuiLinearData(2,  1, true),
+                new GuiLinearData(6,  1, true),
+                new GuiLinearData(8,  3, true),
+                new GuiLinearData(24, 3, true),
+                new GuiLinearData(37, 3, true),
+                new GuiLinearData(2,  1, true),
+                new GuiLinearData(6,  1, true),
+                new GuiLinearData(17, 3, true),
+                new GuiLinearData(33, 3, true),
+                new GuiLinearData(46, 3, true)
             });
         }
         ~GuiServicesSettingsWindow() => Dispose();
@@ -151,6 +175,7 @@ namespace HomeMailHub.Gui
         #region Init
         public GuiServicesSettingsWindow Init(string s)
         {
+            int idx = 0;
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
             tabView = new TabView()
@@ -167,15 +192,18 @@ namespace HomeMailHub.Gui
             {
                 X = 0,
                 Y = 0,
-                Width = Dim.Fill() - 1,
-                Height = Dim.Fill() - 1,
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
                 Border = new Border { BorderStyle = BorderStyle.None }
             };
+
             #region POP3 Left
-            framePOP3Left = new FrameView(new Rect(0, 0, 52, 7), RES.TAG_NETWORK)
+            framePOP3Left = new FrameView(RES.TAG_NETWORK)
             {
                 X = 1,
-                Y = 0
+                Y = 0,
+                Width = 52,
+                Height = 7
             };
             framePOP3Left.Add(hostPop3Label = new Label(RES.TAG_HOST)
             {
@@ -239,12 +267,14 @@ namespace HomeMailHub.Gui
             #endregion
 
             #region POP3 Right
-            framePOP3Right = new FrameView(new Rect(0, 0, 61, 7), RES.TAG_OPTION)
+            framePOP3Right = new FrameView(RES.TAG_OPTION)
             {
-                X = 54,
-                Y = 0
+                X = Pos.Right(framePOP3Left) + 1,
+                Y = 0,
+                Width = 62,
+                Height = 7,
             };
-            framePOP3Right.Add(enablePop3PgpDecrypt = new CheckBox(1, 0, RES.CHKBOX_POP3PGP)
+            framePOP3Right.Add(enablePop3PgpDecrypt = new CheckBox(RES.CHKBOX_IN_PGP)
             {
                 X = 1,
                 Y = 1,
@@ -252,7 +282,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsIncommingPgpDecrypt
             });
-            framePOP3Right.Add(enablePop3DeleteAllMessages = new CheckBox(1, 0, RES.CHKBOX_POP3DELALL)
+            framePOP3Right.Add(enablePop3DeleteAllMessages = new CheckBox(RES.CHKBOX_POP3DELALL)
             {
                 X = 1,
                 Y = 2,
@@ -260,7 +290,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsPop3DeleteAllMessages
             });
-            framePOP3Right.Add(enablePop3Log = new CheckBox(1, 0, RES.CHKBOX_SESSIONLOG)
+            framePOP3Right.Add(enablePop3Log = new CheckBox(RES.CHKBOX_SESSIONLOG)
             {
                 X = 1,
                 Y = 3,
@@ -268,11 +298,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsPop3Log
             });
-            enablePop3Log.Toggled += EnablePop3Log_Toggled;
-            enablePop3PgpDecrypt.Toggled += EnablePop3PgpDecrypt_Toggled;
-            enablePop3DeleteAllMessages.Toggled += EnablePop3DeleteAllMessages_Toggled;
-            framePOP3.Add(framePOP3Right);
-            framePOP3.Add(buttonPop3Action = new Button(10, 19, Global.Instance.IsPop3Run ? RES.BTN_STOP : RES.BTN_START)
+            framePOP3.Add(buttonPop3Action = new Button(Global.Instance.IsPop3Run ? RES.BTN_STOP : RES.BTN_START)
             {
                 X = 43,
                 Y = 7,
@@ -280,6 +306,29 @@ namespace HomeMailHub.Gui
                 ColorScheme = Global.Instance.IsPop3Run ? GuiApp.ColorGreen : GuiApp.ColorRed
             });
             buttonPop3Action.Clicked += ButtonPop3Action_Clicked;
+            enablePop3Log.Toggled += EnablePop3Log_Toggled;
+            enablePop3PgpDecrypt.Toggled += EnablePop3PgpDecrypt_Toggled;
+            enablePop3DeleteAllMessages.Toggled += EnablePop3DeleteAllMessages_Toggled;
+            framePOP3.Add(framePOP3Right);
+            #endregion
+
+            #region POP3 Help
+            framePOP3Help = new FrameView(RES.TAG_HELP)
+            {
+                X = Pos.Right(framePOP3Right) + 1,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            };
+            framePOP3Help.Add(helpPop3Text = new Label()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill() - 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            framePOP3.Add(framePOP3Help);
             #endregion
 
             #endregion
@@ -290,15 +339,18 @@ namespace HomeMailHub.Gui
             {
                 X = 0,
                 Y = 0,
-                Width = Dim.Fill() - 1,
-                Height = Dim.Fill() - 1,
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
                 Border = new Border { BorderStyle = BorderStyle.None }
             };
+
             #region SMTP Left
-            frameSMTPLeft = new FrameView(new Rect(0, 0, 52, 7), RES.TAG_NETWORK)
+            frameSMTPLeft = new FrameView(RES.TAG_NETWORK)
             {
                 X = 1,
-                Y = 0
+                Y = 0,
+                Width = 52,
+                Height = 7,
             };
             frameSMTPLeft.Add(hostSmtpLabel = new Label(RES.TAG_HOST)
             {
@@ -362,12 +414,14 @@ namespace HomeMailHub.Gui
             #endregion
 
             #region SMTP Right
-            frameSMTPRight = new FrameView(new Rect(0, 0, 61, 9), RES.TAG_OPTION)
+            frameSMTPRight = new FrameView(RES.TAG_OPTION)
             {
-                X = 54,
-                Y = 0
+                X = Pos.Right(frameSMTPLeft) + 1,
+                Y = 0,
+                Width = 62,
+                Height = 9
             };
-            frameSMTPRight.Add(enableSmtpAllOutPgpSign = new CheckBox(1, 0, RES.CHKBOX_SMTPPGPSIGN)
+            frameSMTPRight.Add(enableSmtpAllOutPgpSign = new CheckBox(RES.CHKBOX_OUT_PGPSIGN)
             {
                 X = 1,
                 Y = 1,
@@ -375,7 +429,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsSmtpAllOutPgpSign
             });
-            frameSMTPRight.Add(enableSmtpAllOutPgpCrypt = new CheckBox(1, 0, RES.CHKBOX_SMTPPGPCRYPT)
+            frameSMTPRight.Add(enableSmtpAllOutPgpCrypt = new CheckBox(RES.CHKBOX_OUT_PGPCRYPT)
             {
                 X = 1,
                 Y = 2,
@@ -383,7 +437,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsSmtpAllOutPgpCrypt
             });
-            frameSMTPRight.Add(enableSmtpDeliveryLocal = new CheckBox(1, 0, RES.CHKBOX_DELIVERYLOC)
+            frameSMTPRight.Add(enableSmtpDeliveryLocal = new CheckBox(RES.CHKBOX_DELIVERYLOC)
             {
                 X = 1,
                 Y = 3,
@@ -391,7 +445,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsSmtpDeliveryLocal
             });
-            frameSMTPRight.Add(enableSmtpCheckFrom = new CheckBox(1, 0, RES.CHKBOX_CHECKFROM)
+            frameSMTPRight.Add(enableSmtpCheckFrom = new CheckBox(RES.CHKBOX_CHECKFROM)
             {
                 X = 1,
                 Y = 4,
@@ -399,7 +453,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsSmtpCheckFrom
             });
-            frameSMTPRight.Add(enableSmtpLog = new CheckBox(1, 0, RES.CHKBOX_SESSIONLOG)
+            frameSMTPRight.Add(enableSmtpLog = new CheckBox(RES.CHKBOX_SESSIONLOG)
             {
                 X = 1,
                 Y = 5,
@@ -413,7 +467,7 @@ namespace HomeMailHub.Gui
             enableSmtpDeliveryLocal.Toggled += EnableSmtpDeliveryLocal_Toggled;
             enableSmtpCheckFrom.Toggled += EnableSmtpCheckFrom_Toggled;
             frameSMTP.Add(frameSMTPRight);
-            frameSMTP.Add(buttonSmtpAction = new Button(10, 19, Global.Instance.IsSmtpRun ? RES.BTN_STOP : RES.BTN_START)
+            frameSMTP.Add(buttonSmtpAction = new Button(Global.Instance.IsSmtpRun ? RES.BTN_STOP : RES.BTN_START)
             {
                 X = 43,
                 Y = 7,
@@ -421,6 +475,25 @@ namespace HomeMailHub.Gui
                 ColorScheme = Global.Instance.IsSmtpRun ? GuiApp.ColorGreen : GuiApp.ColorRed
             });
             buttonSmtpAction.Clicked += ButtonSmtpAction_Clicked;
+            #endregion
+
+            #region SMTP Help
+            frameSMTPHelp = new FrameView(RES.TAG_HELP)
+            {
+                X = Pos.Right(frameSMTPRight) + 1,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            };
+            frameSMTPHelp.Add(helpSmtpText = new Label()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill() - 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            frameSMTP.Add(frameSMTPHelp);
             #endregion
 
             #endregion
@@ -431,66 +504,97 @@ namespace HomeMailHub.Gui
             {
                 X = 0,
                 Y = 0,
-                Width = Dim.Fill() - 1,
+                Width = Dim.Fill(),
                 Height = Dim.Fill(),
                 Border = new Border { BorderStyle = BorderStyle.None }
             };
-            #region Secure Left
-            frameSecureLeft = new FrameView(new Rect(0, 0, 52, 6), "PGP")
-            {
-                X = 1,
-                Y = 0
-            };
-            frameSecureLeft.Add(pgpPassLabel = new Label(RES.TAG_PASSWORD)
+
+            #region Secure Forbiden Entry
+            frameSecure.Add(frameSecureEntry = new FrameView(RES.TAG_BANNEDIPLIST)
             {
                 X = 1,
                 Y = 0,
-                AutoSize = true
+                Width = 52,
+                Height = Dim.Fill()
             });
-            frameSecureLeft.Add(pgpPassText = new TextField(Global.Instance.Config.PgpPassword)
-            {
-                X = labelOffset,
-                Y = 0,
-                Width = 38,
-                Height = 1,
-                ColorScheme = GuiApp.ColorField
-            });
-            frameSecureLeft.Add(pgpPathLabel = new Label(RES.TAG_PATH)
+            frameSecureEntry.Add(entrySelectType = new RadioGroup(new ustring[] { $" {RES.TAG_FORBIDDEN} ", $" {RES.TAG_ALLOWED} " })
             {
                 X = 1,
-                Y = 2,
-                AutoSize = true
-            });
-            frameSecureLeft.Add(pgpPathText = new TextField(Properties.Settings.Default.PgpBinPath)
-            {
-                X = labelOffset,
-                Y = 2,
-                Width = 38,
+                Y = 1,
+                Width = 35,
                 Height = 1,
-                ReadOnly = true,
-                ColorScheme = GuiApp.ColorField
+                DisplayMode = DisplayModeLayout.Horizontal,
+                SelectedItem = Global.Instance.Config.IsAccessIpWhiteList ? 1 : 0,
+                NoSymbol = true
             });
-            frameSecureLeft.Add(pgpWarnLabel = new Label(RES.TAG_PGPWARN)
+            frameSecureEntry.Add(entrySelectText = new TextField(EntryType()) 
             {
-                X = labelOffset,
+                X = 37,
+                Y = 1,
+                Width = 10,
+                Height = 1,
+                ColorScheme = EntryTypeColor()
+            });
+            frameSecureEntry.Add(listForbidenEntryView = new ListView(Global.Instance.Config.ForbidenEntryList)
+            {
+                X = 1,
                 Y = 3,
-                AutoSize = true,
-                ColorScheme = GuiApp.ColorDescription
+                Width = Dim.Fill() - 2,
+                Height = Dim.Fill() - 4,
+                AllowsMarking = true,
+                AllowsMultipleSelection = false
             });
-            pgpPassText.TextChanged += PgpPassText_TextChanged;
-            pgpPathText.TextChanged += PgpPathText_TextChanged;
-            pgpPathText.MouseClick  += PgpPathText_MouseClick;
-            pgpWarnLabel.Clicked    += PgpWarnLabel_Clicked;
-            frameSecure.Add(frameSecureLeft);
+            frameSecureEntry.Add(forbidenEntryLabel = new Label(RES.TAG_HOST)
+            {
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenEntryView) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize
+            });
+            frameSecureEntry.Add(forbidenEntryText = new TextField(string.Empty)
+            {
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenEntryView) + layout[idx++].Y,
+                Width = 42,
+                Height = 1,
+                ColorScheme = GuiApp.ColorField
+            });
+            frameSecureEntry.Add(buttonForbidenEntrySort = new Button(RES.BTN_SORT)
+            {
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenEntryView) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize
+            });
+            frameSecureEntry.Add(buttonForbidenEntryAdd = new Button(RES.BTN_ADD)
+            {
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenEntryView) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize
+            });
+            frameSecureEntry.Add(buttonForbidenEntryDelete = new Button(RES.BTN_DELETE)
+            {
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenEntryView) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize
+            });
+            listForbidenEntryView.OpenSelectedItem += ListForbidenEntryView_OpenSelectedItem;
+            listForbidenEntryView.SelectedItemChanged += ListForbidenEntryView_SelectedItemChanged;
+
+            forbidenEntryText.KeyUp += ForbidenEntryText_KeyUp;
+            buttonForbidenEntryAdd.Clicked += () => ForbidenEntryIp(true);
+            buttonForbidenEntrySort.Clicked += () => ForbidenListSort(Global.Instance.Config.ForbidenEntryList, listForbidenEntryView);
+            buttonForbidenEntryDelete.Clicked += () => ForbidenEntryIp(false);
+            entrySelectType.SelectedItemChanged += EntrySelectType_SelectedItemChanged;
             #endregion
 
             #region Secure Right
-            frameSecureRight = new FrameView(new Rect(0, 0, 61, 11), RES.TAG_OPTION)
+            frameSecureRight = new FrameView(RES.TAG_OPTION)
             {
-                X = 54,
-                Y = 0
+                X = Pos.Right(frameSecureEntry) + 1,
+                Y = 0,
+                Width = 62,
+                Height = 11
             };
-            frameSecureRight.Add(enableSaveAttachments = new CheckBox(1, 0, RES.CHKBOX_SAVEATTACH)
+            frameSecureRight.Add(enableSaveAttachments = new CheckBox(RES.CHKBOX_SAVEATTACH)
             {
                 X = 1,
                 Y = 1,
@@ -498,7 +602,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsSaveAttachments
             });
-            frameSecureRight.Add(enableSharingSocket = new CheckBox(1, 0, RES.CHKBOX_SHARINGSOCKET)
+            frameSecureRight.Add(enableSharingSocket = new CheckBox(RES.CHKBOX_SHARINGSOCKET)
             {
                 X = 1,
                 Y = 2,
@@ -506,7 +610,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsSharingSocket
             });
-            frameSecureRight.Add(enableAlwaysNewMessageId = new CheckBox(1, 0, RES.CHKBOX_NEWMSGID)
+            frameSecureRight.Add(enableAlwaysNewMessageId = new CheckBox(RES.CHKBOX_NEWMSGID)
             {
                 X = 1,
                 Y = 3,
@@ -514,7 +618,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsAlwaysNewMessageId
             });
-            frameSecureRight.Add(enableNewMessageSendImmediately = new CheckBox(1, 0, RES.CHKBOX_NEWMSGIMD)
+            frameSecureRight.Add(enableNewMessageSendImmediately = new CheckBox(RES.CHKBOX_NEWMSGIMD)
             {
                 X = 1,
                 Y = 4,
@@ -522,7 +626,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsNewMessageSendImmediately
             });
-            frameSecureRight.Add(enableModifyMessageDeliveredLocal = new CheckBox(1, 0, RES.CHKBOX_DELIVERYMSGMOD)
+            frameSecureRight.Add(enableModifyMessageDeliveredLocal = new CheckBox(RES.CHKBOX_DELIVERYMSGMOD)
             {
                 X = 1,
                 Y = 5,
@@ -568,128 +672,54 @@ namespace HomeMailHub.Gui
             frameSecure.Add(frameSecureRight);
             #endregion
 
-            #region Secure Forbiden Entry
-            frameSecureEntry = new FrameView(new Rect(0, 0, 52, 16), RES.TAG_BANNEDIPLIST)
-            {
-                X = 1,
-                Y = 6
-            };
-            frameSecureEntry.Add(entrySelectType = new RadioGroup(new ustring[] { $" {RES.TAG_FORBIDDEN} ", $" {RES.TAG_ALLOWED} " })
-            {
-                X = 1,
-                Y = 1,
-                Width = 35,
-                Height = 1,
-                DisplayMode = DisplayModeLayout.Horizontal,
-                SelectedItem = Global.Instance.Config.IsAccessIpWhiteList ? 1 : 0,
-                NoSymbol = true
-            });
-            frameSecureEntry.Add(entrySelectText = new TextField(EntryType()) 
-            {
-                X = 37,
-                Y = 1,
-                Width = 10,
-                Height = 1,
-                ColorScheme = EntryTypeColor()
-            });
-            frameSecureEntry.Add(listForbidenEntryView = new ListView(Global.Instance.Config.ForbidenEntryList)
-            {
-                X = 1,
-                Y = 3,
-                Width = Dim.Fill() - 2,
-                Height = 7,
-                AllowsMarking = true,
-                AllowsMultipleSelection = false
-            });
-            frameSecureEntry.Add(forbidenEntryLabel = new Label(RES.TAG_HOST)
-            {
-                X = 1,
-                Y = 11,
-                AutoSize = true
-            });
-            frameSecureEntry.Add(forbidenEntryText = new TextField(string.Empty)
-            {
-                X = 6,
-                Y = 11,
-                Width = 42,
-                Height = 1,
-                ColorScheme = GuiApp.ColorField
-            });
-            frameSecureEntry.Add(buttonForbidenEntrySort = new Button(10, 19, RES.BTN_SORT)
-            {
-                X = layout[0].X,
-                Y = layout[0].Y,
-                AutoSize = layout[0].AutoSize
-            });
-            frameSecureEntry.Add(buttonForbidenEntryAdd = new Button(10, 19, RES.BTN_ADD)
-            {
-                X = layout[1].X,
-                Y = layout[1].Y,
-                AutoSize = layout[1].AutoSize
-            });
-            frameSecureEntry.Add(buttonForbidenEntryDelete = new Button(10, 19, RES.BTN_DELETE)
-            {
-                X = layout[2].X,
-                Y = layout[2].Y,
-                AutoSize = layout[2].AutoSize
-            });
-            listForbidenEntryView.OpenSelectedItem += ListForbidenEntryView_OpenSelectedItem;
-            listForbidenEntryView.SelectedItemChanged += ListForbidenEntryView_SelectedItemChanged;
-
-            forbidenEntryText.KeyUp += ForbidenEntryText_KeyUp;
-            buttonForbidenEntryAdd.Clicked += () => ForbidenEntryIp(true);
-            buttonForbidenEntrySort.Clicked += () => ForbidenListSort(Global.Instance.Config.ForbidenEntryList, listForbidenEntryView);
-            buttonForbidenEntryDelete.Clicked += () => ForbidenEntryIp(false);
-            entrySelectType.SelectedItemChanged += EntrySelectType_SelectedItemChanged;
-            frameSecure.Add(frameSecureEntry);
-            #endregion
-
             #region Secure Forbiden Route
-            frameSecureRoute = new FrameView(new Rect(0, 0, 61, 11), RES.TAG_STOPROUTELIST)
+            frameSecureRoute = new FrameView(RES.TAG_STOPROUTELIST)
             {
-                X = 54,
-                Y = 11
+                X = Pos.Right(frameSecureEntry) + 1,
+                Y = Pos.Bottom(frameSecureRight),
+                Width = 62,
+                Height = Dim.Fill()
             };
             frameSecureRoute.Add(listForbidenRouteView = new ListView(Global.Instance.Config.ForbidenRouteList)
             {
                 X = 1,
                 Y = 1,
                 Width = Dim.Fill() - 2,
-                Height = 4,
+                Height = Dim.Fill() - 4,
                 AllowsMarking = true,
                 AllowsMultipleSelection = false
             });
             frameSecureRoute.Add(forbidenRouteLabel = new Label(RES.TAG_HOST)
             {
-                X = 1,
-                Y = 6,
-                AutoSize = true
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenRouteView) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize
             });
             frameSecureRoute.Add(ForbidenRouteText = new TextField(string.Empty)
             {
-                X = 6,
-                Y = 6,
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenRouteView) + layout[idx++].Y,
                 Width = 51,
                 Height = 1,
                 ColorScheme = GuiApp.ColorField
             });
-            frameSecureRoute.Add(buttonForbidenRouteSort = new Button(10, 19, RES.BTN_SORT)
+            frameSecureRoute.Add(buttonForbidenRouteSort = new Button(RES.BTN_SORT)
             {
-                X = layout[3].X,
-                Y = layout[3].Y,
-                AutoSize = layout[3].AutoSize
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenRouteView) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize
             });
-            frameSecureRoute.Add(buttonForbidenRouteAdd = new Button(10, 19, RES.BTN_ADD)
+            frameSecureRoute.Add(buttonForbidenRouteAdd = new Button(RES.BTN_ADD)
             {
-                X = layout[4].X,
-                Y = layout[4].Y,
-                AutoSize = layout[4].AutoSize
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenRouteView) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize
             });
-            frameSecureRoute.Add(buttonForbidenRouteDelete = new Button(10, 19, RES.BTN_DELETE)
+            frameSecureRoute.Add(buttonForbidenRouteDelete = new Button(RES.BTN_DELETE)
             {
-                X = layout[5].X,
-                Y = layout[5].Y,
-                AutoSize = layout[5].AutoSize
+                X = layout[idx].X,
+                Y = Pos.Bottom(listForbidenRouteView) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize
             });
             listForbidenRouteView.OpenSelectedItem += ListForbidenRrouteView_OpenSelectedItem;
             listForbidenRouteView.SelectedItemChanged += ListForbidenRrouteView_SelectedItemChanged;
@@ -700,6 +730,131 @@ namespace HomeMailHub.Gui
             buttonForbidenRouteDelete.Clicked += () => ForbidenRouteIp(false);
             frameSecure.Add(frameSecureRoute);
             #endregion
+
+            #region Secure Help
+            frameSecureHelp = new FrameView(RES.TAG_HELP)
+            {
+                X = Pos.Right(frameSecureRight) + 1,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            };
+            frameSecureHelp.Add(helpSecureText = new Label()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill() - 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            frameSecure.Add(frameSecureHelp);
+            #endregion
+
+            #endregion
+
+            /* Pgp */
+            #region Pgp
+            framePgp = new FrameView()
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
+                Border = new Border { BorderStyle = BorderStyle.None }
+            };
+            framePgpLeft = new FrameView("PGP")
+            {
+                X = 1,
+                Y = 0,
+                Width = 115,
+                Height = 10,
+            };
+
+            #region frame Pgp Left
+            framePgpLeft.Add(pgpPassLabel = new Label(RES.TAG_PASSWORD)
+            {
+                X = 1,
+                Y = 1,
+                AutoSize = true
+            });
+            framePgpLeft.Add(pgpPassText = new TextField(Global.Instance.Config.PgpPassword)
+            {
+                X = labelOffset,
+                Y = 1,
+                Width = 60,
+                Height = 1,
+                ColorScheme = GuiApp.ColorField
+            });
+            framePgpLeft.Add(pgpServLabel = new Label(RES.TAG_SERVER)
+            {
+                X = 1,
+                Y = 3,
+                AutoSize = true
+            });
+            framePgpLeft.Add(pgpServText = new TextField(Global.Instance.Config.PgpKeyHost)
+            {
+                X = labelOffset,
+                Y = 3,
+                Width = 60,
+                Height = 1,
+                ColorScheme = GuiApp.ColorField
+            });
+            framePgpLeft.Add(pgpPathLabel = new Label(RES.TAG_PATH)
+            {
+                X = 1,
+                Y = 5,
+                AutoSize = true
+            });
+            framePgpLeft.Add(pgpPathText = new TextField(Properties.Settings.Default.PgpBinPath)
+            {
+                X = labelOffset,
+                Y = 5,
+                Width = 60,
+                Height = 1,
+                ReadOnly = true,
+                ColorScheme = GuiApp.ColorField
+            });
+            framePgpLeft.Add(buttonOpenPgInstal = new Button(RES.BTN_INSTALL)
+            {
+                X = labelOffset + 60 + 2,
+                Y = 5,
+                Width = 60,
+                AutoSize = true
+            });
+            framePgpLeft.Add(pgpWarnLabel = new Label(RES.TAG_PGPWARN)
+            {
+                X = labelOffset,
+                Y = 6,
+                AutoSize = true,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            pgpPassText.TextChanged += PgpPassText_TextChanged;
+            pgpPathText.TextChanged += PgpPathText_TextChanged;
+            pgpServText.TextChanged += PgpServText_TextChanged;
+            pgpPathText.MouseClick  += PgpPathText_MouseClick;
+            buttonOpenPgInstal.Clicked += ButtonOpenPgInstal_Clicked;
+            framePgp.Add(framePgpLeft);
+            #endregion
+
+            #region frame Pgp Help
+            framePgpHelp = new FrameView(RES.TAG_HELP)
+            {
+                X = Pos.Right(framePgpLeft) + 1,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            };
+            framePgpHelp.Add(helpPgpText = new Label()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill() - 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            framePgp.Add(framePgpHelp);
+            #endregion
+
             #endregion
 
             /* Mail clients */
@@ -708,17 +863,18 @@ namespace HomeMailHub.Gui
             {
                 X = 0,
                 Y = 0,
-                Width = Dim.Fill() - 1,
-                Height = Dim.Fill() - 1,
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
                 Border = new Border { BorderStyle = BorderStyle.None }
             };
+
             #region Clients Left
             frameClientsLeft = new FrameView(RES.TAG_OPTION)
             {
                 X = 1,
                 Y = 0,
-                Width = Dim.Fill() - 1,
-                Height = Dim.Fill() - 8
+                Width = 115,
+                Height = 14
             };
             frameClientsLeft.Add(idleClientsLabel = new Label(RES.TAG_CLIENTSTIMEOUT)
             {
@@ -782,13 +938,33 @@ namespace HomeMailHub.Gui
             enableReceiveOnSend.Toggled += EnableReceiveOnSend_Toggled;
             enableSmtpClientFakeIp.Toggled += EnableSmtpClientFakeIp_Toggled;
             enableImapClientMessagePurge.Toggled += EnableImapClientMessagePurge_Toggled;
+            frameClients.Add(frameClientsLeft);
             #endregion
 
-            frameClients.Add(frameClientsLeft);
+            #region Clients Help
+            frameClientsHelp = new FrameView(RES.TAG_HELP)
+            {
+                X = Pos.Right(frameClientsLeft) + 1,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            };
+            frameClientsHelp.Add(helpClientsText = new Label()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill() - 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            frameClients.Add(frameClientsHelp);
+            #endregion
+
             #endregion
 
             tabView.AddTab(new TabView.Tab(" POP3 ", framePOP3), true);
             tabView.AddTab(new TabView.Tab(" SMTP ", frameSMTP), false);
+            tabView.AddTab(new TabView.Tab(" PGP ", framePgp), false);
             tabView.AddTab(new TabView.Tab($" {RES.TAG_SECURITY} ", frameSecure), false);
             tabView.AddTab(new TabView.Tab($" {RES.TAG_CLIENTS} ", frameClients), false);
             Add(tabView);
@@ -867,6 +1043,9 @@ namespace HomeMailHub.Gui
         private void PgpPassText_TextChanged(ustring s) =>
             Global.Instance.Config.PgpPassword = s.ToString();
 
+        private void PgpServText_TextChanged(ustring s) =>
+            Global.Instance.Config.PgpKeyHost = s.ToString();
+
         private void PgpPathText_TextChanged(ustring s) =>
             Properties.Settings.Default.PgpBinPath = s.ToString();
 
@@ -875,7 +1054,7 @@ namespace HomeMailHub.Gui
                 Global.Instance.Config.ServicesInterfaceName = a.Value.ToString();
         }
 
-        private void PgpWarnLabel_Clicked() {
+        private void ButtonOpenPgInstal_Clicked() {
             Path.Combine(
                 Path.GetDirectoryName(
                     Assembly.GetEntryAssembly().Location),
@@ -939,65 +1118,64 @@ namespace HomeMailHub.Gui
 
         private void EnablePop3Box_Toggled(bool b) {
             Toggled(b, Global.Instance.IsPop3Run, Global.Instance.StopPop3Service);
-            Global.Instance.Config.IsPop3Enable = !b;
+            Global.Instance.Config.IsPop3Enable = b;
         }
 
         private void EnablePop3PgpDecrypt_Toggled(bool b) =>
-            Global.Instance.Config.IsIncommingPgpDecrypt = !b;
+            Global.Instance.Config.IsIncommingPgpDecrypt = b;
 
         private void EnablePop3DeleteAllMessages_Toggled(bool b) =>
-            Global.Instance.Config.IsPop3DeleteAllMessages = !b;
+            Global.Instance.Config.IsPop3DeleteAllMessages = b;
 
         private void EnablePop3Log_Toggled(bool b) =>
-            Global.Instance.Config.IsPop3Log = !b;
+            Global.Instance.Config.IsPop3Log = b;
 
         private void EnableSharingSocket_Toggled(bool b) =>
-            Global.Instance.Config.IsSharingSocket = !b;
+            Global.Instance.Config.IsSharingSocket = b;
 
         private void EnableSmtpAllOutPgpCrypt_Toggled(bool b) =>
-            Global.Instance.Config.IsSmtpAllOutPgpCrypt = !b;
+            Global.Instance.Config.IsSmtpAllOutPgpCrypt = b;
 
         private void EnableSmtpAllOutPgpSign_Toggled(bool b) =>
-            Global.Instance.Config.IsSmtpAllOutPgpSign = !b;
+            Global.Instance.Config.IsSmtpAllOutPgpSign = b;
 
         private void EnableSmtpLog_Toggled(bool b) =>
-            Global.Instance.Config.IsSmtpLog = !b;
+            Global.Instance.Config.IsSmtpLog = b;
 
         private void EnableSmtpCheckFrom_Toggled(bool b) =>
-            Global.Instance.Config.IsSmtpCheckFrom = !b;
+            Global.Instance.Config.IsSmtpCheckFrom = b;
 
         private void EnableSmtpDeliveryLocal_Toggled(bool b) =>
-            Global.Instance.Config.IsSmtpDeliveryLocal = !b;
+            Global.Instance.Config.IsSmtpDeliveryLocal = b;
 
         private void EnableSaveAttachments_Toggled(bool b) =>
-            Global.Instance.Config.IsSaveAttachments = !b;
+            Global.Instance.Config.IsSaveAttachments = b;
 
         private void EnableAlwaysNewMessageId_Toggled(bool b) =>
-            Global.Instance.Config.IsAlwaysNewMessageId = !b;
+            Global.Instance.Config.IsAlwaysNewMessageId = b;
 
         private void EnableNewMessageSendImmediately_Toggled(bool b) =>
-            Global.Instance.Config.IsAlwaysNewMessageId = !b;
+            Global.Instance.Config.IsAlwaysNewMessageId = b;
 
         private void EnableModifyMessageDeliveredLocal_Toggled(bool b) =>
-            Global.Instance.Config.IsModifyMessageDeliveredLocal = !b;
+            Global.Instance.Config.IsModifyMessageDeliveredLocal = b;
 
         private void EnableReceiveOnSend_Toggled(bool b) =>
-            Global.Instance.Config.IsReceiveOnSendOnly = !b;
+            Global.Instance.Config.IsReceiveOnSendOnly = b;
 
         private void EnableSmtpClientFakeIp_Toggled(bool b) =>
-            Global.Instance.Config.IsSmtpClientFakeIp = !b;
+            Global.Instance.Config.IsSmtpClientFakeIp = b;
 
         private void EnableImapClientMessagePurge_Toggled(bool b) =>
-            Global.Instance.Config.IsImapClientMessagePurge = !b;
+            Global.Instance.Config.IsImapClientMessagePurge = b;
 
         private void Toggled(bool b, bool state, Action act) {
             if (state)
                 act.Invoke();
 
-            buttonPop3Action.Enabled = !b;
-            buttonPop3Action.ColorScheme = b ? Colors.Base : (state ? GuiApp.ColorGreen : GuiApp.ColorRed);
+            buttonPop3Action.Enabled = b;
+            buttonPop3Action.ColorScheme = b ? (state ? GuiApp.ColorGreen : GuiApp.ColorRed) : Colors.Base;
             buttonPop3Action.Text = state ? RES.BTN_STOP : RES.BTN_START;
-            System.Diagnostics.Debug.WriteLine($"\t\t{b} - {state}");
         }
         #endregion
 
@@ -1019,6 +1197,8 @@ namespace HomeMailHub.Gui
                         hostSmtpBox.SetSource(adapters);
                         hostPop3Box.SelectedItem =
                         hostSmtpBox.SelectedItem = (idx >= 0) ? idx : 0;
+                        helpPgpText.Text = RES.GuiServicesSettingsWindowPgpHelp;
+                        helpSecureText.Text = RES.GuiServicesSettingsWindowSecureHelp;
                     });
                 } catch (Exception ex) { ex.StatusBarError(); }
                 try {

@@ -1,0 +1,31 @@
+﻿
+Save Attachments:
+If this option is enabled, all attachments attached to the message will be saved in the recipient's folder: "/Attachments/year/month/day/". When deleting a message, saved attachments are retained.
+
+Allow other applications to open the socket in use:
+Allows you to run multiple applications using a common port on the same device. Used during debugging, it provides the ability to scan traffic directly on the port. In the normal state, it is recommended to turn it off.
+
+Always create a new message ID:
+Overwrite message ID when sending and forwarding messages. Since the original identifier usually includes the real name of the device, which makes it easier for third parties to identify mailings. For security and anonymous purposes, it is recommended to enable. (anti-spy)
+
+Send received message immediately:
+When receiving messages for external recipients, immediately initialize a mail session with an external mail provider, without waiting for a scheduled send. (anti-spy)
+
+Modify messages delivered locally:
+When receiving messages from external servers, the content of the message is translated into text format, excluding various spy links and other "bookmarks". All external links, including those to images, are listed at the end of the email body, preventing them from being automatically downloaded. It also removes headers that create additional uncontrolled mail traffic, such as read receipts, receipt receipts, etc. (anti-spy)
+
+Number of spam counters triggered:
+Break time in minutes when a spam rule is triggered: Activations occur when the registration data is entered incorrectly by the mail client, or when spam rules are triggered when processing messages. After the specified number of times has been reached, access from the IP address is restricted for the time specified in the service interruption time field. (anti-spam)
+
+Access rules for IP ,NET or country codes:
+The choice of the type of the list of rules is possible from two options, "allowed" or "forbidden".
+
+If you select the "allowed" type, you must specify the addresses, networks or countries that will be allowed access to mail services. Other addresses, networks and countries not included in the list will be denied access. When you select the "forbidden" type, addresses, networks and countries that are denied access to services are indicated. (anti-spam)
+
+Filters access to mail services by IP address, network address or two-letter country code. For example:
+- IP address: 1.2.3.4
+- Network address: 1.2.3.0/24
+- Country code: RU
+
+Forbidden IP addresses in routing:
+At each stage of sending or receiving mail, the network is tested, all network routes to the specified node are calculated, the received routes are compared with the "forbidden routes" table, and if they match, the connection is immediately terminated. Usually the IP address of your ISP's gateway is specified. (anonymity)

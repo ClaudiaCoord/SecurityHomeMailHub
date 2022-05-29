@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using SecyrityMail.Data;
+using SecyrityMail.GnuPG;
 using SecyrityMail.Proxy;
 
 namespace SecyrityMail
@@ -23,6 +24,8 @@ namespace SecyrityMail
                      _incommingPgpDecrypt = false;
 
         public string PgpPassword { get; set; } = string.Empty;
+        public string PgpKeyHost { get; set; } = string.Empty;
+
         public bool IsIncommingPgpDecrypt { get => _incommingPgpDecrypt; set => _incommingPgpDecrypt = pgpOnce(value); }
 
         public bool IsSharingSocket { get; set; } = false;
@@ -151,6 +154,7 @@ namespace SecyrityMail
             IsProxyListRepack = cfg.IsProxyListRepack;
             IsSharingSocket = cfg.IsSharingSocket;
             IsAccessIpWhiteList = cfg.IsAccessIpWhiteList;
+            PgpKeyHost = cfg.PgpKeyHost;
             PgpPassword = cfg.PgpPassword;
             Pop3ClientIdle = cfg.Pop3ClientIdle;
             Pop3ServicePort = cfg.Pop3ServicePort;

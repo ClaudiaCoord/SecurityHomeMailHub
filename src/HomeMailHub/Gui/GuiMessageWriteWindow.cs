@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HomeMailHub.Gui.Dialogs;
@@ -15,14 +16,14 @@ using MimeKit;
 using NStack;
 using SecyrityMail;
 using SecyrityMail.Data;
+using SecyrityMail.GnuPG;
 using SecyrityMail.MailAccounts;
+using SecyrityMail.Messages;
 using SecyrityMail.Servers;
 using SecyrityMail.Utils;
 using Terminal.Gui;
-using RES = HomeMailHub.Properties.Resources;
 using GuiAttribute = Terminal.Gui.Attribute;
-using SecyrityMail.Messages;
-using System.Text;
+using RES = HomeMailHub.Properties.Resources;
 
 namespace HomeMailHub.Gui
 {
@@ -134,15 +135,19 @@ namespace HomeMailHub.Gui
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
             int addrow = string.IsNullOrWhiteSpace(selectedPath) ? 2 : 0;
-            frameHeader = new FrameView(new Rect(0, 0, 116, 8 + addrow))
+            frameHeader = new FrameView()
             {
                 X = 1,
-                Y = 1
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = 8 + addrow,
             };
-            frameMsg = new FrameView(new Rect(0, 0, 116, 17 - addrow), RES.TAG_MESSAGE)
+            frameMsg = new FrameView(RES.TAG_MESSAGE)
             {
                 X = 1,
-                Y = 9 + addrow
+                Y = 9 + addrow,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill()
             };
             if (addrow > 0)
             {
@@ -391,7 +396,7 @@ namespace HomeMailHub.Gui
         }
 
         private void WarningBox_Toggled(bool b) =>
-            GuiApp.IsSendNoWarning = !b;
+            GuiApp.IsSendNoWarning = b;
 
         #region Load
         public async void Load() => _ = await Load_().ConfigureAwait(false);

@@ -124,6 +124,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Create.
+        /// </summary>
+        internal static string BTN_CREATE {
+            get {
+                return ResourceManager.GetString("BTN_CREATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на _Delete.
         /// </summary>
         internal static string BTN_DELETE {
@@ -147,6 +156,15 @@ namespace HomeMailHub.Properties {
         internal static string BTN_IMPORT {
             get {
                 return ResourceManager.GetString("BTN_IMPORT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Install.
+        /// </summary>
+        internal static string BTN_INSTALL {
+            get {
+                return ResourceManager.GetString("BTN_INSTALL", resourceCulture);
             }
         }
         
@@ -286,6 +304,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на PGP decrypt.
+        /// </summary>
+        internal static string CHKBOX_IN_PGP {
+            get {
+                return ResourceManager.GetString("CHKBOX_IN_PGP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Always new message Id, anti-spy.
         /// </summary>
         internal static string CHKBOX_NEWMSGID {
@@ -313,6 +340,24 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Encrypt PGP email text if available.
+        /// </summary>
+        internal static string CHKBOX_OUT_PGPCRYPT {
+            get {
+                return ResourceManager.GetString("CHKBOX_OUT_PGPCRYPT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Certify PGP email signature if available.
+        /// </summary>
+        internal static string CHKBOX_OUT_PGPSIGN {
+            get {
+                return ResourceManager.GetString("CHKBOX_OUT_PGPSIGN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на PGP auto decrypt.
         /// </summary>
         internal static string CHKBOX_PGPAUTODECRYPT {
@@ -327,15 +372,6 @@ namespace HomeMailHub.Properties {
         internal static string CHKBOX_POP3DELALL {
             get {
                 return ResourceManager.GetString("CHKBOX_POP3DELALL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на PGP decrypt.
-        /// </summary>
-        internal static string CHKBOX_POP3PGP {
-            get {
-                return ResourceManager.GetString("CHKBOX_POP3PGP", resourceCulture);
             }
         }
         
@@ -381,24 +417,6 @@ namespace HomeMailHub.Properties {
         internal static string CHKBOX_SMTPFAKEIP {
             get {
                 return ResourceManager.GetString("CHKBOX_SMTPFAKEIP", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Encrypt PGP email text if available.
-        /// </summary>
-        internal static string CHKBOX_SMTPPGPCRYPT {
-            get {
-                return ResourceManager.GetString("CHKBOX_SMTPPGPCRYPT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Certify PGP email signature if available.
-        /// </summary>
-        internal static string CHKBOX_SMTPPGPSIGN {
-            get {
-                return ResourceManager.GetString("CHKBOX_SMTPPGPSIGN", resourceCulture);
             }
         }
         
@@ -493,6 +511,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на PGP key server (hkp://keys.gnupg.net).
+        /// </summary>
+        internal static string CMD_LINE_H7 {
+            get {
+                return ResourceManager.GetString("CMD_LINE_H7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на _{0} all {1} accounts.
         /// </summary>
         internal static string GUIACCOUNT_FMT1 {
@@ -552,6 +579,25 @@ namespace HomeMailHub.Properties {
         internal static string GUIMAIL_TITLE1 {
             get {
                 return ResourceManager.GetString("GUIMAIL_TITLE1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на A mail account can be either local or designed to work with external mail providers.
+        ///
+        ///Local mail account:
+        ///A local mail account can have any arbitrary domain, even not necessarily registered, for example:
+        ///myname@local.my, myname@my.local, my@microsoft.com, etc.
+        ///To use a local mail account, you must fill in the fields: login, password and name.
+        ///
+        ///
+        ///External mail account:
+        ///The mail account for external mail services must include completed POP3 or IMAP and SMTP blocks.
+        ///Complete filling of all blocks for external p [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string GuiMailAccountWindowHelp {
+            get {
+                return ResourceManager.GetString("GuiMailAccountWindowHelp", resourceCulture);
             }
         }
         
@@ -961,6 +1007,34 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на 
+        ///For any account it is possible to create a pair of PGP keys that will encrypt, decrypt and sign your email messages. The &quot;Decrypt incoming messages&quot; option is used if you are using an email client that does not support PGP encryption. In this case, the received mail messages are decrypted and are available to the mail client in decrypted form.
+        ///
+        ///In the settings, in the &quot;POP3&quot; and &quot;SMTP&quot; sections, you must also enable the general rules for encrypting and decrypting mail messages. With general encryption r [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string GuiServicesSettingsWindowPgpHelp {
+            get {
+                return ResourceManager.GetString("GuiServicesSettingsWindowPgpHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на 
+        ///Save Attachments:
+        ///If this option is enabled, all attachments attached to the message will be saved in the recipient&apos;s folder: &quot;/Attachments/year/month/day/&quot;. When deleting a message, saved attachments are retained.
+        ///
+        ///Allow other applications to open the socket in use:
+        ///Allows you to run multiple applications using a common port on the same device. Used during debugging, it provides the ability to scan traffic directly on the port. In the normal state, it is recommended to turn it off.
+        ///
+        ///Always create a [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string GuiServicesSettingsWindowSecureHelp {
+            get {
+                return ResourceManager.GetString("GuiServicesSettingsWindowSecureHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Select the path to the GnuPG executables.
         /// </summary>
         internal static string GUISETTIGS_PGP_DIALOG {
@@ -1159,7 +1233,7 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на _Export all accounts for GPG.
+        ///   Ищет локализованную строку, похожую на _Export all accounts for GnuPG.
         /// </summary>
         internal static string MENU_GPGEXPORT {
             get {
@@ -1326,6 +1400,51 @@ namespace HomeMailHub.Properties {
         internal static string MENU_OPENURI {
             get {
                 return ResourceManager.GetString("MENU_OPENURI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Create PGP key.
+        /// </summary>
+        internal static string MENU_PGPKEY_CREATE {
+            get {
+                return ResourceManager.GetString("MENU_PGPKEY_CREATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на account not selected for operations with PGP keys.
+        /// </summary>
+        internal static string MENU_PGPKEY_EMPTY {
+            get {
+                return ResourceManager.GetString("MENU_PGPKEY_EMPTY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Export PGP key.
+        /// </summary>
+        internal static string MENU_PGPKEY_EXPORT {
+            get {
+                return ResourceManager.GetString("MENU_PGPKEY_EXPORT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Import PGP key.
+        /// </summary>
+        internal static string MENU_PGPKEY_IMPORT {
+            get {
+                return ResourceManager.GetString("MENU_PGPKEY_IMPORT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на PGP _Keys.
+        /// </summary>
+        internal static string MENU_PGPKEYS {
+            get {
+                return ResourceManager.GetString("MENU_PGPKEYS", resourceCulture);
             }
         }
         
@@ -1744,6 +1863,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Descriptions.
+        /// </summary>
+        internal static string TAG_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("TAG_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Disable.
         /// </summary>
         internal static string TAG_DISABLE {
@@ -1776,6 +1904,15 @@ namespace HomeMailHub.Properties {
         internal static string TAG_DT_SUBJ {
             get {
                 return ResourceManager.GetString("TAG_DT_SUBJ", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на E-mail:.
+        /// </summary>
+        internal static string TAG_EMAIL {
+            get {
+                return ResourceManager.GetString("TAG_EMAIL", resourceCulture);
             }
         }
         
@@ -1866,6 +2003,24 @@ namespace HomeMailHub.Properties {
         internal static string TAG_FROM {
             get {
                 return ResourceManager.GetString("TAG_FROM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Headers.
+        /// </summary>
+        internal static string TAG_HEADERS {
+            get {
+                return ResourceManager.GetString("TAG_HEADERS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Help.
+        /// </summary>
+        internal static string TAG_HELP {
+            get {
+                return ResourceManager.GetString("TAG_HELP", resourceCulture);
             }
         }
         
@@ -2023,6 +2178,51 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Crypt key.
+        /// </summary>
+        internal static string TAG_PGPKEY_CRYPT {
+            get {
+                return ResourceManager.GetString("TAG_PGPKEY_CRYPT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Public key count.
+        /// </summary>
+        internal static string TAG_PGPKEY_CRYPT_COUNT {
+            get {
+                return ResourceManager.GetString("TAG_PGPKEY_CRYPT_COUNT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Decrypt key.
+        /// </summary>
+        internal static string TAG_PGPKEY_DECRYPT {
+            get {
+                return ResourceManager.GetString("TAG_PGPKEY_DECRYPT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ID.
+        /// </summary>
+        internal static string TAG_PGPKEY_ID {
+            get {
+                return ResourceManager.GetString("TAG_PGPKEY_ID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Sign key.
+        /// </summary>
+        internal static string TAG_PGPKEY_SIGN {
+            get {
+                return ResourceManager.GetString("TAG_PGPKEY_SIGN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на encryption works with gnuPG &lt;= 2.0.0.
         /// </summary>
         internal static string TAG_PGPWARN {
@@ -2091,6 +2291,15 @@ namespace HomeMailHub.Properties {
         internal static string TAG_SEND {
             get {
                 return ResourceManager.GetString("TAG_SEND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Server:.
+        /// </summary>
+        internal static string TAG_SERVER {
+            get {
+                return ResourceManager.GetString("TAG_SERVER", resourceCulture);
             }
         }
         

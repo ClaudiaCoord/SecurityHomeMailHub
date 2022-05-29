@@ -110,12 +110,13 @@ namespace HomeMailHub.Gui {
             GuiAttribute cdwarn = Application.Driver.MakeAttribute(Color.DarkGray, Color.Blue);
 
             GuiAttribute cdesc = Application.Driver.MakeAttribute(Color.Gray, Color.Blue);
+            GuiAttribute cfdesc = Application.Driver.MakeAttribute(Color.Black, Color.Gray);
             GuiAttribute cddesc = Application.Driver.MakeAttribute(Color.DarkGray, Color.Blue);
 
             ColorRed = new ColorScheme() { Normal = cred, Focus = cred, HotFocus = cfred, HotNormal = cfred, Disabled = cdred };
 			ColorGreen = new ColorScheme() { Normal = cgreen, Focus = cgreen, HotFocus = cfgreen, HotNormal = cfgreen, Disabled = cdgreen };
             ColorWarning = new ColorScheme() { Normal = cwarn, Focus = cwarn, HotFocus = cwarn, HotNormal = cwarn, Disabled = cdwarn };
-            ColorDescription = new ColorScheme() { Normal = cdesc, Focus = cdesc, HotFocus = cdesc, HotNormal = cdesc, Disabled = cddesc };
+            ColorDescription = new ColorScheme() { Normal = cdesc, Focus = cfdesc, HotFocus = cfdesc, HotNormal = cfdesc, Disabled = cddesc };
             Colors.Menu = new ColorScheme() { Normal = cnmenu, Focus = cfmenu, HotFocus = chfmenu, HotNormal = chnmenu, Disabled = cdmenu };
             Colors.Dialog = new ColorScheme() { Normal = cndialog, Focus = cfdialog, HotFocus = chfdialog, HotNormal = chndialog, Disabled = cddialog };
             InitFieldColor(Settings.Default.IsGuiLightText);
@@ -152,16 +153,18 @@ namespace HomeMailHub.Gui {
 		~GuiApp() => Dispose();
 
 		public void LoadWindow(Type t, string s = default) {
-			switch (t.Name) {
-				case nameof(GuiMailAccountWindow): LoadWindow<GuiMailAccountWindow>(s); break;
-				case nameof(GuiVpnAccountWindow): LoadWindow<GuiVpnAccountWindow>(s); break;
-				case nameof(GuiSshAccountWindow): LoadWindow<GuiSshAccountWindow>(s); break;
-				case nameof(GuiMessagesListWindow): LoadWindow<GuiMessagesListWindow>(s); break;
-				case nameof(GuiMessageReadWindow): LoadWindow<GuiMessageReadWindow>(s); break;
-				case nameof(GuiMessageWriteWindow): LoadWindow<GuiMessageWriteWindow>(s); break;
-				case nameof(GuiProxyListWindow): LoadWindow<GuiProxyListWindow>(s); break;
-				case nameof(GuiServicesSettingsWindow): LoadWindow<GuiServicesSettingsWindow>(s); break;
-			}
+			try {
+				switch (t.Name) {
+					case nameof(GuiMailAccountWindow):  LoadWindow<GuiMailAccountWindow>(s); break;
+					case nameof(GuiVpnAccountWindow):   LoadWindow<GuiVpnAccountWindow>(s); break;
+					case nameof(GuiSshAccountWindow):   LoadWindow<GuiSshAccountWindow>(s); break;
+					case nameof(GuiMessagesListWindow): LoadWindow<GuiMessagesListWindow>(s); break;
+					case nameof(GuiMessageReadWindow):  LoadWindow<GuiMessageReadWindow>(s); break;
+					case nameof(GuiMessageWriteWindow): LoadWindow<GuiMessageWriteWindow>(s); break;
+					case nameof(GuiProxyListWindow):    LoadWindow<GuiProxyListWindow>(s); break;
+					case nameof(GuiServicesSettingsWindow): LoadWindow<GuiServicesSettingsWindow>(s); break;
+				}
+			} catch (Exception ex) { GuiMainStatusBar.UpdateStatus(GuiStatusItemId.Error, ex.Message); }
 		}
 
 		private void LoadWindow<T>(string s = default) where T : Window, IGuiWindow<T>, new() {

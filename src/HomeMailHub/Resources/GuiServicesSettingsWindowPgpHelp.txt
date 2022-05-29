@@ -1,0 +1,23 @@
+﻿
+For any account it is possible to create a pair of PGP keys that will encrypt, decrypt and sign your email messages. The "Decrypt incoming messages" option is used if you are using an email client that does not support PGP encryption. In this case, the received mail messages are decrypted and are available to the mail client in decrypted form.
+
+In the settings, in the "POP3" and "SMTP" sections, you must also enable the general rules for encrypting and decrypting mail messages. With general encryption rules enabled, if you send an unencrypted message, the message will be encrypted with the recipient's keys, if available, before being sent to the final recipient.
+
+You can export a public key from the main menu - "Setting up mail accounts". The public key is required for mutual end-to-end encryption of mail traffic between subscribers, you must transfer your own public key to the participant in the correspondence, and he will transfer his public key to you.
+
+Password:
+Shared password for existing and newly created PGP keys. Having installed it once, it is not recommended to change it in the future, otherwise some of the keys created earlier will not be available. (necessarily)
+
+Server:
+The Internet PGP key server is designed to facilitate the exchange of keys between users, via mail systems. Setting the server address is not required to use PGP encryption. The address must begin with the "hkp://" prefix, for example:
+
+hkp://subkeys.pgp.net
+hkp://pgp.mit.edu
+hkp://pool.sks-keyservers.net
+hkp://zimmermann.mayfirst.org
+hkp://pgp-public-keys@keys.(country code).pgp.net
+
+Path:
+The path to the folder where the GnuPG PGP key manager is installed. The compatible version of GnuPG to work with is 2.0.0 and earlier. Later versions have an incompatible output file format.
+
+Installing GnuPG is optional and is used at your discretion to manipulate PGP keys. The distribution kit includes the installation file GnuPG version 2.0.0, installation is possible through the button of the same name.

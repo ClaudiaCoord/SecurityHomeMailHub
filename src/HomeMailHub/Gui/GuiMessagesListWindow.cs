@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using HomeMailHub.Gui.ListSources;
 using NStack;
+using SecyrityMail.MailAccounts;
+using SecyrityMail;
 using SecyrityMail.Messages;
 using SecyrityMail.Utils;
 using Terminal.Gui;
@@ -45,7 +47,17 @@ namespace HomeMailHub.Gui
         private Label subjText { get; set; } = default;
         private Label dateText { get; set; } = default;
 
+        private Label infoNameLabel { get; set; } = default;
+        private Label infoLoginLabel { get; set; } = default;
+        private Label infoEmailLabel { get; set; } = default;
+        private Label infoPgpLabel { get; set; } = default;
+        private Label infoNameText { get; set; } = default;
+        private Label infoLoginText { get; set; } = default;
+        private Label infoEmailText { get; set; } = default;
+        private Label infoPgpText { get; set; } = default;
+
         private FrameView frameMsg { get; set; } = default;
+        private FrameView frameInfo { get; set; } = default;
         private RadioGroup sortTitle { get; set; } = default;
         private CheckBox readingBox { get; set; } = default;
         private ProgressBar waitLoadProgress { get; set; } = default;
@@ -106,11 +118,6 @@ namespace HomeMailHub.Gui
             selectedName = s;
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
-            frameMsg = new FrameView(new Rect(0, 0, 116, 8), RES.TAG_MESSAGE)
-            {
-                X = 1,
-                Y = 18
-            };
             tableView = new TableView()
             {
                 X = 1,
@@ -142,6 +149,82 @@ namespace HomeMailHub.Gui
             };
             Add(waitLoadProgress);
 
+            frameMsg = new FrameView(RES.TAG_MESSAGE)
+            {
+                X = 1,
+                Y = Pos.Bottom(tableView),
+                Width = 117,
+                Height = 8
+            };
+
+            #region frameInfo
+            frameInfo = new FrameView(RES.MENU_MAILACCOUNT.ClearText())
+            {
+                X = Pos.Right(frameMsg) + 1,
+                Y = Pos.Bottom(tableView),
+                Width = Dim.Fill() - 1,
+                Height = 8
+            };
+            frameInfo.Add(infoNameLabel = new Label(RES.TAG_NAME)
+            {
+                X = 1,
+                Y = 1,
+                AutoSize = true
+            });
+            frameInfo.Add(infoNameText = new Label(string.Empty)
+            {
+                X = 12,
+                Y = 1,
+                Width = Dim.Fill() - 2,
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            frameInfo.Add(infoLoginLabel = new Label(RES.TAG_LOGIN)
+            {
+                X = 1,
+                Y = 2,
+                AutoSize = true
+            });
+            frameInfo.Add(infoLoginText = new Label(string.Empty)
+            {
+                X = 12,
+                Y = 2,
+                Width = Dim.Fill() - 2,
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            frameInfo.Add(infoEmailLabel = new Label(RES.TAG_EMAIL)
+            {
+                X = 1,
+                Y = 3,
+                AutoSize = true
+            });
+            frameInfo.Add(infoEmailText = new Label(string.Empty)
+            {
+                X = 12,
+                Y = 3,
+                Width = Dim.Fill() - 2,
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            frameInfo.Add(infoPgpLabel = new Label($"{RES.CHKBOX_PGPAUTODECRYPT.ClearText()}:")
+            {
+                X = 1,
+                Y = 4,
+                AutoSize = true
+            });
+            frameInfo.Add(infoPgpText = new Label(string.Empty)
+            {
+                X = Pos.Right(infoPgpLabel) + 1,
+                Y = 4,
+                Width = Dim.Fill() - 2,
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            Add(frameInfo);
+            #endregion
+
+            #region frameMsg
             frameMsg.Add(sortTitle = new RadioGroup(new ustring[] { $" {(char)0x2191}", $"{(char)0x2193} " })
             {
                 X = 107,
@@ -280,6 +363,8 @@ namespace HomeMailHub.Gui
                 Y = layout[idx].Y,
                 AutoSize = layout[idx++].AutoSize
             });
+            #endregion
+
             buttonClose.Clicked += () => {
                 CloseDialog();
                 Application.RequestStop();
@@ -359,6 +444,15 @@ namespace HomeMailHub.Gui
                     WaitStart();
                     _ = await dataTable.LoadMessages();
                     base.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, dataTable.Count);
+                    try {
+                        UserAccount a = Global.Instance.Accounts.FindFromEmail(selectedName);
+                        if ((a != null) && !a.IsEmpty) {
+                            infoNameText.Text = a.Name;
+                            infoLoginText.Text = a.Login;
+                            infoEmailText.Text = a.Email;
+                            infoPgpText.Text = a.IsPgpAutoDecrypt ? RES.TAG_YES : RES.TAG_NO;
+                        }
+                    } catch (Exception ex) { ex.StatusBarError(); }
                 } catch (Exception ex) { ex.StatusBarError(); }
                 finally { WaitStop(); }
                 return true;
@@ -450,7 +544,7 @@ namespace HomeMailHub.Gui
 
         private void ReadingBox_Toggled(bool b) {
             if (__lastId < 0) return;
-            dataTable.SetReadMessage(__lastId, !b);
+            dataTable.SetReadMessage(__lastId, b);
         }
 
         private void SetMessageReading() {

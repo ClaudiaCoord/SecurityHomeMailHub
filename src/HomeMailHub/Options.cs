@@ -52,6 +52,14 @@ namespace HomeMailHub
         public double CheckMailPeriod { get; set; } = 0.0;
         [CmdOption(Key = "--proxy-type", IsEnum = true, ResourceId = "CMD_LINE_H6")]
         public ProxyType ProxyTypeOverride { get; set; } = ProxyType.None;
+        [CmdOption(Key = "--pgp-out-crypt", IsSwitch = true, ResourceId = "CHKBOX_OUT_PGPCRYPT")]
+        public bool IsSmtpAllOutPgpCrypt { get; set; } = false;
+        [CmdOption(Key = "--pgp-out-sign", IsSwitch = true, ResourceId = "CHKBOX_OUT_PGPSIGN")]
+        public bool IsSmtpAllOutPgpSign { get; set; } = false;
+        [CmdOption(Key = "--pgp-in-decrypt", IsSwitch = true, ResourceId = "CHKBOX_IN_PGP")]
+        public bool IsIncommingPgpDecrypt { get; set; } = false;
+        [CmdOption(Key = "--pgp-key-server", ResourceId = "CMD_LINE_H7")]
+        public string PgpKeyHost { get; set; } = string.Empty;
 
         public bool Check()
         {
@@ -96,12 +104,21 @@ namespace HomeMailHub
                 Settings.Default.IsAlwaysNewMessageId = true;
             if (IsModifyMessageDeliveredLocal)
                 Settings.Default.IsModifyMessageDeliveredLocal = true;
+            if (IsSmtpAllOutPgpCrypt)
+                Settings.Default.IsSmtpAllOutPgpCrypt = true;
+            if (IsSmtpAllOutPgpSign)
+                Settings.Default.IsSmtpAllOutPgpSign = true;
+            if (IsIncommingPgpDecrypt)
+                Settings.Default.IsIncommingPgpDecrypt = true;
 
             if (ProxyTypeOverride != ProxyType.None)
                 Settings.Default.ProxyType = ProxyTypeOverride.ToString();
 
             if (CheckMailPeriod > 0.0)
                 Settings.Default.CheckMailPeriod = CheckMailPeriod;
+
+            if (!string.IsNullOrWhiteSpace(PgpKeyHost))
+                Settings.Default.PgpKeyHost = PgpKeyHost;
 
             return true;
         }

@@ -90,7 +90,8 @@
     <Compile Include="Clients\POP3\Pop3ClientStat.cs" />
     <Compile Include="Clients\SMTP\SmtpClientStat.cs" />
     <Compile Include="Data\AccountsBase.cs" />
-    <Compile Include="Data\CryptGpgAccountsExport.cs" />
+    <Compile Include="GnuPG\AccountGpgKeys.cs" />
+    <Compile Include="GnuPG\CryptGpgAccountsExport.cs" />
     <Compile Include="Data\IAccountsBase.cs" />
     <Compile Include="Data\IAutoInit.cs" />
     <Compile Include="Clients\IMailClient.cs" />
@@ -100,7 +101,8 @@
     <Compile Include="Clients\SMTP\ClientSmtp.cs" />
     <Compile Include="Clients\SMTP\ClientSmtpTask.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="Data\CryptGpgContext.cs" />
+    <Compile Include="GnuPG\CryptGpgContext.cs" />
+    <Compile Include="Messages\MessageBuilder.cs" />
     <Compile Include="Messages\MessagesCacheOpener.cs" />
     <Compile Include="Utils\IOExtension.cs" />
     <Compile Include="Global.cs" />
@@ -195,5 +197,6 @@
   <ItemGroup>
     <None Include="SecyrityMail.licenseheader" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using MimeKit;
 using MimeKit.Cryptography;
 using Org.BouncyCastle.Bcpg.OpenPgp;
-using SecyrityMail.Data;
+using SecyrityMail.GnuPG;
 
 namespace SecyrityMail.Messages
 {
@@ -102,6 +102,7 @@ namespace SecyrityMail.Messages
         }
         #endregion
 
+        #region Decrypt Stream
         public async Task<MemoryStream> DecryptStream(MimeMessage mmsg) =>
             await Task.Run(async () => {
                 using MemoryStream ms = new(Encoding.UTF8.GetBytes(mmsg.TextBody), false);
@@ -116,6 +117,7 @@ namespace SecyrityMail.Messages
                 msd.Position = 0;
                 return msd;
             });
+        #endregion
 
         private void LocalLogger(string tag, Exception ex)
         {

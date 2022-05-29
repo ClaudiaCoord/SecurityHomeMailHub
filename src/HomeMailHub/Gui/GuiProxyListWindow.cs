@@ -12,8 +12,8 @@ using SecyrityMail;
 using SecyrityMail.Proxy;
 using SecyrityMail.Utils;
 using Terminal.Gui;
-using RES = HomeMailHub.Properties.Resources;
 using GuiAttribute = Terminal.Gui.Attribute;
+using RES = HomeMailHub.Properties.Resources;
 
 namespace HomeMailHub.Gui
 {
@@ -100,26 +100,36 @@ namespace HomeMailHub.Gui
 		{
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
-            frameList = new FrameView(new Rect(0, 0, 35, 25), RES.GUIPROXY_TITLE1)
+            frameList = new FrameView(RES.GUIPROXY_TITLE1)
+            {
+                X = 1,
+                Y = 1,
+                Width = 35,
+                Height = Dim.Fill()
+            };
+			frameSelect = new FrameView($"{RES.GUIPROXY_TITLE2} - {proxyType}")
 			{
-				X = 1,
-				Y = 1,
+                X = Pos.Right(frameList) + 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = 5
 			};
-			frameSelect = new FrameView(new Rect(0, 0, 80, 5), $"{RES.GUIPROXY_TITLE2} - {proxyType}")
+			frameForm = new FrameView(RES.GUIPROXY_TITLE3)
 			{
-				X = 37,
-				Y = 1
+                X = Pos.Right(frameList) + 1,
+                Y = Pos.Bottom(frameSelect),
+                Width = Dim.Fill() - 1,
+                Height = 10
 			};
-			frameForm = new FrameView(new Rect(0, 0, 80, 10), RES.GUIPROXY_TITLE3)
+			frameCheck = new FrameView($"{RES.GUIPROXY_TITLE4} - {proxyType}")
 			{
-				X = 37,
-				Y = 6
+                X = Pos.Right(frameList) + 1,
+                Y = Pos.Bottom(frameForm),
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill()
 			};
-			frameCheck = new FrameView(new Rect(0, 0, 80, 10), $"{RES.GUIPROXY_TITLE4} - {proxyType}")
-			{
-				X = 37,
-				Y = 16
-			};
+
+            #region frameList
             frameList.Add(listView = new ListView(data)
 			{
 				X = 1,
@@ -141,7 +151,9 @@ namespace HomeMailHub.Gui
             listView.OpenSelectedItem += ListView_OpenSelectedItem;
 			listView.SelectedItemChanged += ListView_SelectedItemChanged;
 			Add(frameList);
+            #endregion
 
+            #region frameCheck
             frameCheck.Add(logView = new TextView()
 			{
 				X = 1,
@@ -152,8 +164,10 @@ namespace HomeMailHub.Gui
 				ReadOnly = true
 			});
 			Add(frameCheck);
+            #endregion
 
-			frameSelect.Add(proxySelectType = new RadioGroup(proxyopt)
+            #region frameSelect
+            frameSelect.Add(proxySelectType = new RadioGroup(proxyopt)
 			{
 				X = 1,
 				Y = 1,
@@ -170,8 +184,10 @@ namespace HomeMailHub.Gui
 			});
 			proxySelectType.SelectedItemChanged += ProxySelectType_SelectedItemChanged;
 			Add(frameSelect);
+            #endregion
 
-			frameForm.Add(hostLabel = new Label(RES.TAG_HOST)
+            #region frameForm
+            frameForm.Add(hostLabel = new Label(RES.TAG_HOST)
 			{
 				X = 1,
 				Y = 1,
@@ -213,7 +229,6 @@ namespace HomeMailHub.Gui
                 AutoSize = layout[5].AutoSize,
 				Enabled = false
 			});
-
 			frameForm.Add(buttonSave = new Button(10, 19, RES.BTN_SAVE)
 			{
                 X = layout[0].X,
@@ -253,8 +268,9 @@ namespace HomeMailHub.Gui
 			buttonDelete.Clicked += () => Delete();
 			buttonPaste.Clicked += async () => await FromClipBoard().ConfigureAwait(false);
 			Add(frameForm);
+            #endregion
 
-			urlmenu = new MenuBarItem("_Url", new MenuItem[0]);
+            urlmenu = new MenuBarItem("_Url", new MenuItem[0]);
 			GuiMenu = new MenuBar(new MenuBarItem[] {
 				new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
 					new MenuItem (RES.GUIPROXY_MENU1, "", async () =>
@@ -448,14 +464,26 @@ namespace HomeMailHub.Gui
 				buttonDelete.Enabled = false;
 			});
 
-		private void DataClear() {
+        private void DataClear() {
             data.Clear();
             Clean();
-            Application.MainLoop.Invoke(() => frameList.Title = $"{RES.GUIPROXY_TITLE1} : 0");
-			runOnce.ResetId();
-		}
+            Application.MainLoop.Invoke(() => {
+                frameList.Title = $"{RES.GUIPROXY_TITLE1} : 0";
+                listView.SetSource(data);
+                listView.SetNeedsDisplay();
+            });
+        }
+        private void DataRemove(int idx) {
+            data.RemoveAt(idx);
+            Clean();
+            Application.MainLoop.Invoke(() => {
+                frameList.Title = $"{RES.GUIPROXY_TITLE1} : {data.Count}";
+                listView.SetSource(data);
+                listView.SetNeedsDisplay();
+            });
+        }
 
-		private void Delete() {
+        private void Delete() {
 
 			if (!runOnce.IsRange(data.Count) || !runOnce.GoRun(SetBusy))
 				return;
@@ -469,8 +497,7 @@ namespace HomeMailHub.Gui
 					$"{RES.GUIPROXY_TXT12} '{s}'",
 					$"{RES.GUIPROXY_TXT13} '{s}' ?", RES.TAG_YES, RES.TAG_NO) == 0) {
 					try {
-						data.RemoveAt(runOnce.LastId);
-						Clean();
+                        DataRemove(runOnce.LastId);
 					} catch (Exception ex) { ex.StatusBarError(); }
 				}
 			}
@@ -688,7 +715,8 @@ namespace HomeMailHub.Gui
                                 string s = txt.Substring(6, idx - 6).Trim();
                                 if (!string.IsNullOrWhiteSpace(s)) {
                                     data.Remove(s);
-                                    listView.SetChildNeedsDisplay();
+									listView.SetSource(data);
+                                    listView.SetNeedsDisplay();
                                 }
                             }
                             frameList.Title = $"{RES.GUIPROXY_TITLE1} : {data.Count}";

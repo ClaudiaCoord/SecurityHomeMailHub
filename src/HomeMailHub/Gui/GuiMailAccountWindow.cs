@@ -12,7 +12,7 @@ using HomeMailHub.Gui.Dialogs;
 using MailKit.Security;
 using NStack;
 using SecyrityMail;
-using SecyrityMail.Data;
+using SecyrityMail.GnuPG;
 using SecyrityMail.MailAccounts;
 using Terminal.Gui;
 using RES = HomeMailHub.Properties.Resources;
@@ -29,7 +29,9 @@ namespace HomeMailHub.Gui
 	public class GuiMailAccountWindow : Window, IGuiWindow<GuiMailAccountWindow> {
 		private const int labelOffset = 10;
 		private const string tag = "Mail";
-		private static readonly string [] extension = new string [] { ".conf", ".cnf", ".xml" };
+        private readonly object __pgpLock = new();
+        private static readonly string [] extension = new string[] { ".conf", ".cnf", ".xml" };
+        private static readonly string [] extpgp = new string [] { ".key", ".public", ".private", ".asc" };
 		private static readonly ustring [] ssltlsopt = new ustring [] { "None", "SslOnConnect", "StartTls", "Auto" };
 		private static readonly ustring [] typeopt = new ustring [] { "_POP3", "_IMAP" };
 		private static ustring GetInTitle(InMailType type = InMailType.None) =>
@@ -46,8 +48,11 @@ namespace HomeMailHub.Gui
 		private Button buttonDelete { get; set; } = default;
 		private Button buttonImport { get; set; } = default;
 		private Button buttonExport { get; set; } = default;
+        private Button buttonPgpImport { get; set; } = default;
+        private Button buttonPgpExport { get; set; } = default;
+        private Button buttonPgpCreate { get; set; } = default;
 
-		private Label hostInLabel { get; set; } = default;
+        private Label hostInLabel { get; set; } = default;
 		private Label portInLabel { get; set; } = default;
 		private Label hostOutLabel { get; set; } = default;
 		private Label portOutLabel { get; set; } = default;
@@ -70,18 +75,33 @@ namespace HomeMailHub.Gui
 		private FrameView frameIn { get; set; } = default;
 		private FrameView frameOut { get; set; } = default;
 		private FrameView frameList { get; set; } = default;
-		private FrameView frameUser { get; set; } = default;
+        private FrameView framePgp { get; set; } = default;
+        private FrameView frameUser { get; set; } = default;
+        private FrameView frameHelp { get; set; } = default;
 
-		private Label tlsInLabel { get; set; } = default;
+        private Label tlsInLabel { get; set; } = default;
 		private Label tlsOutLabel { get; set; } = default;
+        private Label helpText { get; set; } = default;
 
-		private ComboBox tlsInText { get; set; } = default;
+        private Label pgpKeyCryptLabel { get; set; } = default;
+        private Label pgpKeyDecryptLabel { get; set; } = default;
+        private Label pgpKeySignLabel { get; set; } = default;
+        private Label pgpKeyCountLabel { get; set; } = default;
+        private Label pgpKeyIdLabel { get; set; } = default;
+
+        private Label pgpKeyCryptText { get; set; } = default;
+        private Label pgpKeyDecryptText { get; set; } = default;
+        private Label pgpKeySignText { get; set; } = default;
+        private Label pgpKeyCountText { get; set; } = default;
+        private Label pgpKeyIdText { get; set; } = default;
+
+        private ComboBox tlsInText { get; set; } = default;
 		private ComboBox tlsOutText { get; set; } = default;
 		private CheckBox enableBox { get; set; } = default;
         private CheckBox pgpAutoBox { get; set; } = default;
         private RadioGroup mailInType { get; set; } = default;
 
-		public Toplevel GetTop => GuiToplevel;
+        public Toplevel GetTop => GuiToplevel;
 
 		private string selectedName { get; set; } = string.Empty;
 		private UserAccount account { get; set; } = default;
@@ -89,6 +109,7 @@ namespace HomeMailHub.Gui
 		private GuiRunOnce runOnce = new();
 		private List<string> data = new();
         private GuiLinearLayot linearLayot { get; } = new();
+		private AccountGpgKeys accountGpg { get; set; } = default;
 
         private bool IsEmptyForm =>
             string.IsNullOrWhiteSpace(loginText.Text.ToString()) ||
@@ -106,18 +127,26 @@ namespace HomeMailHub.Gui
 			GuiToplevel = GuiExtensions.CreteTop ();
 
             linearLayot.Add("en", new List<GuiLinearData> {
-                new GuiLinearData(10, 12, true),
-                new GuiLinearData(19, 12, true),
-                new GuiLinearData(29, 12, true),
-                new GuiLinearData(40, 12, true),
-                new GuiLinearData(51, 12, true)
+                new GuiLinearData(1,  7, true),
+                new GuiLinearData(12, 7, true),
+                new GuiLinearData(2,  1, true),
+                new GuiLinearData(14, 1, true),
+                new GuiLinearData(2,  3, true),
+                new GuiLinearData(11, 3, true),
+                new GuiLinearData(21, 3, true),
+                new GuiLinearData(32, 3, true),
+                new GuiLinearData(43, 3, true)
             });
             linearLayot.Add("ru", new List<GuiLinearData> {
-                new GuiLinearData(10, 12, true),
-                new GuiLinearData(24, 12, true),
-                new GuiLinearData(37, 12, true),
-                new GuiLinearData(49, 12, true),
-                new GuiLinearData(60, 12, true)
+                new GuiLinearData(1,  7, true),
+                new GuiLinearData(12, 7, true),
+                new GuiLinearData(2,  1, true),
+                new GuiLinearData(14, 1, true),
+                new GuiLinearData(2,  3, true),
+                new GuiLinearData(16, 3, true),
+                new GuiLinearData(29, 3, true),
+                new GuiLinearData(41, 3, true),
+                new GuiLinearData(52, 3, true)
             });
         }
 
@@ -131,25 +160,49 @@ namespace HomeMailHub.Gui
 		#region Init
 		public GuiMailAccountWindow Init(string __)
 		{
+			int idx = 0;
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
-            frameList = new FrameView (new Rect (0, 0, 35, 25), RES.TAG_ACCOUNTS) {
+            frameList = new FrameView (RES.TAG_ACCOUNTS) {
 				X = 1,
-				Y = 1
-			};
-			frameIn = new FrameView (new Rect (0, 0, 40, 9), GetInTitle()) {
-				X = 37,
-				Y = 1
-			};
-			frameOut = new FrameView (new Rect (0, 0, 40, 9), "SMTP") {
-				X = 77,
-				Y = 1
-			};
-			frameUser = new FrameView (new Rect (0, 0, 80, 16), RES.TAG_ACCOUNT) {
-				X = 37,
-				Y = 10
-			};
-			listView = new ListView (data) {
+				Y = 1,
+                Width = 35,
+                Height = Dim.Fill()
+            };
+			frameIn = new FrameView (GetInTitle()) {
+				X = Pos.Right(frameList) + 1,
+				Y = 1,
+                Width = 40,
+                Height = 9
+            };
+			frameOut = new FrameView ("SMTP") {
+				X = Pos.Right(frameIn) + 1,
+                Y = 1,
+                Width = 40,
+                Height = 9
+            };
+			frameUser = new FrameView (RES.TAG_ACCOUNT) {
+				X = Pos.Right(frameList) + 1,
+				Y = 10,
+				Width = 50,
+				Height = Dim.Fill() - 5
+            };
+            framePgp = new FrameView(RES.MENU_PGPKEYS.ClearText()) {
+                X = Pos.Right(frameUser) + 1,
+                Y = 10,
+                Width = 30,
+                Height = Dim.Fill() - 5
+            };
+            frameHelp = new FrameView(RES.TAG_HELP)
+            {
+                X = Pos.Right(frameOut) + 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill()
+            };
+
+            #region frameList
+            listView = new ListView (data) {
 				X = 1,
 				Y = 1,
 				Width = Dim.Fill () - 4,
@@ -162,8 +215,10 @@ namespace HomeMailHub.Gui
 
 			frameList.Add (listView);
 			Add (frameList);
+            #endregion
 
-			frameIn.Add (hostInLabel = new Label (RES.TAG_HOST) {
+            #region frameIn
+            frameIn.Add (hostInLabel = new Label (RES.TAG_HOST) {
 				X = 1,
 				Y = 1,
 				AutoSize = true
@@ -210,8 +265,10 @@ namespace HomeMailHub.Gui
 			tlsInText.SetSource (ssltlsopt.ToList());
 			mailInType.SelectedItemChanged += MailType_SelectedItemChanged;
 			Add (frameIn);
+            #endregion
 
-			frameOut.Add (hostOutLabel = new Label (RES.TAG_HOST) {
+            #region frameOut
+            frameOut.Add (hostOutLabel = new Label (RES.TAG_HOST) {
 				X = 1,
 				Y = 1,
 				AutoSize = true
@@ -250,8 +307,10 @@ namespace HomeMailHub.Gui
 			});
 			tlsOutText.SetSource (ssltlsopt.ToList ());
 			Add (frameOut);
+            #endregion
 
-			frameUser.Add (loginLabel = new Label (RES.TAG_LOGIN) {
+            #region frameUser
+            frameUser.Add (loginLabel = new Label (RES.TAG_LOGIN) {
 				X = 1,
 				Y = 1,
 				AutoSize = true
@@ -259,7 +318,7 @@ namespace HomeMailHub.Gui
 			frameUser.Add (loginText = new TextField (string.Empty) {
 				X = labelOffset,
 				Y = 1,
-				Width = 30,
+				Width = 37,
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
 			});
@@ -271,7 +330,7 @@ namespace HomeMailHub.Gui
 			frameUser.Add (passText = new TextField (string.Empty) {
 				X = labelOffset,
 				Y = 3,
-				Width = 30,
+				Width = 37,
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
 			});
@@ -283,7 +342,7 @@ namespace HomeMailHub.Gui
 			frameUser.Add (emailText = new TextField (string.Empty) {
 				X = labelOffset,
 				Y = 5,
-				Width = 30,
+				Width = 37,
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
 			});
@@ -295,64 +354,229 @@ namespace HomeMailHub.Gui
 			frameUser.Add (nameText = new TextField (string.Empty) {
 				X = labelOffset,
 				Y = 7,
-				Width = 30,
+				Width = 37,
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
-			});
-			frameUser.Add (enableBox = new CheckBox (1, 0, RES.TAG_ENABLE) {
-				X = labelOffset,
-				Y = 10,
-				Width = 10,
-				Height = 1,
-				Checked = true
-			});
-            frameUser.Add(pgpAutoBox = new CheckBox(1, 0, RES.CHKBOX_PGPAUTODECRYPT)
-            {
-                X = labelOffset + 12,
-                Y = 10,
-                Width = 10,
-                Height = 1,
-                Checked = false,
-				Enabled = false
-            });
-            enableBox.Toggled += EnableBox_Toggled;
-            pgpAutoBox.Toggled += PgpAutoBox_Toggled;
-
-            frameUser.Add (buttonSave = new Button (10, 19, RES.BTN_SAVE) {
-                X = layout[0].X,
-                Y = layout[0].Y,
-                AutoSize = layout[0].AutoSize,
-                TabIndex = 13
-			});
-			frameUser.Add (buttonClear = new Button (10, 19, RES.BTN_CLEAR) {
-                X = layout[1].X,
-                Y = layout[1].Y,
-                AutoSize = layout[1].AutoSize,
-                TabIndex = 14
-			});
-			frameUser.Add (buttonDelete = new Button (10, 19, RES.BTN_DELETE) {
-                X = layout[2].X,
-                Y = layout[2].Y,
-                AutoSize = layout[2].AutoSize,
-                TabIndex = 15
-			});
-			frameUser.Add (buttonImport = new Button (10, 19, RES.BTN_IMPORT) {
-                X = layout[3].X,
-                Y = layout[3].Y,
-                AutoSize = layout[3].AutoSize,
-                TabIndex = 16
-			});
-			frameUser.Add (buttonExport = new Button (10, 19, RES.BTN_EXPORT) {
-                X = layout[4].X,
-                Y = layout[4].Y,
-                AutoSize = layout[4].AutoSize,
-                TabIndex = 17
 			});
             loginText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
             passText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
             Add(frameUser);
+            #endregion
 
-			buttonSave.Clicked += () => SaveItem();
+            #region framePgp
+            framePgp.Add(pgpKeyIdLabel = new Label(RES.TAG_PGPKEY_ID)
+            {
+                X = 1,
+                Y = 1,
+                AutoSize = true
+            });
+            framePgp.Add(pgpKeyIdText = new Label(string.Empty)
+            {
+                X = 7,
+                Y = 1,
+                AutoSize = true,
+				ColorScheme = GuiApp.ColorDescription
+            });
+            framePgp.Add(pgpKeySignLabel = new Label(RES.TAG_PGPKEY_SIGN)
+            {
+                X = 1,
+                Y = 2,
+                AutoSize = true
+            });
+            framePgp.Add(pgpKeySignText = new Label(string.Empty)
+            {
+                X = 24,
+                Y = 2,
+                AutoSize = true,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            framePgp.Add(pgpKeyCryptLabel = new Label(RES.TAG_PGPKEY_CRYPT)
+            {
+                X = 1,
+                Y = 3,
+                AutoSize = true
+            });
+            framePgp.Add(pgpKeyCryptText = new Label(string.Empty)
+            {
+                X = 24,
+                Y = 3,
+                AutoSize = true,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            framePgp.Add(pgpKeyDecryptLabel = new Label(RES.TAG_PGPKEY_DECRYPT)
+            {
+                X = 1,
+                Y = 4,
+                AutoSize = true
+            });
+            framePgp.Add(pgpKeyDecryptText = new Label(string.Empty)
+            {
+                X = 24,
+                Y = 4,
+                AutoSize = true,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            framePgp.Add(pgpKeyCountLabel = new Label(RES.TAG_PGPKEY_CRYPT_COUNT)
+            {
+                X = 1,
+                Y = 5,
+                AutoSize = true
+            });
+            framePgp.Add(pgpKeyCountText = new Label(string.Empty)
+            {
+                X = 24,
+                Y = 5,
+                AutoSize = true,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            framePgp.Add(buttonPgpImport = new Button(RES.BTN_IMPORT)
+            {
+                X = layout[idx].X,
+                Y = layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize,
+				Enabled = false
+            });
+            framePgp.Add(buttonPgpExport = new Button(RES.BTN_EXPORT)
+            {
+                X = layout[idx].X,
+                Y = layout[idx].Y,
+                AutoSize = layout[idx].AutoSize,
+                Enabled = false
+            });
+            framePgp.Add(buttonPgpCreate = new Button(RES.BTN_CREATE)
+            {
+                X = layout[idx].X,
+                Y = layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize,
+                Enabled = false,
+				Visible = false
+            });
+            Add(framePgp);
+            #endregion
+
+            #region frameHelp
+            frameHelp.Add(helpText = new Label()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill() - 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            Add(frameHelp);
+            #endregion
+
+            #region main Windows
+            Add(enableBox = new CheckBox(RES.TAG_ENABLE)
+            {
+                X = Pos.Right(frameList) + layout[idx].X,
+                Y = Pos.Bottom(frameUser) + layout[idx++].Y,
+                Width = 10,
+                Height = 1,
+                Checked = true
+            });
+            Add(pgpAutoBox = new CheckBox(RES.CHKBOX_PGPAUTODECRYPT)
+            {
+                X = Pos.Right(frameList) + layout[idx].X,
+                Y = Pos.Bottom(frameUser) + layout[idx++].Y,
+                Width = 10,
+                Height = 1,
+                Checked = false,
+                Enabled = false
+            });
+            enableBox.Toggled += EnableBox_Toggled;
+            pgpAutoBox.Toggled += PgpAutoBox_Toggled;
+
+            Add(buttonSave = new Button(RES.BTN_SAVE)
+            {
+                X = Pos.Right(frameList) + layout[idx].X,
+                Y = Pos.Bottom(frameUser) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize,
+                TabIndex = 13
+            });
+            Add(buttonClear = new Button(RES.BTN_CLEAR)
+            {
+                X = Pos.Right(frameList) + layout[idx].X,
+                Y = Pos.Bottom(frameUser) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize,
+                TabIndex = 14
+            });
+            Add(buttonDelete = new Button(RES.BTN_DELETE)
+            {
+                X = Pos.Right(frameList) + layout[idx].X,
+                Y = Pos.Bottom(frameUser) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize,
+                TabIndex = 15
+            });
+            Add(buttonImport = new Button(RES.BTN_IMPORT)
+            {
+                X = Pos.Right(frameList) + layout[idx].X,
+                Y = Pos.Bottom(frameUser) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize,
+                TabIndex = 16
+            });
+            Add(buttonExport = new Button(RES.BTN_EXPORT)
+            {
+                X = Pos.Right(frameList) + layout[idx].X,
+                Y = Pos.Bottom(frameUser) + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize,
+                TabIndex = 17
+            });
+            #endregion
+
+            #region Buttons
+            buttonPgpImport.Clicked += async () => {
+                try {
+                    if ((accountGpg == null) || !accountGpg.CanImport) {
+                        Application.MainLoop.Invoke(() => buttonPgpImport.Enabled = false);
+						return;
+                    }
+                    GuiOpenDialog d = $"{RES.MENU_PGPKEY_IMPORT.ClearText()} - {selectedName}"
+															   .GuiOpenDialogs(true, extpgp);
+                    Application.Run(d);
+                    if (!d.Canceled) {
+                        string[] ss = d.GuiReturnDialog();
+						if (ss.Length > 0)
+							_ = await accountGpg.ImportAsync(ss[0]).ContinueWith(async (t) => {
+                                _ = await ControlPgp().ConfigureAwait(false);
+                            }).ConfigureAwait(false);
+                    }
+                } catch (Exception ex) { ex.StatusBarError(); }
+            };
+            buttonPgpExport.Clicked += async () => {
+                try {
+                    if ((accountGpg == null) || !accountGpg.CanExport) {
+                        Application.MainLoop.Invoke(() => buttonPgpExport.Enabled = false);
+                        return;
+                    }
+                    GuiSaveDialog d = $"{RES.MENU_PGPKEY_EXPORT.ClearText()} - {selectedName}"
+															   .GuiSaveDialogs(
+																	Global.GetRootDirectory(Global.DirectoryPlace.Export),
+																	extpgp);
+                    Application.Run(d);
+                    if (!d.Canceled) {
+                        string[] ss = d.GuiReturnDialog();
+                        if (ss.Length > 0)
+                            _ = await accountGpg.ExportAsync(ss[0]).ConfigureAwait(false);
+                    }
+                } catch (Exception ex) { ex.StatusBarError(); }
+            };
+            buttonPgpCreate.Clicked += async () => {
+                try {
+                    if ((accountGpg == null) || !accountGpg.CanCreate) {
+                        Application.MainLoop.Invoke(() => buttonPgpCreate.Enabled = false);
+                        return;
+                    }
+                    if (MessageBox.Query(50, 7,
+                        RES.MENU_PGPKEYS.ClearText(),
+                        $"{RES.MENU_PGPKEY_CREATE.ClearText()} - {selectedName} ?", RES.TAG_YES, RES.TAG_NO) == 0) {
+                        _ = await accountGpg.GenerateKeyPairAsync().ContinueWith(async (t) => {
+                            _ = await ControlPgp().ConfigureAwait(false);
+                        }).ConfigureAwait(false);
+                    }
+                } catch (Exception ex) { ex.StatusBarError(); }
+            };
+            buttonSave.Clicked += () => SaveItem();
 			buttonClear.Clicked += () => Clean();
 			buttonDelete.Clicked += () => Delete();
 			buttonImport.Clicked += async () => {
@@ -396,8 +620,10 @@ namespace HomeMailHub.Gui
 					} catch (Exception ex) { ex.StatusBarError(); }
 				}
 			};
+            #endregion
+
             urlmenu = new MenuBarItem("_Url", new MenuItem[0]);
-            GuiMenu = new MenuBar (new MenuBarItem [] {
+			GuiMenu = new MenuBar(new MenuBarItem[] {
 				new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
 					new MenuItem (RES.MENU_RELOAD, "", async () => {
 						_ = await Global.Instance.Accounts.Load().ConfigureAwait(false);
@@ -434,19 +660,32 @@ namespace HomeMailHub.Gui
 							string.Format(RES.GUIACCOUNT_FMT2, RES.TAG_DELETE),
 							string.Format(RES.GUIACCOUNT_FMT4, RES.TAG_DELETE, tag), RES.TAG_YES, RES.TAG_NO) == 0) {
 							try {
-								Global.Instance.Accounts.Clear();
+								DataClear();
+                                Global.Instance.Accounts.Clear();
 								_ = await Global.Instance.Accounts.Save().ConfigureAwait(false);
 							} catch (Exception ex) { ex.StatusBarError(); }
 						}
-					}),
-                    new MenuItem (RES.MENU_GPGEXPORT, string.Empty, async () => {
+					})
+				}),
+				new MenuBarItem (RES.MENU_PGPKEYS, new MenuItem [] {
+					new MenuItem (RES.MENU_PGPKEY_CREATE, "",
+						() => buttonPgpCreate.OnClicked(),
+						() => (accountGpg != null) && accountGpg.CanCreate),
+                    new MenuItem (RES.MENU_PGPKEY_IMPORT, "",
+						() => buttonPgpImport.OnClicked(),
+						() => (accountGpg != null) && accountGpg.CanImport),
+					null,
+                    new MenuItem (RES.MENU_PGPKEY_EXPORT, "",
+                        () => buttonPgpExport.OnClicked(),
+                        () => (accountGpg != null) && accountGpg.CanExport),
+                    new MenuItem (RES.MENU_GPGEXPORT, "", async () => {
                         try {
                             _ = await CryptGpgContext.ExportAccountToGpg(Properties.Settings.Default.PgpBinPath)
-													 .ConfigureAwait(false);
+                                                     .ConfigureAwait(false);
                         } catch (Exception ex) { ex.StatusBarError(); }
                     }, () => !string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpBinPath) &&
-							 !string.IsNullOrWhiteSpace(Global.Instance.Config.PgpPassword)),
-				}),
+                             !string.IsNullOrWhiteSpace(Global.Instance.Config.PgpPassword))
+                }),
                 urlmenu
             });
 			GuiToplevel.Add (GuiMenu, this);
@@ -463,16 +702,47 @@ namespace HomeMailHub.Gui
 					foreach (UserAccount a in Global.Instance.Accounts.Items)
 						data.Add(a.Email);
 					await listView.SetSourceAsync(data).ConfigureAwait(false);
-					frameList.Title = selectedName.GetListTitle(data.Count);
 					Clean();
-				} catch (Exception ex) { ex.StatusBarError(); }
+                    Application.MainLoop.Invoke(() => frameList.Title = selectedName.GetListTitle(data.Count));
+                } catch (Exception ex) { ex.StatusBarError(); }
                 try {
                     MenuItem[] mitems = await nameof(GuiMailAccountWindow).LoadMenuUrls().ConfigureAwait(false);
                     Application.MainLoop.Invoke(() => urlmenu.Children = mitems);
-                }
-                catch { }
+                } catch { }
+                Application.MainLoop.Invoke(() => helpText.Text = RES.GuiMailAccountWindowHelp);
                 return true;
 			});
+        #endregion
+
+        #region Delete
+        private async void Delete() {
+
+            if (!runOnce.IsRange(data.Count) || !runOnce.GoRun())
+                return;
+
+            try {
+                string s = data[runOnce.LastId];
+                if (string.IsNullOrWhiteSpace(s))
+                    return;
+
+                if (MessageBox.Query(50, 7,
+                    string.Format(RES.GUIACCOUNT_FMT5, RES.TAG_DELETE, s),
+                    string.Format(RES.GUIACCOUNT_FMT3, RES.TAG_DELETE, s), RES.TAG_YES, RES.TAG_NO) == 0) {
+                    try {
+                        UserAccount a = (from i in Global.Instance.Accounts.Items
+                                         where i.Email.Equals(s)
+                                         select i).FirstOrDefault();
+                        if (a == default)
+                            return;
+
+                        DataRemove(a.Email);
+                        Global.Instance.Accounts.Items.Remove(a);
+                        _ = await Global.Instance.Accounts.Save().ConfigureAwait(false);
+                    } catch (Exception ex) { ex.StatusBarError(); }
+                }
+            }
+            finally { runOnce.EndRun(); }
+        }
         #endregion
 
         private void MailType_SelectedItemChanged (SelectedItemChangedArgs obj) {
@@ -487,58 +757,59 @@ namespace HomeMailHub.Gui
 		private void DataClear() {
 			data.Clear();
 			Clean();
-            Application.MainLoop.Invoke(() => frameList.Title = selectedName.GetListTitle(0));
+            Application.MainLoop.Invoke(() => {
+				frameList.Title = string.Empty.GetListTitle(0);
+				listView.SetSource(data);
+                listView.SetNeedsDisplay();
+            });
 		}
-		private void Clean() =>
+        private void DataRemove(string s) {
+            data.Remove(s);
+            Clean();
+            Application.MainLoop.Invoke(() => {
+                frameList.Title = string.Empty.GetListTitle(data.Count);
+                listView.SetSource(data);
+                listView.SetNeedsDisplay();
+            });
+        }
+		private void Clean() {
 			Application.MainLoop.Invoke(() => {
-                hostInText.Text =
-                hostOutText.Text =
-                loginText.Text =
-                passText.Text =
-                emailText.Text =
-                nameText.Text = string.Empty;
-                portInText.Text = "110";
-                portOutText.Text = "25";
+				hostInText.Text =
+				hostOutText.Text =
+				loginText.Text =
+				passText.Text =
+				emailText.Text =
+				nameText.Text = string.Empty;
+				portInText.Text = "110";
+				portOutText.Text = "25";
+
+                pgpKeyIdText.Text =
+                pgpKeySignText.Text =
+				pgpKeyCountText.Text =
+				pgpKeyCryptText.Text =
+				pgpKeyDecryptText.Text = string.Empty;
+
+                buttonPgpCreate.Enabled =
+				buttonPgpImport.Enabled =
+                buttonPgpExport.Enabled =
+                buttonPgpExport.Visible = false;
+                buttonPgpCreate.Visible = true;
 
                 enableBox.Checked = false;
-                pgpAutoBox.Checked = false;
-                enableBox.Enabled = false;
-                pgpAutoBox.Enabled = false;
-                tlsInText.SelectedItem = 0;
-                tlsOutText.SelectedItem = 0;
-                enableBox.Checked = true;
-                inMailType = InMailType.None;
-                frameIn.Title = GetInTitle();
-                ButtonsEnable(false);
-            });
-
-		private async void Delete() {
-
-			if (!runOnce.IsRange(data.Count) || !runOnce.GoRun())
-				return;
-
-			try {
-				string s = data[runOnce.LastId];
-				if (string.IsNullOrWhiteSpace(s))
-					return;
-
-				if (MessageBox.Query(50, 7,
-					string.Format(RES.GUIACCOUNT_FMT5, RES.TAG_DELETE, s),
-					string.Format(RES.GUIACCOUNT_FMT3, RES.TAG_DELETE, s), RES.TAG_YES, RES.TAG_NO) == 0) {
-					try {
-						UserAccount a = (from i in Global.Instance.Accounts.Items
-										 where i.Email.Equals(s)
-										 select i).FirstOrDefault();
-						if (a == default)
-							return;
-
-						Global.Instance.Accounts.Items.Remove(a);
-						_ = await Global.Instance.Accounts.Save().ConfigureAwait(false);
-					}
-					catch (Exception ex) { ex.StatusBarError(); }
-				}
-			} finally { runOnce.EndRun(); }
-		}
+				pgpAutoBox.Checked = false;
+				enableBox.Enabled = false;
+				pgpAutoBox.Enabled = false;
+				tlsInText.SelectedItem = 0;
+				tlsOutText.SelectedItem = 0;
+				enableBox.Checked = true;
+				inMailType = InMailType.None;
+				selectedName = string.Empty;
+				frameIn.Title = GetInTitle();
+				ButtonsEnable(false);
+			});
+			DisposeControlPgp();
+            runOnce.ResetId();
+        }
 
 		private void EnableBox_Toggled(bool b) =>
 			Application.MainLoop.Invoke(() => {
@@ -552,13 +823,13 @@ namespace HomeMailHub.Gui
 				passText.Enabled =
 				emailText.Enabled =
 				nameText.Enabled =
-				pgpAutoBox.Enabled = !b;
-                ButtonsEnable(!b);
+				pgpAutoBox.Enabled = b;
+                ButtonsEnable(b);
             });
 
 		private void PgpAutoBox_Toggled(bool b) {
 			if (account != default)
-                account.IsPgpAutoDecrypt = !b;
+                account.IsPgpAutoDecrypt = b;
         }
 
         private void ListView_OpenSelectedItem(ListViewItemEventArgs obj) => SelectedListItem(obj);
@@ -567,11 +838,12 @@ namespace HomeMailHub.Gui
 		private void SelectedListItem(ListViewItemEventArgs obj) {
 			if (obj == null)
 				return;
+			System.Diagnostics.Debug.WriteLine($"\t{obj.Item} -> {data.Count}");
 			if ((obj.Item >= 0) && (obj.Item < data.Count))
 				SelectItem(data[obj.Item], obj.Item);
 		}
 
-		private void SelectItem(string s, int id) {
+		private async void SelectItem(string s, int id) {
 
 			if (!runOnce.GoRun(id))
 				return;
@@ -628,12 +900,13 @@ namespace HomeMailHub.Gui
                 enableBox.Enabled = true;
 
                 enableBox.Checked = a.Enable;
-				EnableBox_Toggled(!a.Enable);
+				EnableBox_Toggled(a.Enable);
 				account = a;
                 ButtonsEnable(true);
+                await ControlPgp().ConfigureAwait(false);
 
             } finally { runOnce.EndRun(); }
-		}
+        }
 
 		private async void SaveItem() {
 
@@ -713,18 +986,65 @@ namespace HomeMailHub.Gui
 			}
 		}
 
-		private async void AddItem(UserAccount a, bool b)
-		{
+		private void AddItem(UserAccount a, bool b) {
 			if (!b) return;
 			try {
-				Global.Instance.Accounts.Add(a);
 				data.Add(a.Name);
-				await listView.SetSourceAsync(data).ConfigureAwait(false);
-				frameList.Title = selectedName.GetListTitle(data.Count);
-			} catch (Exception ex) { ex.StatusBarError(); }
+				Application.MainLoop.Invoke(() => {
+					listView.SetSource(data);
+					listView.SetNeedsDisplay();
+                    frameList.Title = string.Empty.GetListTitle(data.Count);
+				});
+                Global.Instance.Accounts.Add(a);
+            } catch (Exception ex) { ex.StatusBarError(); }
 		}
 
-		private int SecureOptionsSelect(SecureSocketOptions opt) =>
+		private async Task<bool> ControlPgp() =>
+			await Task.Run(() => {
+                if (string.IsNullOrWhiteSpace(selectedName))
+                    return false;
+
+                lock (__pgpLock) {
+                    if (accountGpg == null)
+                        accountGpg = new(selectedName);
+                    else if (!selectedName.Equals(accountGpg.EmailAddress.Address)) {
+                        DisposeControlPgpInternal();
+                        accountGpg = new(selectedName);
+                    }
+                    accountGpg.Build();
+                }
+                Application.MainLoop.Invoke(() => {
+                    pgpKeySignText.Text = ControlPgpAnswer(accountGpg.IsSigningKey);
+                    pgpKeyCryptText.Text = ControlPgpAnswer(accountGpg.IsPublicKey);
+                    pgpKeyDecryptText.Text = ControlPgpAnswer(accountGpg.IsSecretKey);
+                    pgpKeyCountText.Text = accountGpg.PublicKeyCount.ToString();
+                    pgpKeyIdText.Text = (accountGpg.KeyId > 0) ? accountGpg.KeyId.ToString() : string.Empty;
+
+					bool isnew = !accountGpg.IsSigningKey && !accountGpg.IsPublicKey && !accountGpg.IsSigningKey;
+                    buttonPgpExport.Visible = !isnew;
+                    buttonPgpExport.Enabled = accountGpg.IsPublicKey;
+                    buttonPgpImport.Enabled =
+                    buttonPgpCreate.Enabled =
+                    buttonPgpCreate.Visible = isnew;
+                });
+				return true;
+			});
+
+		private string ControlPgpAnswer(bool b) =>
+			b ? RES.TAG_OK : RES.TAG_NO;
+
+        private void DisposeControlPgp() {
+			lock (__pgpLock)
+                DisposeControlPgpInternal();
+        }
+        private void DisposeControlPgpInternal() {
+            AccountGpgKeys acc = accountGpg;
+            accountGpg = null;
+            if (acc != null)
+                acc.Dispose();
+        }
+
+        private int SecureOptionsSelect(SecureSocketOptions opt) =>
 			opt switch {
 				SecureSocketOptions.None => 0,
 				SecureSocketOptions.SslOnConnect => 1,

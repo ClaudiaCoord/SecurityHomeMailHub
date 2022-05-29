@@ -58,6 +58,8 @@ namespace SecyrityMail
         List<string> ForbidenEntryList { get; set; }
 
         string PgpPassword { get; set; }
+        string PgpKeyHost { get; set; }
+
         double Pop3ClientIdle { get; set; }
         int Pop3ServicePort { get; set; }
         ProxyType ProxyType { get; set; }

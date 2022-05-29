@@ -222,7 +222,7 @@ namespace HomeMailHub.Gui.ListSources
             Columns.Add(RES.TAG_DT_SUBJ);
             Columns.Add(RES.TAG_DT_DATE);
             Columns.Add(hiddencol, typeof(bool));
-            Columns.Add(RES.MENU_SORTFROM, typeof(string));
+            Columns.Add(RES.TAG_FROM, typeof(string));
 
             GuiAttribute cnnorm = Application.Driver.MakeAttribute(Color.Gray, Color.Blue);
             GuiAttribute crnorm = Application.Driver.MakeAttribute(Color.White, Color.Blue);
@@ -255,11 +255,17 @@ namespace HomeMailHub.Gui.ListSources
             tv.Style.ColumnStyles.Add(tv.Table.Columns[RES.TAG_DT_NUM],
                 new TableView.ColumnStyle() { MinWidth = 3,  MaxWidth = 3, Alignment = TextAlignment.Centered });
             tv.Style.ColumnStyles.Add(tv.Table.Columns[RES.TAG_DT_SUBJ],
-                new TableView.ColumnStyle() { MinWidth = 93, MaxWidth = 93, Alignment = TextAlignment.Left });
+                new TableView.ColumnStyle() { MinWidth = 93, MaxWidth = tv.MaxCellWidth, Alignment = TextAlignment.Left });
             tv.Style.ColumnStyles.Add(tv.Table.Columns[RES.TAG_DT_DATE],
-                new TableView.ColumnStyle() { MinWidth = 16, MaxWidth = 16, Alignment = TextAlignment.Justified });
+                new TableView.ColumnStyle() { MinWidth = 18, MaxWidth = 18, Alignment = TextAlignment.Justified });
+            tv.Style.ColumnStyles.Add(tv.Table.Columns[RES.TAG_MSGREADING],
+                new TableView.ColumnStyle() { MinWidth = 10, MaxWidth = 10, Alignment = TextAlignment.Justified });
+            tv.Style.ColumnStyles.Add(tv.Table.Columns[RES.TAG_FROM],
+                new TableView.ColumnStyle() { MinWidth = 40, MaxWidth = 40, Alignment = TextAlignment.Left });
 
             tv.Style.RowColorGetter = (a) => IsRowRead(a.RowIndex) ? UnReradColorScheme : null;
+            tv.Style.GetOrCreateColumnStyle(tv.Table.Columns[RES.TAG_MSGREADING]).RepresentationGetter =
+                (k) => (bool)k ? RES.TAG_YES : RES.TAG_NO;
         }
 
         private void SortData(TableSort ts = TableSort.None, bool isrefresh = true) {

@@ -249,6 +249,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="HomeMailHub.ico" />
+    <Content Include="Resources\GuiServicesSettingsWindowPgpHelp.txt" />
+    <Content Include="Resources\GuiServicesSettingsWindowSecureHelp.txt" />
+    <Content Include="Resources\ru\GuiServicesSettingsWindowPgpHelp.txt" />
+    <Content Include="Resources\ru\GuiServicesSettingsWindowSecureHelp.txt" />
+    <None Include="Resources\GuiMailAccountWindowHelp.txt" />
+    <None Include="Resources\ru\GuiMailAccountWindowHelp.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -33,8 +33,8 @@ namespace SecyrityMail.Messages
         private const string ErrorReportingMtaId = "Reporting-MTA";
         private const string ErrorFinalRecipientId = "Final-Recipient";
         private const string ErrorArrivalDateId = "Arrival-Date";
-        private const string XConfirmReadingToId = "X-Confirm-Reading-To";
         private const string DeliveryStatusId = "delivery-status";
+        public const string XConfirmReadingToId = "X-Confirm-Reading-To";
 
         [XmlElement("id")]
         public int Id { get; set; } = 0;
@@ -226,7 +226,9 @@ namespace SecyrityMail.Messages
 }
                                 catch (Exception ex) { Global.Instance.Log.Add(place.ToString(), ex); }
                                 finally {
-                                    Global.Instance.Log.Add(nameof(MailMessageCrypt), $"PGP message {place}/'{mmsg.MessageId}' status: {iscrypted}/{iscrypt}");
+                                    if (iscrypted)
+                                        Global.Instance.Log.Add(nameof(MailMessageCrypt),
+                                            $"PGP message {place}/'{mmsg.MessageId}' status: {iscrypted}/{iscrypt}");
                                 }
                                 break;
                             }
@@ -264,6 +266,7 @@ namespace SecyrityMail.Messages
                                 break;
                             }
                         case Global.DirectoryPlace.Out: {
+                                MailMessageCrypt.Actions actions = MailMessageCrypt.Actions.None;
                                 bool iscrypt = false;
                                 try {
                                     if (mmsg.Headers != default) {
@@ -286,16 +289,31 @@ namespace SecyrityMail.Messages
                                             Global.Instance.Config.IsSmtpAllOutPgpCrypt && !crypt.CheckCrypted(mmsg),
                                             Global.Instance.Config.IsSmtpAllOutPgpSign && !crypt.CheckSigned(mmsg)
                                         };
-                                        if (b[0] && b[1])
-                                            iscrypt = await crypt.SignEncrypt(mmsg).ConfigureAwait(false);
-                                        else if (b[0])
-                                            iscrypt = await crypt.Encrypt(mmsg).ConfigureAwait(false);
-                                        else if (b[1])
-                                            iscrypt = await crypt.Sign(mmsg).ConfigureAwait(false);
+                                        actions = (b[0] && b[1]) ? MailMessageCrypt.Actions.SignEncrypt :
+                                            (b[0] ? MailMessageCrypt.Actions.Encrypt :
+                                                (b[1] ? MailMessageCrypt.Actions.Sign : MailMessageCrypt.Actions.None));
+
+                                        switch (actions) {
+                                            case MailMessageCrypt.Actions.Sign: {
+                                                    iscrypt = await crypt.Sign(mmsg).ConfigureAwait(false);
+                                                    break;
+                                                }
+                                            case MailMessageCrypt.Actions.Encrypt: {
+                                                    iscrypt = await crypt.Encrypt(mmsg).ConfigureAwait(false);
+                                                    break;
+                                                }
+                                            case MailMessageCrypt.Actions.SignEncrypt: {
+                                                    iscrypt = await crypt.SignEncrypt(mmsg).ConfigureAwait(false);
+                                                    break;
+                                                }
+                                            default: break;
+                                        }
                                     }
                                     catch (Exception ex) { Global.Instance.Log.Add(place.ToString(), ex); }
                                     finally {
-                                        Global.Instance.Log.Add(nameof(MailMessageCrypt), $"PGP message {place}/'{mmsg.MessageId}' status: {iscrypt}");
+                                        if (actions != MailMessageCrypt.Actions.None)
+                                            Global.Instance.Log.Add(nameof(MailMessageCrypt),
+                                                $"PGP message {place}/'{mmsg.MessageId}' status: {iscrypt}");
                                     }
                                 }
                                 break;

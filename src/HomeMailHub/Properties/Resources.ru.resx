@@ -138,6 +138,9 @@
   <data name="BTN_CLOSE" xml:space="preserve">
     <value>_Закрыть</value>
   </data>
+  <data name="BTN_CREATE" xml:space="preserve">
+    <value>_Создать</value>
+  </data>
   <data name="BTN_DELETE" xml:space="preserve">
     <value>_Удалить</value>
   </data>
@@ -146,6 +149,9 @@
   </data>
   <data name="BTN_IMPORT" xml:space="preserve">
     <value>_Импорт</value>
+  </data>
+  <data name="BTN_INSTALL" xml:space="preserve">
+    <value>_Установить</value>
   </data>
   <data name="BTN_OPEN" xml:space="preserve">
     <value>_Открыть</value>
@@ -192,6 +198,9 @@
   <data name="CHKBOX_IMAPPURGE" xml:space="preserve">
     <value>Всегда очищать сообщения при получении (IMAP)</value>
   </data>
+  <data name="CHKBOX_IN_PGP" xml:space="preserve">
+    <value>Расшифровывать PGP сообщения, если доступно</value>
+  </data>
   <data name="CHKBOX_NEWMSGID" xml:space="preserve">
     <value>Всегда создавать новый идентификатор сообщения</value>
   </data>
@@ -201,14 +210,17 @@
   <data name="CHKBOX_NOWARN" xml:space="preserve">
     <value>Без предупреждений</value>
   </data>
+  <data name="CHKBOX_OUT_PGPCRYPT" xml:space="preserve">
+    <value>Зашифровать текст письма PGP, если доступно</value>
+  </data>
+  <data name="CHKBOX_OUT_PGPSIGN" xml:space="preserve">
+    <value>Заверять подпись письма PGP, если доступно</value>
+  </data>
   <data name="CHKBOX_PGPAUTODECRYPT" xml:space="preserve">
     <value>Автоматически расшифровывать PGP</value>
   </data>
   <data name="CHKBOX_POP3DELALL" xml:space="preserve">
     <value>Принудительно удалять все сообщения</value>
-  </data>
-  <data name="CHKBOX_POP3PGP" xml:space="preserve">
-    <value>Расшифровывать PGP сообщения, если доступно</value>
   </data>
   <data name="CHKBOX_RECEIVEONSEND" xml:space="preserve">
     <value>Получать внешнюю почту только при отправке сообщений</value>
@@ -224,12 +236,6 @@
   </data>
   <data name="CHKBOX_SMTPFAKEIP" xml:space="preserve">
     <value>Всегда добавлять поддельный IP-адрес в заголовки сообщения (SMTP)</value>
-  </data>
-  <data name="CHKBOX_SMTPPGPCRYPT" xml:space="preserve">
-    <value>Зашифровать текст письма PGP, если доступно</value>
-  </data>
-  <data name="CHKBOX_SMTPPGPSIGN" xml:space="preserve">
-    <value>Заверять подпись письма PGP, если доступно</value>
   </data>
   <data name="CMD_LINE_E1" xml:space="preserve">
     <value>Неподдерживаемый тип конфигурации</value>
@@ -261,6 +267,9 @@
   <data name="CMD_LINE_H6" xml:space="preserve">
     <value>Использывать тип прокси (Http,Https,Sock4,Sock5,SshSock5)</value>
   </data>
+  <data name="CMD_LINE_H7" xml:space="preserve">
+    <value>Сервер ключей PGP (hkp://keys.gnupg.net)</value>
+  </data>
   <data name="GUIACCOUNT_FMT1" xml:space="preserve">
     <value>_{0} все {1} аккаунты</value>
   </data>
@@ -278,6 +287,10 @@
   </data>
   <data name="GUIACCOUNT_FMT6" xml:space="preserve">
     <value>{0} '{1}' аккаунт?</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="GuiMailAccountWindowHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiMailAccountWindowHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;windows-1251</value>
   </data>
   <data name="GUIMAILREAD_TITLE1" xml:space="preserve">
     <value>Чтение сообщения</value>
@@ -417,6 +430,12 @@
   <data name="GUIPROXY_TXT9" xml:space="preserve">
     <value>Очистить текущий список прокси серверов</value>
   </data>
+  <data name="GuiServicesSettingsWindowPgpHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiServicesSettingsWindowPgpHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="GuiServicesSettingsWindowSecureHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiServicesSettingsWindowSecureHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GUISETTIGS_PGP_DIALOG" xml:space="preserve">
     <value>Выберите путь к исполняемым файлам GnuPG</value>
   </data>
@@ -484,7 +503,7 @@
     <value>Текущая версия {0}, обновлений нет</value>
   </data>
   <data name="MENU_GPGEXPORT" xml:space="preserve">
-    <value>_Экспортировать все учетные записи для GPG</value>
+    <value>_Экспортировать все учетные записи для GnuPG</value>
   </data>
   <data name="MENU_LIGHTTEXT" xml:space="preserve">
     <value>_Более яркий текст в формах</value>
@@ -539,6 +558,21 @@
   </data>
   <data name="MENU_OPENURI" xml:space="preserve">
     <value>_Открыть с помощью ..</value>
+  </data>
+  <data name="MENU_PGPKEYS" xml:space="preserve">
+    <value>_Ключи PGP</value>
+  </data>
+  <data name="MENU_PGPKEY_CREATE" xml:space="preserve">
+    <value>_Создать ключ PGP</value>
+  </data>
+  <data name="MENU_PGPKEY_EMPTY" xml:space="preserve">
+    <value>аккаунт не выбран для операций с PGP ключами</value>
+  </data>
+  <data name="MENU_PGPKEY_EXPORT" xml:space="preserve">
+    <value>_Экспортировать PGP ключ</value>
+  </data>
+  <data name="MENU_PGPKEY_IMPORT" xml:space="preserve">
+    <value>_Импортировать PGP ключ</value>
   </data>
   <data name="MENU_PROXYCHECK" xml:space="preserve">
     <value>Проверка прокси серверов запущена</value>
@@ -678,6 +712,9 @@
   <data name="TAG_DELETE" xml:space="preserve">
     <value>Удалить</value>
   </data>
+  <data name="TAG_DESCRIPTION" xml:space="preserve">
+    <value>Описание</value>
+  </data>
   <data name="TAG_DISABLE" xml:space="preserve">
     <value>Отключено</value>
   </data>
@@ -689,6 +726,9 @@
   </data>
   <data name="TAG_DT_SUBJ" xml:space="preserve">
     <value>Тема</value>
+  </data>
+  <data name="TAG_EMAIL" xml:space="preserve">
+    <value>Е@почта:</value>
   </data>
   <data name="TAG_ENABLE" xml:space="preserve">
     <value>Включено</value>
@@ -719,6 +759,12 @@
   </data>
   <data name="TAG_FROM" xml:space="preserve">
     <value>От:</value>
+  </data>
+  <data name="TAG_HEADERS" xml:space="preserve">
+    <value>Заголовки</value>
+  </data>
+  <data name="TAG_HELP" xml:space="preserve">
+    <value>Помощь</value>
   </data>
   <data name="TAG_HOST" xml:space="preserve">
     <value>IP:</value>
@@ -774,8 +820,23 @@
   <data name="TAG_PATH" xml:space="preserve">
     <value>Путь:</value>
   </data>
+  <data name="TAG_PGPKEY_CRYPT" xml:space="preserve">
+    <value>Ключ шифрования</value>
+  </data>
+  <data name="TAG_PGPKEY_CRYPT_COUNT" xml:space="preserve">
+    <value>Количество ключей</value>
+  </data>
+  <data name="TAG_PGPKEY_DECRYPT" xml:space="preserve">
+    <value>Ключ дешифрования</value>
+  </data>
+  <data name="TAG_PGPKEY_ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="TAG_PGPKEY_SIGN" xml:space="preserve">
+    <value>Ключ подписи</value>
+  </data>
   <data name="TAG_PGPWARN" xml:space="preserve">
-    <value>шифрование работает с gnuPG &lt;= 2.0.0</value>
+    <value>шифрование работает с gnuPG &lt;= 2.0.0 (установка необязательна)</value>
   </data>
   <data name="TAG_PORT" xml:space="preserve">
     <value>Порт:</value>
@@ -797,6 +858,9 @@
   </data>
   <data name="TAG_SEND" xml:space="preserve">
     <value>Отправить</value>
+  </data>
+  <data name="TAG_SERVER" xml:space="preserve">
+    <value>Сервер:</value>
   </data>
   <data name="TAG_SERVICE" xml:space="preserve">
     <value>служба</value>
