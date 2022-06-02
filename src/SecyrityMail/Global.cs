@@ -247,6 +247,7 @@ namespace SecyrityMail
             Send,       // Send -> (sending remote and archivied)   LOCAL*
             Attach,     // Nothing =?                               -
             Error,      // All error delivery/move                  LOCAL*
+            Spam,       // All spam message delivery/move           LOCAL*
             Log,        // Log ditectory                            LOCAL*
             Root,       // Root directory
             Proxy,      // Proxy configuration directory
@@ -330,6 +331,7 @@ namespace SecyrityMail
                    path = place switch {
                        DirectoryPlace.Msg => GetTreeDirectory_(rootacc, plogin, place, dt),
                        DirectoryPlace.Send => GetTreeDirectory_(rootacc, plogin, place, dt),
+                       DirectoryPlace.Spam => GetTreeDirectory_(rootacc, plogin, place, dt),
                        DirectoryPlace.Error => GetTreeDirectory_(rootacc, plogin, place, dt),
                        DirectoryPlace.Bounced => GetTreeDirectory_(rootacc, plogin, place, dt),
                        DirectoryPlace.Out => GetPartDirectory_(rootacc, plogin, place, default),

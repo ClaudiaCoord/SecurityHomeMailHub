@@ -68,6 +68,7 @@ namespace SecyrityMail
         public int    SpamCheckCount { get; set; } = 3;
         public double SpamClientIdle { get; set; } = 20.0; /* min */
         public bool   IsAccessIpWhiteList { get; set; } = false;
+        public bool   IsAccessIpCheckDns { get; set; } = false;
 
         public List<string> ForbidenRouteList { get; set; } = new();
         public List<string> ForbidenEntryList { get; set; } = new();
@@ -154,6 +155,7 @@ namespace SecyrityMail
             IsProxyListRepack = cfg.IsProxyListRepack;
             IsSharingSocket = cfg.IsSharingSocket;
             IsAccessIpWhiteList = cfg.IsAccessIpWhiteList;
+            IsAccessIpCheckDns = cfg.IsAccessIpCheckDns;
             PgpKeyHost = cfg.PgpKeyHost;
             PgpPassword = cfg.PgpPassword;
             Pop3ClientIdle = cfg.Pop3ClientIdle;

@@ -50,6 +50,7 @@ namespace SecyrityMail
         bool IsProxyListRepack { get; set; }
         bool IsSharingSocket { get; set; }
         bool IsAccessIpWhiteList { get; set; }
+        bool IsAccessIpCheckDns { get; set; }
         bool IsCheckMailRun { get; }
 
         string ServicesInterfaceName { get; set; }

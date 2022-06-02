@@ -44,6 +44,7 @@ namespace HomeMailHub
         public bool IsProxyListRepack { get; set; }
         public bool IsSharingSocket { get; set; }
         public bool IsAccessIpWhiteList { get; set; }
+        public bool IsAccessIpCheckDns { get; set; }
         public string PgpPassword { get; set; }
         public string PgpKeyHost { get; set; }
         public double Pop3ClientIdle { get; set; }
@@ -116,6 +117,7 @@ namespace HomeMailHub
             IsProxyListRepack = Properties.Settings.Default.IsProxyListRepack;
             IsSharingSocket = Properties.Settings.Default.IsSharingSocket;
             IsAccessIpWhiteList = Properties.Settings.Default.IsAccessIpWhiteList;
+            IsAccessIpCheckDns = Properties.Settings.Default.IsAccessIpCheckDns;
             PgpPassword = string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpPassword) ? string.Empty : Properties.Settings.Default.PgpPassword;
             PgpKeyHost = string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpKeyHost) ? string.Empty : Properties.Settings.Default.PgpKeyHost;
 

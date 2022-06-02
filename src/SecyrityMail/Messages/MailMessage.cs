@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using MimeKit;
@@ -65,21 +66,22 @@ namespace SecyrityMail.Messages
         public void Set(int id, string mid, string from, string subj, string file) =>
             Set(id, mid, from, subj, new FileInfo(file));
 
-        public void Set(int id, string mid, string from, string subj, FileInfo file)
-        {
+        public void Set(int id, string mid, string from, string subj, FileInfo file) {
             Id = id;
             From = from;
-            Subj = subj;
+            Subj = NormalizeSubject(subj);
             MsgId = mid;
             Size = file.Length;
             FilePath = file.FullName;
             Folder = file.FullName.Contains(@"\Msg\") ? Global.DirectoryPlace.Msg :
                 (file.FullName.Contains(@"\Bounced\") ? Global.DirectoryPlace.Bounced :
-                (file.FullName.Contains(@"\Error\") ? Global.DirectoryPlace.Error : Global.DirectoryPlace.None));
+                (file.FullName.Contains(@"\Error\") ? Global.DirectoryPlace.Error :
+                (file.FullName.Contains(@"\Spam\") ? Global.DirectoryPlace.Spam :
+                Global.DirectoryPlace.None)));
             DateSerialize = file.CreationTimeUtc;
         }
-        public MailMessage Copy(MailMessage msg, int count)
-        {
+
+        public MailMessage Copy(MailMessage msg, int count) {
             if (msg == null)
                 return null;
 
@@ -93,6 +95,8 @@ namespace SecyrityMail.Messages
             FilePath = msg.FilePath;
             return this;
         }
+
+        #region LoadAndCreate
         public async Task<MailMessage> LoadAndCreate(string file, int count) => await LoadAndCreate(new FileInfo(file), count);
         public async Task<MailMessage> LoadAndCreate(FileInfo file, int count) =>
             await Task.Run(async () => {
@@ -121,7 +125,9 @@ namespace SecyrityMail.Messages
                 }
                 return this;
             });
+        #endregion
 
+        #region CreateAndDelivery
         public async Task<MailMessage> CreateAndDelivery(
             Global.DirectoryPlace place, string msgpath, int count, string rootpath = default,
             bool isdelete = true, bool pgpauto = false, bool localdelivery = true) =>
@@ -174,7 +180,7 @@ namespace SecyrityMail.Messages
 
                     Id     = count;
                     From   = ((mmsg.From == null) || (mmsg.From.Count == 0)) ? string.Empty : mmsg.From.ToString();
-                    Subj   = (mmsg.Subject == null) ? string.Empty : mmsg.Subject;
+                    Subj   = NormalizeSubject(mmsg.Subject);
                     Date   = mmsg.Date = GetOrCreateDateTimeOffset(mmsg.Date);
                     MsgId  = mmsg.MessageId = GetOrCreateMessageId(Global.Instance.Config.IsAlwaysNewMessageId ? string.Empty : mmsg.MessageId);
                     Folder = place;
@@ -338,6 +344,7 @@ namespace SecyrityMail.Messages
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(CreateAndDelivery), ex); return null; }
                 return this;
             });
+        #endregion
 
         public bool Check()
         {
@@ -374,6 +381,9 @@ namespace SecyrityMail.Messages
 
         private string MailerDaemonSubject(string s) =>
             string.IsNullOrWhiteSpace(s) ? ErrorSubject : $"{ErrorSubject}: {s}";
+
+        private string NormalizeSubject(string s) =>
+            string.IsNullOrWhiteSpace(s) ? string.Empty : Regex.Replace(s, @"\p{C}+", string.Empty);
 
         private async Task SaveAttachments(IEnumerable<MimeEntity> attachments, string rootpath, string id, DateTimeOffset dt) =>
             await Task.Run(() => {

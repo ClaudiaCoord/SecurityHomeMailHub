@@ -49,6 +49,7 @@ namespace HomeMailHub
                 Properties.Settings.Default.IsProxyListRepack = cfg.IsProxyListRepack;
                 Properties.Settings.Default.IsSharingSocket = cfg.IsSharingSocket;
                 Properties.Settings.Default.IsAccessIpWhiteList = cfg.IsAccessIpWhiteList;
+                Properties.Settings.Default.IsAccessIpCheckDns = cfg.IsAccessIpCheckDns;
                 Properties.Settings.Default.PgpKeyHost = cfg.PgpKeyHost;
                 Properties.Settings.Default.PgpPassword = cfg.PgpPassword;
                 Properties.Settings.Default.Pop3ClientIdle = cfg.Pop3ClientIdle;

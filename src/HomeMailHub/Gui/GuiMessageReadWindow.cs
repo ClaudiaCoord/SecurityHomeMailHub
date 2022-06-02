@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MimeKit;
 using MimeKit.Cryptography;
@@ -415,9 +416,13 @@ namespace HomeMailHub.Gui
                     else
                         messageBody[0] = mmsg.ToString();
 
+                    string subj = mmsg.Subject;
+                    if (!string.IsNullOrWhiteSpace(subj))
+                        subj = Regex.Replace(subj, @"\p{C}+", string.Empty);
+
                     Application.MainLoop.Invoke(() => {
 
-                        subjText.Text = mmsg.Subject;
+                        subjText.Text = subj;
                         dateText.Text = mmsg.Date.ToString("dddd, dd MMMM yyyy");
                         sizeText.Text = rdata.Info.Length.Humanize();
                         msgIdText.Text = mmsg.MessageId;

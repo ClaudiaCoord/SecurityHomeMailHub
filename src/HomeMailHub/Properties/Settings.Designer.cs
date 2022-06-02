@@ -619,5 +619,17 @@ namespace HomeMailHub.Properties {
                 this["SignaturesText"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsAccessIpCheckDns {
+            get {
+                return ((bool)(this["IsAccessIpCheckDns"]));
+            }
+            set {
+                this["IsAccessIpCheckDns"] = value;
+            }
+        }
     }
 }

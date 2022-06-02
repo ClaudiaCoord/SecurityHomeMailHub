@@ -22,6 +22,7 @@ namespace SecyrityMail.IPFilters
         List<Tuple<string, string>> countryList = new();
 
         public bool IsAccessIpWhiteList => Global.Instance.Config.IsAccessIpWhiteList;
+        public bool IsAccessIpCheckDns => Global.Instance.Config.IsAccessIpCheckDns;
 
         public async Task AutoInit() => await Reload();
 
@@ -49,6 +50,17 @@ namespace SecyrityMail.IPFilters
                              select i).FirstOrDefault() != null)
                             return IsAccessIpWhiteList;
                     } catch (Exception ex) { Global.Instance.Log.Add(nameof(Check), ex); }
+
+                /*
+                if (IsAccessIpCheckDns)
+                    try {
+                        string host = Utility.Net.IPAddress.getReversedIpString(ipa) + "." + suffix;
+                        IPAddress[] result = Dns.GetHostAddresses(host);
+                        if (result.Length > 0)
+                            if (result.Contains<IPAddress>(OPresult))
+                                return IsAccessIpWhiteList;
+                    } catch (Exception ex) { Global.Instance.Log.Add(nameof(Check), ex); }
+                */
 
                 if (countryList.Count > 0)
                     try {
