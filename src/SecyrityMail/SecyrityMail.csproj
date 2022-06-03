@@ -102,6 +102,7 @@
     <Compile Include="Clients\SMTP\ClientSmtpTask.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="GnuPG\CryptGpgContext.cs" />
+    <Compile Include="IPFilters\DnsblFilter.cs" />
     <Compile Include="Messages\MessageBuilder.cs" />
     <Compile Include="Messages\MessagesCacheOpener.cs" />
     <Compile Include="Utils\IOExtension.cs" />
@@ -163,6 +164,7 @@
     <Compile Include="Utils\ConverterHtmlToHtml.cs" />
     <Compile Include="Utils\ConverterTextToHtml.cs" />
     <Compile Include="Utils\HumanizeExtension.cs" />
+    <Compile Include="Utils\RunOnce.cs" />
     <Compile Include="Utils\Serialization.cs" />
     <Compile Include="Vpn\VpnAccount.cs" />
     <Compile Include="Vpn\VpnAccounts.cs" />

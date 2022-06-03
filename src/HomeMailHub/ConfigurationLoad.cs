@@ -45,6 +45,8 @@ namespace HomeMailHub
         public bool IsSharingSocket { get; set; }
         public bool IsAccessIpWhiteList { get; set; }
         public bool IsAccessIpCheckDns { get; set; }
+        public bool IsDnsblIpCheck { get; set; }
+        public string DnsblHost { get; set; }
         public string PgpPassword { get; set; }
         public string PgpKeyHost { get; set; }
         public double Pop3ClientIdle { get; set; }
@@ -118,6 +120,7 @@ namespace HomeMailHub
             IsSharingSocket = Properties.Settings.Default.IsSharingSocket;
             IsAccessIpWhiteList = Properties.Settings.Default.IsAccessIpWhiteList;
             IsAccessIpCheckDns = Properties.Settings.Default.IsAccessIpCheckDns;
+            IsDnsblIpCheck = Properties.Settings.Default.IsDnsblIpCheck;
             PgpPassword = string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpPassword) ? string.Empty : Properties.Settings.Default.PgpPassword;
             PgpKeyHost = string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpKeyHost) ? string.Empty : Properties.Settings.Default.PgpKeyHost;
 
@@ -146,6 +149,9 @@ namespace HomeMailHub
 
             if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.CheckProxyEndPointUrl))
                 CheckProxyEndPointUrl = Properties.Settings.Default.CheckProxyEndPointUrl;
+
+            if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.DnsblHost))
+                DnsblHost = Properties.Settings.Default.DnsblHost;
 
             if ((Properties.Settings.Default.ForbidenRouteList != default) && (Properties.Settings.Default.ForbidenRouteList.Count > 0)) {
                 string[] ss = new string[Properties.Settings.Default.ForbidenRouteList.Count];

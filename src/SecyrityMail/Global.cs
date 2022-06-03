@@ -45,7 +45,7 @@ namespace SecyrityMail
         ~Global() => DeInit();
         static Global() {
             _ = Global.Instance;
-            Global.Instance.FindAutoInit();
+            //Global.Instance.FindAutoInit();
         }
         private Global() => eventProxy = new EventHandler<EventActionArgs>(Child_ProxyEventCb);
         private EventHandler<EventActionArgs> eventProxy;
@@ -58,6 +58,7 @@ namespace SecyrityMail
         #region Init
         public async void Init(CancellationToken ct) {
 
+            FindAutoInit();
             IPAddress ipa = default;
             do {
                 if (!string.IsNullOrWhiteSpace(Config.ServicesInterfaceName)) {

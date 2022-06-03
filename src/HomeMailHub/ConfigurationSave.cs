@@ -50,6 +50,8 @@ namespace HomeMailHub
                 Properties.Settings.Default.IsSharingSocket = cfg.IsSharingSocket;
                 Properties.Settings.Default.IsAccessIpWhiteList = cfg.IsAccessIpWhiteList;
                 Properties.Settings.Default.IsAccessIpCheckDns = cfg.IsAccessIpCheckDns;
+                Properties.Settings.Default.IsDnsblIpCheck = cfg.IsDnsblIpCheck;
+                Properties.Settings.Default.DnsblHost = cfg.DnsblHost;
                 Properties.Settings.Default.PgpKeyHost = cfg.PgpKeyHost;
                 Properties.Settings.Default.PgpPassword = cfg.PgpPassword;
                 Properties.Settings.Default.Pop3ClientIdle = cfg.Pop3ClientIdle;

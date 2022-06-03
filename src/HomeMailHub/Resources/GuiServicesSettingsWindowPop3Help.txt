@@ -1,0 +1,9 @@
+﻿
+Decrypt message text:
+When receiving email messages, decrypt the contents of the message with PGP keys if the message is encrypted and the recipient's master key is available. (anonymity)
+
+Force delete messages:
+Force deletion of all messages after the client receives the mail. (behavior)
+
+Write session log:
+Detailed log of POP3 mail sessions. Useful when there are problems with settings in various email clients. (debug)

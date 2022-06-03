@@ -43,6 +43,7 @@ namespace HomeMailHub.Gui
         private Label hostSmtpLabel { get; set; } = default;
         private Label portSmtpLabel { get; set; } = default;
         private Label idleSmtpLabel { get; set; } = default;
+        private Label dnsblSmtpLabel { get; set; } = default;
         private Label pgpPassLabel { get; set; } = default;
         private Label pgpServLabel { get; set; } = default;
         private Label pgpPathLabel { get; set; } = default;
@@ -61,6 +62,7 @@ namespace HomeMailHub.Gui
 
         private ComboBox hostPop3Box { get; set; } = default;
         private ComboBox hostSmtpBox { get; set; } = default;
+        private ComboBox dnsblSmtpBox { get; set; } = default;
 
         private TextField portPop3Text { get; set; } = default;
         private TextField idlePop3Text { get; set; } = default;
@@ -98,16 +100,19 @@ namespace HomeMailHub.Gui
         private CheckBox enableImapClientMessagePurge { get; set; } = default;
         private CheckBox enableSmtpClientFakeIp { get; set; } = default;
         private CheckBox enableReceiveOnSend { get; set; } = default;
+        private CheckBox enableIpDnsCheck { get; set; } = default;
+        private CheckBox enableDnsbl { get; set; } = default;
 
-        private TabView tabView { get; set; } = default;
-        private ListView listForbidenRouteView { get; set; } = default;
-        private ListView listForbidenEntryView { get; set; } = default;
+        private TabView   tabView { get; set; } = default;
+        private ListView  listForbidenRouteView { get; set; } = default;
+        private ListView  listForbidenEntryView { get; set; } = default;
         private FrameView framePOP3 { get; set; } = default;
         private FrameView framePOP3Left { get; set; } = default;
         private FrameView framePOP3Right { get; set; } = default;
         private FrameView frameSMTP { get; set; } = default;
         private FrameView frameSMTPLeft { get; set; } = default;
         private FrameView frameSMTPRight { get; set; } = default;
+        private FrameView frameDNSBLRight { get; set; } = default;
         private FrameView frameSecure { get; set; } = default;
         private FrameView frameSecureLeft { get; set; } = default;
         private FrameView frameSecureRight { get; set; } = default;
@@ -461,12 +466,6 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsSmtpLog
             });
-            enableSmtpLog.Toggled += EnableSmtpLog_Toggled;
-            enableSmtpAllOutPgpSign.Toggled += EnableSmtpAllOutPgpSign_Toggled;
-            enableSmtpAllOutPgpCrypt.Toggled += EnableSmtpAllOutPgpCrypt_Toggled;
-            enableSmtpDeliveryLocal.Toggled += EnableSmtpDeliveryLocal_Toggled;
-            enableSmtpCheckFrom.Toggled += EnableSmtpCheckFrom_Toggled;
-            frameSMTP.Add(frameSMTPRight);
             frameSMTP.Add(buttonSmtpAction = new Button(Global.Instance.IsSmtpRun ? RES.BTN_STOP : RES.BTN_START)
             {
                 X = 43,
@@ -474,7 +473,48 @@ namespace HomeMailHub.Gui
                 AutoSize = true,
                 ColorScheme = Global.Instance.IsSmtpRun ? GuiApp.ColorGreen : GuiApp.ColorRed
             });
+            enableSmtpLog.Toggled += EnableSmtpLog_Toggled;
+            enableSmtpAllOutPgpSign.Toggled += EnableSmtpAllOutPgpSign_Toggled;
+            enableSmtpAllOutPgpCrypt.Toggled += EnableSmtpAllOutPgpCrypt_Toggled;
+            enableSmtpDeliveryLocal.Toggled += EnableSmtpDeliveryLocal_Toggled;
+            enableSmtpCheckFrom.Toggled += EnableSmtpCheckFrom_Toggled;
             buttonSmtpAction.Clicked += ButtonSmtpAction_Clicked;
+            frameSMTP.Add(frameSMTPRight);
+            #endregion
+
+            #region DNSBL Right
+            frameDNSBLRight = new FrameView("DNSBL")
+            {
+                X = Pos.Right(frameSMTPLeft) + 1,
+                Y = Pos.Bottom(frameSMTPRight),
+                Width = 62,
+                Height = 7
+            };
+            frameDNSBLRight.Add(dnsblSmtpLabel = new Label(RES.TAG_SERVER)
+            {
+                X = 1,
+                Y = 1,
+                AutoSize = true
+            });
+            frameDNSBLRight.Add(dnsblSmtpBox = new ComboBox()
+            {
+                X = labelOffset,
+                Y = 1,
+                Width = 37,
+                Height = 4,
+                ColorScheme = GuiApp.ColorField
+            });
+            frameDNSBLRight.Add(enableDnsbl = new CheckBox(RES.CHKBOX_SMTPDNSBL)
+            {
+                X = 1,
+                Y = 3,
+                Width = 10,
+                Height = 1,
+                Checked = Global.Instance.Config.IsDnsblIpCheck
+            });
+            enableDnsbl.Toggled += (b) => Global.Instance.Config.IsDnsblIpCheck = b;
+            frameSMTP.Add(frameDNSBLRight);
+            //
             #endregion
 
             #region SMTP Help
@@ -517,10 +557,18 @@ namespace HomeMailHub.Gui
                 Width = 52,
                 Height = Dim.Fill()
             });
-            frameSecureEntry.Add(entrySelectType = new RadioGroup(new ustring[] { $" {RES.TAG_FORBIDDEN} ", $" {RES.TAG_ALLOWED} " })
+            frameSecureEntry.Add(enableIpDnsCheck = new CheckBox(RES.CHKBOX_IPDNSCHECK)
             {
                 X = 1,
                 Y = 1,
+                Width = 20,
+                Height = 1,
+                Checked = Global.Instance.Config.IsAccessIpCheckDns
+            });
+            frameSecureEntry.Add(entrySelectType = new RadioGroup(new ustring[] { $" {RES.TAG_FORBIDDEN} ", $" {RES.TAG_ALLOWED} " })
+            {
+                X = 1,
+                Y = 3,
                 Width = 35,
                 Height = 1,
                 DisplayMode = DisplayModeLayout.Horizontal,
@@ -529,16 +577,17 @@ namespace HomeMailHub.Gui
             });
             frameSecureEntry.Add(entrySelectText = new TextField(EntryType()) 
             {
-                X = 37,
-                Y = 1,
-                Width = 10,
+                X = 36,
+                Y = 3,
+                Width = 12,
                 Height = 1,
-                ColorScheme = EntryTypeColor()
+                ColorScheme = EntryTypeColor(),
+                TextAlignment = TextAlignment.Centered
             });
             frameSecureEntry.Add(listForbidenEntryView = new ListView(Global.Instance.Config.ForbidenEntryList)
             {
                 X = 1,
-                Y = 3,
+                Y = 5,
                 Width = Dim.Fill() - 2,
                 Height = Dim.Fill() - 4,
                 AllowsMarking = true,
@@ -578,12 +627,12 @@ namespace HomeMailHub.Gui
             });
             listForbidenEntryView.OpenSelectedItem += ListForbidenEntryView_OpenSelectedItem;
             listForbidenEntryView.SelectedItemChanged += ListForbidenEntryView_SelectedItemChanged;
-
             forbidenEntryText.KeyUp += ForbidenEntryText_KeyUp;
             buttonForbidenEntryAdd.Clicked += () => ForbidenEntryIp(true);
             buttonForbidenEntrySort.Clicked += () => ForbidenListSort(Global.Instance.Config.ForbidenEntryList, listForbidenEntryView);
             buttonForbidenEntryDelete.Clicked += () => ForbidenEntryIp(false);
             entrySelectType.SelectedItemChanged += EntrySelectType_SelectedItemChanged;
+            enableIpDnsCheck.Toggled += EnableIpDnsCheck_Toggled;
             #endregion
 
             #region Secure Right
@@ -1169,6 +1218,9 @@ namespace HomeMailHub.Gui
         private void EnableImapClientMessagePurge_Toggled(bool b) =>
             Global.Instance.Config.IsImapClientMessagePurge = b;
 
+        private void EnableIpDnsCheck_Toggled(bool b) =>
+            Global.Instance.Config.IsAccessIpCheckDns = b;
+
         private void Toggled(bool b, bool state, Action act) {
             if (state)
                 act.Invoke();
@@ -1198,12 +1250,33 @@ namespace HomeMailHub.Gui
                         hostPop3Box.SelectedItem =
                         hostSmtpBox.SelectedItem = (idx >= 0) ? idx : 0;
                         helpPgpText.Text = RES.GuiServicesSettingsWindowPgpHelp;
+                        helpPop3Text.Text = RES.GuiServicesSettingsWindowPop3Help;
+                        helpSmtpText.Text = RES.GuiServicesSettingsWindowSmtpHelp;
                         helpSecureText.Text = RES.GuiServicesSettingsWindowSecureHelp;
+                        helpClientsText.Text = RES.GuiServicesSettingsWindowClientsHelp;
                     });
                 } catch (Exception ex) { ex.StatusBarError(); }
                 try {
                     MenuItem[] mitems = await nameof(GuiServicesSettingsWindow).LoadMenuUrls().ConfigureAwait(false);
                     Application.MainLoop.Invoke(() => urlmenu.Children = mitems);
+                } catch { }
+                try {
+                    string [] ss = File.ReadAllLines(
+                                    Path.Combine(
+                                        Global.GetRootDirectory(),
+                                        "DNSBL.list"));
+                    if ((ss != null) && (ss.Length > 0)) {
+                        List<string> list = ss.Distinct().ToList();
+                        if (!string.IsNullOrWhiteSpace(Global.Instance.Config.DnsblHost)) {
+                            if (list.Contains(Global.Instance.Config.DnsblHost))
+                                list.Remove(Global.Instance.Config.DnsblHost);
+                            list.Insert(0, Global.Instance.Config.DnsblHost);
+                        }
+                        Application.MainLoop.Invoke(() => {
+                            dnsblSmtpBox.SetSource(list);
+                            dnsblSmtpBox.SelectedItem = 0;
+                        });
+                    }
                 } catch { }
                 return true;
             });
@@ -1270,7 +1343,7 @@ namespace HomeMailHub.Gui
         }
 
         private ustring EntryType() =>
-            Global.Instance.Config.IsAccessIpWhiteList ? $" {RES.TAG_ALLOWED} " : $" {RES.TAG_FORBIDDEN} ";
+            Global.Instance.Config.IsAccessIpWhiteList ? $" +{RES.TAG_ALLOWED}" : $" -{RES.TAG_FORBIDDEN}";
 
         private ColorScheme EntryTypeColor() =>
             Global.Instance.Config.IsAccessIpWhiteList? GuiApp.ColorGreen : GuiApp.ColorRed;

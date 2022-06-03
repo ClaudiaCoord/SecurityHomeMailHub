@@ -199,7 +199,10 @@
     <value>Всегда очищать сообщения при получении (IMAP)</value>
   </data>
   <data name="CHKBOX_IN_PGP" xml:space="preserve">
-    <value>Расшифровывать PGP сообщения, если доступно</value>
+    <value>Расшифровывать письма, если доступно (PGP шифрование)</value>
+  </data>
+  <data name="CHKBOX_IPDNSCHECK" xml:space="preserve">
+    <value>Расширенная проверка на основании домена</value>
   </data>
   <data name="CHKBOX_NEWMSGID" xml:space="preserve">
     <value>Всегда создавать новый идентификатор сообщения</value>
@@ -211,10 +214,10 @@
     <value>Без предупреждений</value>
   </data>
   <data name="CHKBOX_OUT_PGPCRYPT" xml:space="preserve">
-    <value>Зашифровать текст письма PGP, если доступно</value>
+    <value>Зашифровать письма, если доступно (PGP шифрование)</value>
   </data>
   <data name="CHKBOX_OUT_PGPSIGN" xml:space="preserve">
-    <value>Заверять подпись письма PGP, если доступно</value>
+    <value>Заверять подпись письма, если доступно (PGP шифрование)</value>
   </data>
   <data name="CHKBOX_PGPAUTODECRYPT" xml:space="preserve">
     <value>Автоматически расшифровывать PGP</value>
@@ -233,6 +236,9 @@
   </data>
   <data name="CHKBOX_SHARINGSOCKET" xml:space="preserve">
     <value>Позволить другим открывать используемый сокет</value>
+  </data>
+  <data name="CHKBOX_SMTPDNSBL" xml:space="preserve">
+    <value>Проверять IP адрес с помощью DNSBL</value>
   </data>
   <data name="CHKBOX_SMTPFAKEIP" xml:space="preserve">
     <value>Всегда добавлять поддельный IP-адрес в заголовки сообщения (SMTP)</value>
@@ -430,11 +436,20 @@
   <data name="GUIPROXY_TXT9" xml:space="preserve">
     <value>Очистить текущий список прокси серверов</value>
   </data>
+  <data name="GuiServicesSettingsWindowClientsHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiServicesSettingsWindowClientsHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GuiServicesSettingsWindowPgpHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ru\GuiServicesSettingsWindowPgpHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="GuiServicesSettingsWindowPop3Help" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiServicesSettingsWindowPop3Help.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GuiServicesSettingsWindowSecureHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ru\GuiServicesSettingsWindowSecureHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="GuiServicesSettingsWindowSmtpHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiServicesSettingsWindowSmtpHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="GUISETTIGS_PGP_DIALOG" xml:space="preserve">
     <value>Выберите путь к исполняемым файлам GnuPG</value>

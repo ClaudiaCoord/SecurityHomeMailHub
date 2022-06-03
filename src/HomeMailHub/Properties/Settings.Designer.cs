@@ -631,5 +631,29 @@ namespace HomeMailHub.Properties {
                 this["IsAccessIpCheckDns"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsDnsblIpCheck {
+            get {
+                return ((bool)(this["IsDnsblIpCheck"]));
+            }
+            set {
+                this["IsDnsblIpCheck"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("zen.spamhaus.org")]
+        public string DnsblHost {
+            get {
+                return ((string)(this["DnsblHost"]));
+            }
+            set {
+                this["DnsblHost"] = value;
+            }
+        }
     }
 }

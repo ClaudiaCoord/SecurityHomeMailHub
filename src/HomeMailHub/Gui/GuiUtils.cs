@@ -176,8 +176,13 @@ namespace HomeMailHub.Gui
             if (string.IsNullOrWhiteSpace(s)) return string.Empty;
             if (s.IndexOf(' ') != -1) return s;
             StringBuilder sb = new();
-            for (int i = 0; i < s.Length; i++)
-                sb.Append(((i > 0) && char.IsUpper(s[i])) ? $" {s[i]}" : s[i]);
+            for (int i = 0; i < s.Length; i++) {
+                if ((i > 0) && char.IsUpper(s[i])) {
+                    int n = i + 1;
+                    sb.Append(((n < s.Length) && char.IsUpper(s[n])) ? s[i] : $" {s[i]}");
+                } else
+                    sb.Append(s[i]);
+            }
             return sb.ToString();
         }
 

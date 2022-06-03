@@ -245,6 +245,15 @@ namespace HomeMailHub.Gui {
 												  new(DateTime.Now, a.Sender.GetType().Name.HumanizeClassName(), a.Text);
                         break;
                     }
+                case MailEventId.EndInit:
+                case MailEventId.BeginInit:
+                    {
+                        t = new(
+                            DateTime.Now, a.Sender.GetType().Name.HumanizeClassName(),
+                            string.Format(
+                                "{0}: {1}", a.Id.ToString().HumanizeClassName(), a.Text.HumanizeClassName()));
+                        break;
+                    }
                 case MailEventId.Started:
                 case MailEventId.Cancelled:
                     {

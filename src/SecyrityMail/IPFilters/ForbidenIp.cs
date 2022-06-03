@@ -4,7 +4,6 @@
  * License MIT.
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,19 +11,22 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using SecyrityMail.Data;
+using SecyrityMail.Utils;
 
 namespace SecyrityMail.IPFilters
 {
     public class ForbidenIp : IAutoInit
     {
-        private bool __loading = false;
+        private DnsblFilter dnsbl = new();
+        private RunOnce runOnce = new();
         List<Tuple<UInt32, UInt32>> ipList = new();
         List<Tuple<string, string>> countryList = new();
 
         public bool IsAccessIpWhiteList => Global.Instance.Config.IsAccessIpWhiteList;
         public bool IsAccessIpCheckDns => Global.Instance.Config.IsAccessIpCheckDns;
+        public bool IsDnsblIpCheck => Global.Instance.Config.IsDnsblIpCheck;
 
-        public async Task AutoInit() => await Reload();
+        public async Task AutoInit() => await Reload().ConfigureAwait(false);
 
         public async Task Reload() =>
             await Task.Run(() => SetSourceList(Global.Instance.Config.ForbidenEntryList))
@@ -32,14 +34,14 @@ namespace SecyrityMail.IPFilters
 
         public bool Check(IPAddress ipa) {
 
-            if ((ipList.Count == 0) && (countryList.Count == 0))
+            if ((ipList.Count == 0) && (countryList.Count == 0) && !IsDnsblIpCheck)
                 return true;
 
             do {
-                if (__loading)
+                if (runOnce.IsRunning)
                     break;
 
-                if (ipList.Count > 0)
+                if (ipList.Count > 0) {
                     try {
                         UInt32 u = ToUInt32(ipa);
                         if (u == 0U)
@@ -51,16 +53,27 @@ namespace SecyrityMail.IPFilters
                             return IsAccessIpWhiteList;
                     } catch (Exception ex) { Global.Instance.Log.Add(nameof(Check), ex); }
 
-                /*
-                if (IsAccessIpCheckDns)
-                    try {
-                        string host = Utility.Net.IPAddress.getReversedIpString(ipa) + "." + suffix;
-                        IPAddress[] result = Dns.GetHostAddresses(host);
-                        if (result.Length > 0)
-                            if (result.Contains<IPAddress>(OPresult))
-                                return IsAccessIpWhiteList;
-                    } catch (Exception ex) { Global.Instance.Log.Add(nameof(Check), ex); }
-                */
+                    if (IsAccessIpCheckDns)
+                        try {
+                            IPHostEntry h = Dns.GetHostEntry(ipa);
+                            if ((h != null) && (h.AddressList != null) && (h.AddressList.Length > 0)) {
+                                foreach (IPAddress ip in h.AddressList) {
+                                    if ((ip == null) || (ip == ipa) ||
+                                        (ip.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork))
+                                        continue;
+
+                                    UInt32 u = ToUInt32(ip);
+                                    if (u == 0U)
+                                        continue;
+
+                                    if ((from i in ipList
+                                         where i.Item1 <= u && i.Item2 >= u
+                                         select i).FirstOrDefault() != null)
+                                        return IsAccessIpWhiteList;
+                                }
+                            }
+                        } catch (Exception ex) { Global.Instance.Log.Add(nameof(Check), ex); }
+                }
 
                 if (countryList.Count > 0)
                     try {
@@ -75,6 +88,11 @@ namespace SecyrityMail.IPFilters
                             return IsAccessIpWhiteList;
                     } catch (Exception ex) { Global.Instance.Log.Add(nameof(Check), ex); }
 
+                if (IsDnsblIpCheck)
+                    try {
+                        if (dnsbl.Check(ipa)) return IsAccessIpWhiteList;
+                    } catch (Exception ex) { Global.Instance.Log.Add(nameof(Check), ex); }
+
                 return !IsAccessIpWhiteList;
             } while (false);
             return false;
@@ -82,9 +100,8 @@ namespace SecyrityMail.IPFilters
 
         public void SetSourceList(List<string> list) {
 
-            if (__loading)
+            if (!runOnce.Begin())
                 return;
-            __loading = true;
 
             try {
 
@@ -94,8 +111,8 @@ namespace SecyrityMail.IPFilters
                 if (list.Count == 0)
                     return;
 
-                Regex r = new(@"^(?<ip>[0-9.]+)/(?<mask>\d{1,2})\s$|^(?<ip>[0-9.]+)\s$|^(?<code>\w{2})\s$|^(?<country>\w+)\s?$",
-                    RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                Regex r = new(@"(?<ip>[0-9.]+)/(?<mask>\d{1,2})\s?$|(?<ip>[0-9.]+)\s?$|(?<code>\w{2})\s?$|(?<country>\w+)\s?$",
+                    RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
 
                 foreach (string s in list) {
                     try {
@@ -121,6 +138,7 @@ namespace SecyrityMail.IPFilters
                                     else if (name.Equals("country"))
                                         country = m.Groups[name].Value;
                                 }
+                                System.Diagnostics.Debug.WriteLine($"\t{ip} :: {mask} :: {isocode} :: {country}");
                                 if (!string.IsNullOrWhiteSpace(ip)) {
                                     UInt32 c = 0, u = ToUInt32(ip);
                                     if (u == 0U)
@@ -139,17 +157,18 @@ namespace SecyrityMail.IPFilters
                 }
             }
             catch (Exception ex) { Global.Instance.Log.Add(nameof(ForbidenIp), ex); }
-            finally { __loading = false; }
+            finally { runOnce.End(); }
         }
 
-        private static UInt32 ToUInt32(string s) {
+        public static UInt32 ToUInt32(string s) {
             if (IPAddress.TryParse(s, out IPAddress ipa))
                 return ToUInt32(ipa);
             return 0U;
         }
-        private static UInt32 ToUInt32(IPAddress ip) {
+        public static UInt32 ToUInt32(IPAddress ip) {
             byte [] bytes = ip.GetAddressBytes();
-            Array.Reverse(bytes);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(bytes);
             return BitConverter.ToUInt32(bytes, 0);
         }
         private static UInt32 ToUInt32(UInt32 ip, int mask) =>

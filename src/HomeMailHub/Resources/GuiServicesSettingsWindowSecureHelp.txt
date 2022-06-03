@@ -17,7 +17,7 @@ When receiving messages from external servers, the content of the message is tra
 Number of spam counters triggered:
 Break time in minutes when a spam rule is triggered: Activations occur when the registration data is entered incorrectly by the mail client, or when spam rules are triggered when processing messages. After the specified number of times has been reached, access from the IP address is restricted for the time specified in the service interruption time field. (anti-spam)
 
-Access rules for IP ,NET or country codes:
+Access rules for IP, NET or Country codes:
 The choice of the type of the list of rules is possible from two options, "allowed" or "forbidden".
 
 If you select the "allowed" type, you must specify the addresses, networks or countries that will be allowed access to mail services. Other addresses, networks and countries not included in the list will be denied access. When you select the "forbidden" type, addresses, networks and countries that are denied access to services are indicated. (anti-spam)

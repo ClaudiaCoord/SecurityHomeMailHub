@@ -1,0 +1,18 @@
+﻿
+Maximum waiting time for email clients:
+Timeout for "CONNECT" state in milliseconds, default value is 240000 (240 seconds).
+The delay time in the "SEND" state is half of the specified value.
+
+Mail check period:
+Schedule for checking mail on external servers, specified in minutes, the default is 1440 minutes (24 hours).
+
+Always clear messages:
+The rule applies to the IMAP protocol for receiving mail from external servers.
+Forcefully deletes received messages from the external server.
+
+Always add fake IP address to message headers:
+The rule is valid for the SMTP protocol, when sending mail to external servers.
+Adds a fictitious sender's IP address to the message headers, equal to the address of the last proxy server through which the connection was made.
+
+Receive external mail only when sending messages:
+The rule disables the schedule for receiving mail from external servers. The actual receipt of mail will occur only when a letter appears that requires sending through external mail providers.

@@ -1,0 +1,19 @@
+﻿
+Certify the signature message:
+When sending mail messages, certify the signature with PGP keys, if the letter is not signed and the sender's master key is available. (anonymity)
+
+Encrypt message text:
+When sending emails, encrypt the content of the email with PGP keys if the email is not encrypted and the recipient's public key is available. (anonymity)
+
+Local delivery of an incoming message:
+If disabled, all mail will be treated as external mail and an attempt will be made to send it through the mail provider's server.
+It is not recommended to disable this mode. (debug)
+
+Check incoming sender address:
+When receiving incoming messages via the SMTP protocol, check whether the sent "FROM" field during the session matches the "FROM" message header. In case of inconsistency, the letter will be rejected and placed in the "Error" folder. (anti-spam)
+
+Write session log:
+Detailed logging of SMTP mail sessions. Useful when there are problems with settings in various email clients. (debug)
+
+DNSBL filter:
+Enables IP address checking when receiving messages on an external DNSBL server, increases resistance to spam attacks. (anti-spam)

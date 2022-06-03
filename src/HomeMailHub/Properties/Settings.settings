@@ -155,5 +155,11 @@
     <Setting Name="IsAccessIpCheckDns" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="IsDnsblIpCheck" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="DnsblHost" Type="System.String" Scope="User">
+      <Value Profile="(Default)">zen.spamhaus.org</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

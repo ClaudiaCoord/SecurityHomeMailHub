@@ -255,7 +255,7 @@ namespace HomeMailHub.Gui.ListSources
             tv.Style.ColumnStyles.Add(tv.Table.Columns[RES.TAG_DT_NUM],
                 new TableView.ColumnStyle() { MinWidth = 3,  MaxWidth = 3, Alignment = TextAlignment.Centered });
             tv.Style.ColumnStyles.Add(tv.Table.Columns[RES.TAG_DT_SUBJ],
-                new TableView.ColumnStyle() { MinWidth = 93, MaxWidth = tv.MaxCellWidth, Alignment = TextAlignment.Left });
+                new TableView.ColumnStyle() { MinWidth = 94, MaxWidth = tv.MaxCellWidth, Alignment = TextAlignment.Left });
             tv.Style.ColumnStyles.Add(tv.Table.Columns[RES.TAG_DT_DATE],
                 new TableView.ColumnStyle() { MinWidth = 18, MaxWidth = 18, Alignment = TextAlignment.Justified });
             tv.Style.ColumnStyles.Add(tv.Table.Columns[RES.TAG_MSGREADING],

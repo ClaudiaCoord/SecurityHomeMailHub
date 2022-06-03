@@ -169,6 +169,10 @@
     </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
+    <ContentWithTargetPath Include="Install\DNSBL.list">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\DNSBL.list</TargetPath>
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Install\GuiSshAccountWindow.urls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>mail\GuiSshAccountWindow.urls</TargetPath>
@@ -249,10 +253,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="HomeMailHub.ico" />
+    <Content Include="Resources\GuiServicesSettingsWindowClientsHelp.txt" />
     <Content Include="Resources\GuiServicesSettingsWindowPgpHelp.txt" />
+    <Content Include="Resources\GuiServicesSettingsWindowPop3Help.txt" />
     <Content Include="Resources\GuiServicesSettingsWindowSecureHelp.txt" />
+    <Content Include="Resources\GuiServicesSettingsWindowSmtpHelp.txt" />
+    <Content Include="Resources\ru\GuiServicesSettingsWindowClientsHelp.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowPgpHelp.txt" />
+    <Content Include="Resources\ru\GuiServicesSettingsWindowPop3Help.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowSecureHelp.txt" />
+    <Content Include="Resources\ru\GuiServicesSettingsWindowSmtpHelp.txt" />
     <None Include="Resources\GuiMailAccountWindowHelp.txt" />
     <None Include="Resources\ru\GuiMailAccountWindowHelp.txt" />
   </ItemGroup>

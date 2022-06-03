@@ -304,11 +304,20 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на PGP decrypt.
+        ///   Ищет локализованную строку, похожую на Decrypt emails if available (PGP encryption).
         /// </summary>
         internal static string CHKBOX_IN_PGP {
             get {
                 return ResourceManager.GetString("CHKBOX_IN_PGP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Extended domain-based validation.
+        /// </summary>
+        internal static string CHKBOX_IPDNSCHECK {
+            get {
+                return ResourceManager.GetString("CHKBOX_IPDNSCHECK", resourceCulture);
             }
         }
         
@@ -340,7 +349,7 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Encrypt PGP email text if available.
+        ///   Ищет локализованную строку, похожую на Encrypt emails if available (PGP encryption).
         /// </summary>
         internal static string CHKBOX_OUT_PGPCRYPT {
             get {
@@ -349,7 +358,7 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Certify PGP email signature if available.
+        ///   Ищет локализованную строку, похожую на Signing emails if available (PGP encryption).
         /// </summary>
         internal static string CHKBOX_OUT_PGPSIGN {
             get {
@@ -408,6 +417,15 @@ namespace HomeMailHub.Properties {
         internal static string CHKBOX_SHARINGSOCKET {
             get {
                 return ResourceManager.GetString("CHKBOX_SHARINGSOCKET", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Check IP address using DNSBL.
+        /// </summary>
+        internal static string CHKBOX_SMTPDNSBL {
+            get {
+                return ResourceManager.GetString("CHKBOX_SMTPDNSBL", resourceCulture);
             }
         }
         
@@ -1008,6 +1026,27 @@ namespace HomeMailHub.Properties {
         
         /// <summary>
         ///   Ищет локализованную строку, похожую на 
+        ///Maximum waiting time for email clients:
+        ///Timeout for &quot;CONNECT&quot; state in milliseconds, default value is 240000 (240 seconds).
+        ///The delay time in the &quot;SEND&quot; state is half of the specified value.
+        ///
+        ///Mail check period:
+        ///Schedule for checking mail on external servers, specified in minutes, the default is 1440 minutes (24 hours).
+        ///
+        ///Always clear messages:
+        ///The rule applies to the IMAP protocol for receiving mail from external servers.
+        ///Forcefully deletes received messages from the external server.
+        ///
+        ///Always add [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string GuiServicesSettingsWindowClientsHelp {
+            get {
+                return ResourceManager.GetString("GuiServicesSettingsWindowClientsHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на 
         ///For any account it is possible to create a pair of PGP keys that will encrypt, decrypt and sign your email messages. The &quot;Decrypt incoming messages&quot; option is used if you are using an email client that does not support PGP encryption. In this case, the received mail messages are decrypted and are available to the mail client in decrypted form.
         ///
         ///In the settings, in the &quot;POP3&quot; and &quot;SMTP&quot; sections, you must also enable the general rules for encrypting and decrypting mail messages. With general encryption r [остаток строки не уместился]&quot;;.
@@ -1015,6 +1054,24 @@ namespace HomeMailHub.Properties {
         internal static string GuiServicesSettingsWindowPgpHelp {
             get {
                 return ResourceManager.GetString("GuiServicesSettingsWindowPgpHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на 
+        ///Decrypt message text:
+        ///When receiving email messages, decrypt the contents of the message with PGP keys if the message is encrypted and the recipient&apos;s master key is available. (anonymity)
+        ///
+        ///Force delete messages:
+        ///Force deletion of all messages after the client receives the mail. (behavior)
+        ///
+        ///Write session log:
+        ///Detailed log of POP3 mail sessions. Useful when there are problems with settings in various email clients. (debug)
+        ///.
+        /// </summary>
+        internal static string GuiServicesSettingsWindowPop3Help {
+            get {
+                return ResourceManager.GetString("GuiServicesSettingsWindowPop3Help", resourceCulture);
             }
         }
         
@@ -1031,6 +1088,23 @@ namespace HomeMailHub.Properties {
         internal static string GuiServicesSettingsWindowSecureHelp {
             get {
                 return ResourceManager.GetString("GuiServicesSettingsWindowSecureHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на 
+        ///Certify the signature message:
+        ///When sending mail messages, certify the signature with PGP keys, if the letter is not signed and the sender&apos;s master key is available. (anonymity)
+        ///
+        ///Encrypt message text:
+        ///When sending emails, encrypt the content of the email with PGP keys if the email is not encrypted and the recipient&apos;s public key is available. (anonymity)
+        ///
+        ///Local delivery of an incoming message:
+        ///If disabled, all mail will be treated as external mail and an attempt will be made to send it through the m [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string GuiServicesSettingsWindowSmtpHelp {
+            get {
+                return ResourceManager.GetString("GuiServicesSettingsWindowSmtpHelp", resourceCulture);
             }
         }
         

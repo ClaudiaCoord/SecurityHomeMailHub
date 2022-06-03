@@ -199,7 +199,10 @@
     <value>Always flush messages when received (IMAP)</value>
   </data>
   <data name="CHKBOX_IN_PGP" xml:space="preserve">
-    <value>PGP decrypt</value>
+    <value>Decrypt emails if available (PGP encryption)</value>
+  </data>
+  <data name="CHKBOX_IPDNSCHECK" xml:space="preserve">
+    <value>Extended domain-based validation</value>
   </data>
   <data name="CHKBOX_NEWMSGID" xml:space="preserve">
     <value>Always new message Id, anti-spy</value>
@@ -211,10 +214,10 @@
     <value>No warnings</value>
   </data>
   <data name="CHKBOX_OUT_PGPCRYPT" xml:space="preserve">
-    <value>Encrypt PGP email text if available</value>
+    <value>Encrypt emails if available (PGP encryption)</value>
   </data>
   <data name="CHKBOX_OUT_PGPSIGN" xml:space="preserve">
-    <value>Certify PGP email signature if available</value>
+    <value>Signing emails if available (PGP encryption)</value>
   </data>
   <data name="CHKBOX_PGPAUTODECRYPT" xml:space="preserve">
     <value>PGP auto decrypt</value>
@@ -233,6 +236,9 @@
   </data>
   <data name="CHKBOX_SHARINGSOCKET" xml:space="preserve">
     <value>Allow others to open this socket on the specified port</value>
+  </data>
+  <data name="CHKBOX_SMTPDNSBL" xml:space="preserve">
+    <value>Check IP address using DNSBL</value>
   </data>
   <data name="CHKBOX_SMTPFAKEIP" xml:space="preserve">
     <value>Always add fake IP address to headers (SMTP)</value>
@@ -430,11 +436,20 @@
   <data name="GUIPROXY_TXT9" xml:space="preserve">
     <value>Clear this proxy list</value>
   </data>
+  <data name="GuiServicesSettingsWindowClientsHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\GuiServicesSettingsWindowClientsHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GuiServicesSettingsWindowPgpHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\GuiServicesSettingsWindowPgpHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="GuiServicesSettingsWindowPop3Help" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\GuiServicesSettingsWindowPop3Help.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GuiServicesSettingsWindowSecureHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\GuiServicesSettingsWindowSecureHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="GuiServicesSettingsWindowSmtpHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\GuiServicesSettingsWindowSmtpHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="GUISETTIGS_PGP_DIALOG" xml:space="preserve">
     <value>Select the path to the GnuPG executables</value>

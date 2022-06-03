@@ -51,6 +51,7 @@ namespace SecyrityMail
         bool IsSharingSocket { get; set; }
         bool IsAccessIpWhiteList { get; set; }
         bool IsAccessIpCheckDns { get; set; }
+        bool IsDnsblIpCheck { get; set; }
         bool IsCheckMailRun { get; }
 
         string ServicesInterfaceName { get; set; }
@@ -60,6 +61,7 @@ namespace SecyrityMail
 
         string PgpPassword { get; set; }
         string PgpKeyHost { get; set; }
+        string DnsblHost { get; set; }
 
         double Pop3ClientIdle { get; set; }
         int Pop3ServicePort { get; set; }
