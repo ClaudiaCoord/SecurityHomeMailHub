@@ -71,6 +71,6 @@ Allows you to use local accounts not tied to a specific domain, the exchange of 
 
 [More screenshot ..](docs/img)  
 
-[Wiki gallery](wiki)  
+[Wiki gallery](/wiki)  
 
 Home security mail fetch hub
