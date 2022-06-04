@@ -138,7 +138,6 @@ namespace SecyrityMail.IPFilters
                                     else if (name.Equals("country"))
                                         country = m.Groups[name].Value;
                                 }
-                                System.Diagnostics.Debug.WriteLine($"\t{ip} :: {mask} :: {isocode} :: {country}");
                                 if (!string.IsNullOrWhiteSpace(ip)) {
                                     UInt32 c = 0, u = ToUInt32(ip);
                                     if (u == 0U)

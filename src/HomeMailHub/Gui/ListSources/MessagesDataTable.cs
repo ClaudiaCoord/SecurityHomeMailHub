@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using SecyrityMail;
 using SecyrityMail.Messages;
 using Terminal.Gui;
 using GuiAttribute = Terminal.Gui.Attribute;
@@ -67,6 +68,7 @@ namespace HomeMailHub.Gui.ListSources
         private ColorScheme UnReradColorScheme { get; set; } = default;
         private string userId { get; set; } = string.Empty;
         private TableSort sortDirections = TableSort.SortUp;
+        private Global.DirectoryPlace placeFolder = Global.DirectoryPlace.Root;
         private bool headerOnce = false;
 
         public MessagesDataTable(string id, TableView tv) : base() { Init(id, tv); }
@@ -74,9 +76,12 @@ namespace HomeMailHub.Gui.ListSources
         public MailMessage Get(string s) => !IsEmpty ?
             (from i in messages.Items where i.MsgId == s select i).FirstOrDefault() : default;
         public bool IsEmpty => (messages == default) || (messages.Count == 0);
-        public int Count => (messages == default) ? 0 : messages.Count;
+        public int Count => base.Rows.Count;
         public int Deleted { get; private set; } = 0;
-        public TableSort SortDirection => sortDirections;
+        public TableSort SortDType => sortDirections;
+        public Global.DirectoryPlace FolderType => placeFolder;
+        public string FolderString => (placeFolder == Global.DirectoryPlace.Root) ?
+            $"{RES.TAG_FOLDER} {RES.TAG_ALL}" : $"{RES.TAG_FOLDER} {placeFolder}";
 
         public async new void Dispose() {
 
@@ -157,12 +162,18 @@ namespace HomeMailHub.Gui.ListSources
                 return true;
             });
 
-        public void SortUp() { Clear(); SortData(TableSort.SortUp); }
-        public void SortDown() { Clear(); SortData(TableSort.SortDown); }
-        public void SortSubj() { Clear(); SortData(TableSort.SortSubj); }
-        public void SortDate() { Clear(); SortData(TableSort.SortDate); }
-        public void SortFrom() { Clear(); SortData(TableSort.SortFrom); }
         public void DataClear() => Clear();
+
+        public void ShowSort(TableSort ts) {
+            Clear();
+            SortData(ts);
+        }
+
+        public void ShowFolder(Global.DirectoryPlace place) {
+            placeFolder = place;
+            Clear();
+            SortData(sortDirections);
+        }
 
         public MailMessage Get(int i) {
             try {
@@ -191,7 +202,8 @@ namespace HomeMailHub.Gui.ListSources
 
         public void SetReadAllMessage() {
             try {
-                for (int i = 0; i < messages.Count; i++) messages[i].IsRead = true;
+                List<MailMessage> list = messages.GetFolder(placeFolder);
+                for (int i = 0; i < list.Count; i++) list[i].IsRead = true;
                 Clear();
                 SortData();
             } catch (Exception ex) { ex.StatusBarError(); }
@@ -224,10 +236,10 @@ namespace HomeMailHub.Gui.ListSources
             Columns.Add(hiddencol, typeof(bool));
             Columns.Add(RES.TAG_FROM, typeof(string));
 
-            GuiAttribute cnnorm = Application.Driver.MakeAttribute(Color.Gray, Color.Blue);
-            GuiAttribute crnorm = Application.Driver.MakeAttribute(Color.White, Color.Blue);
+            GuiAttribute cnnorm  = Application.Driver.MakeAttribute(Color.Gray, Color.Blue);
+            GuiAttribute crnorm  = Application.Driver.MakeAttribute(Color.White, Color.Blue);
             GuiAttribute crfocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightBlue);
-            GuiAttribute cdis = Application.Driver.MakeAttribute(Color.DarkGray, Color.Blue);
+            GuiAttribute cdis    = Application.Driver.MakeAttribute(Color.DarkGray, Color.Blue);
 
             UnReradColorScheme = new ColorScheme {
                 Normal = crnorm,
@@ -279,27 +291,29 @@ namespace HomeMailHub.Gui.ListSources
 
             switch (ts) {
                 case TableSort.SortUp: {
-                        for (int i = messages.Count - 1; 0 <= i; i--) RowsAdd(messages[i]);
+                        List<MailMessage> list = messages.GetFolder(placeFolder);
+                        for (int i = list.Count - 1; 0 <= i; i--) RowsAdd(list[i]);
                         break;
                     }
                 case TableSort.SortDown: {
-                        for (int i = 0; i < messages.Count; i++) RowsAdd(messages[i]);
+                        List<MailMessage> list = messages.GetFolder(placeFolder);
+                        for (int i = 0; i < list.Count; i++) RowsAdd(list[i]);
                         break;
                     }
                 case TableSort.SortSubj: {
-                        List<MailMessage> list = new List<MailMessage>(messages.Items);
+                        List<MailMessage> list = messages.GetFolder(placeFolder);
                         list.Sort(new SubjComparer());
                         for (int i = 0; i < list.Count; i++) RowsAdd(list[i]);
                         break;
                     }
                 case TableSort.SortDate: {
-                        List<MailMessage> list = new List<MailMessage>(messages.Items);
+                        List<MailMessage> list = messages.GetFolder(placeFolder);
                         list.Sort(new DateComparer());
                         for (int i = 0; i < list.Count; i++) RowsAdd(list[i]);
                         break;
                     }
                 case TableSort.SortFrom: {
-                        List<MailMessage> list = new List<MailMessage>(messages.Items);
+                        List<MailMessage> list = messages.GetFolder(placeFolder);
                         list.Sort(new FromComparer());
                         for (int i = 0; i < list.Count; i++) RowsAdd(list[i]);
                         break;
@@ -323,7 +337,7 @@ namespace HomeMailHub.Gui.ListSources
         private int GetId(int i) {
             try {
                 do {
-                    if (!IsEmpty && ((i < 0) || (i >= base.Rows.Count))) break;
+                    if (!IsEmpty && ((i < 0) || (i >= Count))) break;
                     DataRow dataRow = base.Rows[i];
                     if ((dataRow == null) || (dataRow.ItemArray == null) || (dataRow.ItemArray.Length == 0)) break;
                     if (int.TryParse(dataRow.ItemArray[0].ToString(), out int n))

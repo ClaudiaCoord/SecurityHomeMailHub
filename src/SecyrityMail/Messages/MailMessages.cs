@@ -141,6 +141,17 @@ namespace SecyrityMail.Messages
                 msg = (from i in Items where i.MsgId.Equals(msgid) select i).FirstOrDefault();
             return msg;
         }
+        public List<MailMessage> GetFolder(Global.DirectoryPlace place) {
+            switch (place) {
+                case Global.DirectoryPlace.Msg:
+                case Global.DirectoryPlace.Spam:
+                case Global.DirectoryPlace.Error:
+                case Global.DirectoryPlace.Bounced: break;
+                case Global.DirectoryPlace.Root:
+                default: return Items;
+            }
+            return new(Items.Where(x => x.Folder == place));
+        }
 
         #region Load* / Save* / Open / Exist / Delete
         public async Task<MailMessages> Open(string email) {

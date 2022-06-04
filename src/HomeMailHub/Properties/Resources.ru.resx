@@ -341,7 +341,7 @@
     <value>Вы уверены, что хотите {0} это сообщение?</value>
   </data>
   <data name="GUIMESSAGE_FMT3" xml:space="preserve">
-    <value>{0} - сообщений : {1}</value>
+    <value>{0} - сообщений : {1} - {2}</value>
   </data>
   <data name="GUIMESSAGE_FMT4" xml:space="preserve">
     <value>Есть удаленные {0} сообщения , их можно восстановить</value>
@@ -516,6 +516,9 @@
   </data>
   <data name="MENU_FMT_VERSIONOLD" xml:space="preserve">
     <value>Текущая версия {0}, обновлений нет</value>
+  </data>
+  <data name="MENU_FOLDER" xml:space="preserve">
+    <value>_Папки</value>
   </data>
   <data name="MENU_GPGEXPORT" xml:space="preserve">
     <value>_Экспортировать все учетные записи для GnuPG</value>
@@ -693,6 +696,9 @@
   </data>
   <data name="TAG_ACCOUNTS" xml:space="preserve">
     <value>Учетные записи</value>
+  </data>
+  <data name="TAG_ALL" xml:space="preserve">
+    <value>все</value>
   </data>
   <data name="TAG_ALLOWED" xml:space="preserve">
     <value>Разрешён</value>

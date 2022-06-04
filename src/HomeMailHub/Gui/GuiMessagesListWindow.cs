@@ -410,6 +410,7 @@ namespace HomeMailHub.Gui
                         Application.RequestStop();
                     }, null, null, Key.AltMask | Key.Q)
                 }),
+                undeleteMenu,
                 new MenuBarItem (RES.MENU_SORT, new MenuItem [] {
                     new MenuItem (
                         RES.MENU_SORTUP, "", async () => await SortDialog(TableSort.SortUp).ConfigureAwait(false),
@@ -427,7 +428,23 @@ namespace HomeMailHub.Gui
                         RES.MENU_SORTFROM, "", async () =>  await SortDialog(TableSort.SortFrom).ConfigureAwait(false),
                         () => SortEnable(TableSort.SortFrom))
                 }),
-                undeleteMenu
+                new MenuBarItem (RES.MENU_FOLDER, new MenuItem [] {
+                    new MenuItem (
+                        $"{RES.TAG_FOLDER} _{RES.TAG_ALL}", "", async () => await SelectFolder(Global.DirectoryPlace.Root).ConfigureAwait(false),
+                        () => FolderEnable(Global.DirectoryPlace.Root)),
+                    new MenuItem (
+                        $"{RES.TAG_FOLDER} _{Global.DirectoryPlace.Msg}", "", async () => await SelectFolder(Global.DirectoryPlace.Msg).ConfigureAwait(false),
+                        () => FolderEnable(Global.DirectoryPlace.Msg)),
+                    new MenuItem (
+                        $"{RES.TAG_FOLDER} _{Global.DirectoryPlace.Spam}", "", async () => await SelectFolder(Global.DirectoryPlace.Spam).ConfigureAwait(false),
+                        () => FolderEnable(Global.DirectoryPlace.Spam)),
+                    new MenuItem (
+                        $"{RES.TAG_FOLDER} _{Global.DirectoryPlace.Error}", "", async () => await SelectFolder(Global.DirectoryPlace.Error).ConfigureAwait(false),
+                        () => FolderEnable(Global.DirectoryPlace.Error)),
+                    new MenuItem (
+                        $"{RES.TAG_FOLDER} _{Global.DirectoryPlace.Bounced}", "", async () => await SelectFolder(Global.DirectoryPlace.Bounced).ConfigureAwait(false),
+                        () => FolderEnable(Global.DirectoryPlace.Bounced))
+                }),
             });
 
             GuiToplevel.Add(GuiMenu, this);
@@ -443,7 +460,7 @@ namespace HomeMailHub.Gui
                     DataClear();
                     WaitStart();
                     _ = await dataTable.LoadMessages();
-                    base.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, dataTable.Count);
+                    SetTitle();
                     try {
                         UserAccount a = Global.Instance.Accounts.FindFromEmail(selectedName);
                         if ((a != null) && !a.IsEmpty) {
@@ -470,7 +487,7 @@ namespace HomeMailHub.Gui
 
         private void DataClear() {
             Clean();
-            base.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, 0);
+            SetTitle();
         }
         private void Clean() {
             Application.MainLoop.Invoke(() => {
@@ -554,12 +571,16 @@ namespace HomeMailHub.Gui
             ReadingBox_Toggled(false);
         }
 
+        private void SetTitle() =>
+            Application.MainLoop.Invoke(() =>
+                    base.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, dataTable.Count, dataTable.FolderString));
+
         private async void CloseDialog() {
             try {
                 if (dataTable.Deleted > 0) {
                     if (Properties.Settings.Default.IsConfirmRestoreMessages) {
                         if (MessageBox.Query(50, 7,
-                            string.Format(RES.GUIMESSAGE_FMT3, RES.TAG_DELETE, dataTable.Deleted),
+                            string.Format(RES.GUIMESSAGE_FMT3, RES.TAG_DELETE, dataTable.Deleted, dataTable.FolderString),
                             string.Format(RES.GUIMESSAGE_FMT4, dataTable.Deleted), RES.TAG_NO, RES.TAG_YES) == 1)
                             _ = await dataTable.UnDeleted().ConfigureAwait(false);
                         else
@@ -579,7 +600,7 @@ namespace HomeMailHub.Gui
                         Clean();
                         _ = await dataTable.SafeDelete(id).ConfigureAwait(false);
                         if (dataTable.Deleted > 0) DeleteMenu();
-                        base.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, dataTable.Count);
+                        SetTitle();
                     }
                 }
             } catch { }
@@ -592,10 +613,11 @@ namespace HomeMailHub.Gui
                     Clean();
                     _ = await dataTable.SafeDeleteAll().ConfigureAwait(false);
                     if (dataTable.Deleted > 0) DeleteMenu();
-                    base.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, 0);
+                    SetTitle();
                 }
             } catch { }
         }
+
         private void DeleteMenu() {
             try {
                 bool b = dataTable.Deleted > 0;
@@ -611,8 +633,7 @@ namespace HomeMailHub.Gui
                                 WaitStart();
                                 _ = await dataTable.UnDeleted().ConfigureAwait(false);
                                 DeleteMenu();
-                                Application.MainLoop.Invoke(() =>
-                                    base.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, dataTable.Count));
+                                SetTitle();
                             } finally { WaitStop(); }
                         });
                     items[3] = new MenuItem(
@@ -627,20 +648,28 @@ namespace HomeMailHub.Gui
             await Task.Run(() => {
                 try {
                     WaitStart();
-                    switch (ts) {
-                        case TableSort.SortUp:   dataTable.SortUp();   break;
-                        case TableSort.SortDown: dataTable.SortDown(); break;
-                        case TableSort.SortSubj: dataTable.SortSubj(); break;
-                        case TableSort.SortDate: dataTable.SortDate(); break;
-                        case TableSort.SortFrom: dataTable.SortFrom(); break;
-                    }
+                    dataTable.ShowSort(ts);
                 }
                 catch (Exception ex) { ex.StatusBarError(); }
                 finally { WaitStop(); }
                 return true;
             });
         private bool SortEnable(TableSort ts) =>
-            !dataTable.IsEmpty && (dataTable.SortDirection != ts);
+            !dataTable.IsEmpty && (dataTable.SortDType != ts);
+
+        private async Task<bool> SelectFolder(Global.DirectoryPlace place) =>
+            await Task.Run(() => {
+                try {
+                    WaitStart();
+                    dataTable.ShowFolder(place);
+                    SetTitle();
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
+                finally { WaitStop(); }
+                return true;
+            });
+        private bool FolderEnable(Global.DirectoryPlace place) =>
+            !dataTable.IsEmpty && (dataTable.FolderType != place);
 
         private void LocalLauncher<T>() {
             Type type = typeof(T);

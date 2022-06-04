@@ -737,7 +737,7 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на {0} - Messages : {1}.
+        ///   Ищет локализованную строку, похожую на {0} - Messages : {1} - {2}.
         /// </summary>
         internal static string GUIMESSAGE_FMT3 {
             get {
@@ -1307,6 +1307,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Folders.
+        /// </summary>
+        internal static string MENU_FOLDER {
+            get {
+                return ResourceManager.GetString("MENU_FOLDER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на _Export all accounts for GnuPG.
         /// </summary>
         internal static string MENU_GPGEXPORT {
@@ -1834,6 +1843,15 @@ namespace HomeMailHub.Properties {
         internal static string TAG_ACCOUNTS {
             get {
                 return ResourceManager.GetString("TAG_ACCOUNTS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на all.
+        /// </summary>
+        internal static string TAG_ALL {
+            get {
+                return ResourceManager.GetString("TAG_ALL", resourceCulture);
             }
         }
         

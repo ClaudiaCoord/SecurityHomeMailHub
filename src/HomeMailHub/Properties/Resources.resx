@@ -341,7 +341,7 @@
     <value>Are you sure you want to {0} this message?</value>
   </data>
   <data name="GUIMESSAGE_FMT3" xml:space="preserve">
-    <value>{0} - Messages : {1}</value>
+    <value>{0} - Messages : {1} - {2}</value>
   </data>
   <data name="GUIMESSAGE_FMT4" xml:space="preserve">
     <value>There are {0} messages deleted, they can be restored</value>
@@ -516,6 +516,9 @@
   </data>
   <data name="MENU_FMT_VERSIONOLD" xml:space="preserve">
     <value>Current version {0}, no updates</value>
+  </data>
+  <data name="MENU_FOLDER" xml:space="preserve">
+    <value>_Folders</value>
   </data>
   <data name="MENU_GPGEXPORT" xml:space="preserve">
     <value>_Export all accounts for GnuPG</value>
@@ -693,6 +696,9 @@
   </data>
   <data name="TAG_ACCOUNTS" xml:space="preserve">
     <value>Accounts</value>
+  </data>
+  <data name="TAG_ALL" xml:space="preserve">
+    <value>all</value>
   </data>
   <data name="TAG_ALLOWED" xml:space="preserve">
     <value>Allowed</value>

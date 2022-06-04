@@ -513,8 +513,8 @@ namespace HomeMailHub.Gui
                 Checked = Global.Instance.Config.IsDnsblIpCheck
             });
             enableDnsbl.Toggled += (b) => Global.Instance.Config.IsDnsblIpCheck = b;
+            dnsblSmtpBox.SelectedItemChanged += DnsblSmtpBox_SelectedItemChanged;
             frameSMTP.Add(frameDNSBLRight);
-            //
             #endregion
 
             #region SMTP Help
@@ -1013,7 +1013,7 @@ namespace HomeMailHub.Gui
 
             tabView.AddTab(new TabView.Tab(" POP3 ", framePOP3), true);
             tabView.AddTab(new TabView.Tab(" SMTP ", frameSMTP), false);
-            tabView.AddTab(new TabView.Tab(" PGP ", framePgp), false);
+            tabView.AddTab(new TabView.Tab(" PGP ",  framePgp), false);
             tabView.AddTab(new TabView.Tab($" {RES.TAG_SECURITY} ", frameSecure), false);
             tabView.AddTab(new TabView.Tab($" {RES.TAG_CLIENTS} ", frameClients), false);
             Add(tabView);
@@ -1101,6 +1101,11 @@ namespace HomeMailHub.Gui
         private void HostBox_SelectedItemChanged(ListViewItemEventArgs a) {
             if ((a != null) && (a.Item > 0) && !string.IsNullOrWhiteSpace(a.Value as string))
                 Global.Instance.Config.ServicesInterfaceName = a.Value.ToString();
+        }
+
+        private void DnsblSmtpBox_SelectedItemChanged(ListViewItemEventArgs a) {
+            if ((a != null) && (a.Item > 0) && !string.IsNullOrWhiteSpace(a.Value as string))
+                Global.Instance.Config.DnsblHost = a.Value.ToString();
         }
 
         private void ButtonOpenPgInstal_Clicked() {
