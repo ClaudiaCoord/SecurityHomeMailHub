@@ -67,8 +67,10 @@ Allows you to use local accounts not tied to a specific domain, the exchange of 
 
 ### Interfaces screens:
 
-![Home security mail fetch hub 1](docs/img/ss7.png)  
+![Home security mail fetch hub](https://claudiacoord.github.io/SecurityHomeMailHub/img/ss2.png) 
 
-![Home security mail fetch hub 2](docs/img/ss3.png)  
+[More screenshot ..](docs/img)  
+
+[Wiki gallery](wiki)  
 
 Home security mail fetch hub
