@@ -45,7 +45,7 @@ Secure, anonymous, domestic home mail hub `MTA` / `MUA`
 
  - authorization to access the services possible using the `LOGIN / PASSWORD`, `PLAIN`, `CRAM-MD5`,
  - limit login attempts, the value of the number of unsuccessful attempts is governed,
- - DNSBL block by IP support,
+ - support DNSBL block by IP.
 
 ### Interfaces:
 
