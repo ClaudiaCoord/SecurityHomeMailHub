@@ -3,8 +3,8 @@
 [![GitHub license](https://img.shields.io/github/license/ClaudiaCoord/SecurityHomeMailHub.svg)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/ClaudiaCoord/SecurityHomeMailHub.svg)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/)
 [![GitHub code size](https://img.shields.io/github/languages/code-size/ClaudiaCoord/SecurityHomeMailHub)](https://github.com/ClaudiaCoord/SecurityHomeMailHub)
-[![Download x64](https://img.shields.io/badge/Download-x64-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8180/SecurityHomeMailHub-x64-1.0.8180.msi)
-[![Download x86](https://img.shields.io/badge/Download-x86-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8180/SecurityHomeMailHub-x86-1.0.8180.msi)
+[![Download x64](https://img.shields.io/badge/Download-x64-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8180/SecurityHomeMailHub-x64-1.0.8191.msi)
+[![Download x86](https://img.shields.io/badge/Download-x86-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8180/SecurityHomeMailHub-x86-1.0.8191.msi)
 
 # HomeMailHub
 Secure, anonymous, domestic home mail hub `MTA` / `MUA`
@@ -40,10 +40,12 @@ Secure, anonymous, domestic home mail hub `MTA` / `MUA`
  - when receiving mail from external servers, content writing translated into text format, eliminating the various references spyware and other whistles,
  - attachments in the message may automatically save in the production, which allows them to pre-check an external program, such as Antivirus
 
-### Safety of local servsov POP3, SMTP:
+### Safety of local services POP3, SMTP:
  - filter service access by IP address, network address, two-character alphabetic country code,
+
  - authorization to access the services possible using the `LOGIN / PASSWORD`, `PLAIN`, `CRAM-MD5`,
- - limit login attempts, the value of the number of unsuccessful attempts is governed
+ - limit login attempts, the value of the number of unsuccessful attempts is governed,
+ - DNSBL block by IP support,
 
 ### Interfaces:
 
