@@ -22,7 +22,7 @@ jobs:
     - name: show dir
       run: dir 
     - name: chdir to src
-      run: dir src
+      run: MSBuild -help
     - name: Restore dependencies
       run: dotnet restore src\HomeMailHub.sln
     - name: Build
