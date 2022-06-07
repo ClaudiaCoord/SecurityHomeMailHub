@@ -276,6 +276,12 @@
   <data name="CMD_LINE_H7" xml:space="preserve">
     <value>PGP key server (hkp://keys.gnupg.net)</value>
   </data>
+  <data name="CMD_LINE_H8" xml:space="preserve">
+    <value>Server DNSBL (zen.spamhaus.org)</value>
+  </data>
+  <data name="CMD_LINE_H9" xml:space="preserve">
+    <value>Using gui CursesDriver, default NetDriver</value>
+  </data>
   <data name="GUIACCOUNT_FMT1" xml:space="preserve">
     <value>_{0} all {1} accounts</value>
   </data>
@@ -565,11 +571,14 @@
   <data name="MENU_MENU" xml:space="preserve">
     <value>_Menu</value>
   </data>
+  <data name="MENU_MESSAGES" xml:space="preserve">
+    <value>_Messages</value>
+  </data>
   <data name="MENU_MSGFORWARDS" xml:space="preserve">
     <value>_Forwards</value>
   </data>
   <data name="MENU_MSGSREADALL" xml:space="preserve">
-    <value>_Mark All Read</value>
+    <value>_Mark all messages as read</value>
   </data>
   <data name="MENU_OPENMSGFROM" xml:space="preserve">
     <value>_Open message in ..</value>
@@ -660,6 +669,33 @@
   </data>
   <data name="MENU_SSHSELECT" xml:space="preserve">
     <value>SSH account selected</value>
+  </data>
+  <data name="MENU_SUB_COMBINEMSG" xml:space="preserve">
+    <value>_Combine selected messages</value>
+  </data>
+  <data name="MENU_SUB_DELETE" xml:space="preserve">
+    <value>_Delete selected messages</value>
+  </data>
+  <data name="MENU_SUB_MOVEFOLDER" xml:space="preserve">
+    <value>Move selected messages to a _folder</value>
+  </data>
+  <data name="MENU_SUB_MULTISELECT" xml:space="preserve">
+    <value>_Multiple message selection</value>
+  </data>
+  <data name="MENU_SUB_OPEN" xml:space="preserve">
+    <value>_Open selected message</value>
+  </data>
+  <data name="MENU_SUB_READEDFLAG" xml:space="preserve">
+    <value>_Mark selected messages</value>
+  </data>
+  <data name="MENU_SUB_READEDMARK" xml:space="preserve">
+    <value>as read</value>
+  </data>
+  <data name="MENU_SUB_REPLAY" xml:space="preserve">
+    <value>_Reply to selected message</value>
+  </data>
+  <data name="MENU_SUB_UNREADEDMARK" xml:space="preserve">
+    <value>as unread</value>
   </data>
   <data name="MENU_UNDELETECONFIRM" xml:space="preserve">
     <value>Show message _recovery messages</value>

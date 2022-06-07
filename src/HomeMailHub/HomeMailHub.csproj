@@ -13,6 +13,21 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <LangVersion>9.0</LangVersion>
     <Deterministic>false</Deterministic>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -101,6 +116,7 @@
     <Compile Include="CmdLine\CmdOptionException.cs" />
     <Compile Include="ConfigurationLoad.cs" />
     <Compile Include="ConfigurationSave.cs" />
+    <Compile Include="Gui\GuiBusyBar.cs" />
     <Compile Include="Gui\GuiLinearLayot.cs" />
     <Compile Include="Gui\GuiMessageForwardsDialog.cs" />
     <Compile Include="Gui\GuiProgressBar.cs" />
@@ -124,6 +140,7 @@
     <Compile Include="Gui\GuiVpnAccountWindow.cs" />
     <Compile Include="Gui\IGuiLogWindow.cs" />
     <Compile Include="Gui\ListSources\MessagesDataTable.cs" />
+    <Compile Include="Gui\ListSources\MessagesDataTableMultiselect.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -228,7 +245,7 @@
       <Project>{F4BA699C-C783-48A9-84EF-856072DF3EE2}</Project>
       <Name>SecyrityMail</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Terminal.Gui\Terminal.Gui.csproj">
+    <ProjectReference Include="..\Terminal.Gui.1.6\Terminal.Gui.csproj">
       <Project>{83576343-4ba3-401b-823f-caa7c81907e6}</Project>
       <Name>Terminal.Gui</Name>
     </ProjectReference>
@@ -248,7 +265,7 @@
       <Version>3.2.0</Version>
     </PackageReference>
     <PackageReference Include="NStack.Core">
-      <Version>0.16.0</Version>
+      <Version>0.17.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -265,6 +282,18 @@
     <Content Include="Resources\ru\GuiServicesSettingsWindowSmtpHelp.txt" />
     <None Include="Resources\GuiMailAccountWindowHelp.txt" />
     <None Include="Resources\ru\GuiMailAccountWindowHelp.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 и x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

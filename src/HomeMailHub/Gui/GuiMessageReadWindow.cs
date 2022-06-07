@@ -129,45 +129,14 @@ namespace HomeMailHub.Gui
             selectedPath = s;
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
+            #region frameHeader
             frameHeader = new FrameView("+")
             {
                 X = 1,
                 Y = 1,
-                Width = 116,
+                Width = 117,
                 Height = 7,
             };
-            frameInfo = new FrameView(RES.TAG_HEADERS)
-            {
-                X = Pos.Right(frameHeader),
-                Y = 1,
-                Width = Dim.Fill() - 1,
-                Height = 7
-            };
-            frameMsg = new FrameView(RES.TAG_MESSAGE)
-            {
-                X = 1,
-                Y = 8,
-                Width = Dim.Fill() - 1,
-                Height = Dim.Fill()
-            };
-
-            #region infoText
-            infoText = new TextView()
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(),
-                Height = Dim.Fill(),
-                Multiline = true,
-                ReadOnly = true,
-                WordWrap = false,
-                ColorScheme = GuiApp.ColorDescription
-            };
-            frameInfo.Add(infoText);
-            Add(frameInfo);
-            #endregion
-
-            #region frameHeader
             frameHeader.Add(msgIdLabel = new Label("MsgId: ")
             {
                 X = 1,
@@ -178,7 +147,7 @@ namespace HomeMailHub.Gui
             {
                 X = 11,
                 Y = 1,
-                Width = 15,
+                Width = 65,
                 Height = 1,
                 ColorScheme = GuiApp.ColorDescription
             });
@@ -192,7 +161,7 @@ namespace HomeMailHub.Gui
             {
                 X = 84,
                 Y = 1,
-                Width = 15,
+                Width = 28,
                 Height = 1,
                 ColorScheme = GuiApp.ColorDescription
             });
@@ -206,7 +175,7 @@ namespace HomeMailHub.Gui
             {
                 X = 11,
                 Y = 2,
-                Width = 10,
+                Width = 65,
                 Height = 1,
                 ColorScheme = GuiApp.ColorDescription
             });
@@ -313,8 +282,37 @@ namespace HomeMailHub.Gui
             Add(frameHeader);
             #endregion
 
+            #region infoText
+            frameInfo = new FrameView(RES.TAG_HEADERS)
+            {
+                X = Pos.Right(frameHeader) + 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = 7
+            };
+            frameInfo.Add(infoText = new TextView()
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
+                Multiline = true,
+                ReadOnly = true,
+                WordWrap = false,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            Add(frameInfo);
+            #endregion
+
             #region frameMsg
-            msgText = new TextView()
+            frameMsg = new FrameView(RES.TAG_MESSAGE)
+            {
+                X = 1,
+                Y = 8,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill()
+            };
+            frameMsg.Add(msgText = new TextView()
             {
                 X = 0,
                 Y = 0,
@@ -323,8 +321,7 @@ namespace HomeMailHub.Gui
                 Multiline = true,
                 ReadOnly = true,
                 WordWrap = true
-            };
-            frameMsg.Add(msgText);
+            });
             Add(frameMsg);
             #endregion
 
@@ -444,18 +441,7 @@ namespace HomeMailHub.Gui
                             MenuItem[] items = new MenuItem[mmsg.Attachments.Count()];
                             for (int i = 0; i < mmsg.Attachments.Count(); i++) {
 
-                                string name = string.Empty;
-                                MimeEntity a = mmsg.Attachments.ElementAt(i);
-                                if (a is MessagePart mep) {
-                                    if (!string.IsNullOrWhiteSpace(mep.ContentDisposition?.FileName))
-                                        name = Path.GetFileName(mep.ContentDisposition?.FileName);
-                                }
-                                else if (a is MimePart mip) {
-                                    if (!string.IsNullOrWhiteSpace(mip?.FileName))
-                                        name = Path.GetFileName(mip?.FileName);
-                                }
-                                else
-                                    continue;
+                                string name = MailMessage.GetMimeEntryName(mmsg.Attachments.ElementAt(i));
                                 if (!string.IsNullOrWhiteSpace(name))
                                     items[n++] = new MenuItem(
                                             name.Replace('_', ' '), "",
@@ -651,8 +637,11 @@ namespace HomeMailHub.Gui
 
         private void BrowseAttachFile(string path, string id, string name) {
             if (string.IsNullOrWhiteSpace(name)) return;
+            (Global.DirectoryPlace _, string rootdir, DateTimeOffset dt) = Global.GetFolderInfo(Path.GetDirectoryName(path));
+            if ((dt == default) || string.IsNullOrWhiteSpace(rootdir))
+                return;
             MailMessage.GetAttachFilePath(
-                Path.GetDirectoryName(path).Replace(@$"\{Global.DirectoryPlace.Msg}\", @$"\{Global.DirectoryPlace.Attach}\"),
+                Global.AppendPartDirectory(Global.GetUserDirectory(rootdir), Global.DirectoryPlace.Attach, dt),
                 id, name).BrowseFile();
         }
     }

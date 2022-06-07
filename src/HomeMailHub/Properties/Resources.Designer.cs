@@ -538,6 +538,24 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Server DNSBL (zen.spamhaus.org).
+        /// </summary>
+        internal static string CMD_LINE_H8 {
+            get {
+                return ResourceManager.GetString("CMD_LINE_H8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Using gui CursesDriver, default NetDriver.
+        /// </summary>
+        internal static string CMD_LINE_H9 {
+            get {
+                return ResourceManager.GetString("CMD_LINE_H9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на _{0} all {1} accounts.
         /// </summary>
         internal static string GUIACCOUNT_FMT1 {
@@ -1451,6 +1469,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Messages.
+        /// </summary>
+        internal static string MENU_MESSAGES {
+            get {
+                return ResourceManager.GetString("MENU_MESSAGES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на _Forwards.
         /// </summary>
         internal static string MENU_MSGFORWARDS {
@@ -1460,7 +1487,7 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на _Mark All Read.
+        ///   Ищет локализованную строку, похожую на _Mark all messages as read.
         /// </summary>
         internal static string MENU_MSGSREADALL {
             get {
@@ -1735,6 +1762,87 @@ namespace HomeMailHub.Properties {
         internal static string MENU_SSHSELECT {
             get {
                 return ResourceManager.GetString("MENU_SSHSELECT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Combine selected messages.
+        /// </summary>
+        internal static string MENU_SUB_COMBINEMSG {
+            get {
+                return ResourceManager.GetString("MENU_SUB_COMBINEMSG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Delete selected messages.
+        /// </summary>
+        internal static string MENU_SUB_DELETE {
+            get {
+                return ResourceManager.GetString("MENU_SUB_DELETE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Move selected messages to a _folder.
+        /// </summary>
+        internal static string MENU_SUB_MOVEFOLDER {
+            get {
+                return ResourceManager.GetString("MENU_SUB_MOVEFOLDER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Multiple message selection.
+        /// </summary>
+        internal static string MENU_SUB_MULTISELECT {
+            get {
+                return ResourceManager.GetString("MENU_SUB_MULTISELECT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Open selected message.
+        /// </summary>
+        internal static string MENU_SUB_OPEN {
+            get {
+                return ResourceManager.GetString("MENU_SUB_OPEN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Mark selected messages.
+        /// </summary>
+        internal static string MENU_SUB_READEDFLAG {
+            get {
+                return ResourceManager.GetString("MENU_SUB_READEDFLAG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на as read.
+        /// </summary>
+        internal static string MENU_SUB_READEDMARK {
+            get {
+                return ResourceManager.GetString("MENU_SUB_READEDMARK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Reply to selected message.
+        /// </summary>
+        internal static string MENU_SUB_REPLAY {
+            get {
+                return ResourceManager.GetString("MENU_SUB_REPLAY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на as unread.
+        /// </summary>
+        internal static string MENU_SUB_UNREADEDMARK {
+            get {
+                return ResourceManager.GetString("MENU_SUB_UNREADEDMARK", resourceCulture);
             }
         }
         

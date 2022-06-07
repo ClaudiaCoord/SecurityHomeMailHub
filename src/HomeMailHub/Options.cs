@@ -30,6 +30,8 @@ namespace HomeMailHub
         public LanguageSupport LanguageOverride { get; set; } = LanguageSupport.Default;
         [CmdOption(Key = "--log", IsSwitch = true, ResourceId = "CMD_LINE_H3")]
         public bool IsAllLog { get; set; } = false;
+        [CmdOption(Key = "--ucs", IsSwitch = true, ResourceId = "CMD_LINE_H9")]
+        public bool IsGuiCursesDriver { get; set; } = false;
         [CmdOption(Key = "--not-pop3", IsSwitch = true, ResourceId = "CMD_LINE_H4")]
         public bool IsNotPop3Enable { get; set; } = false;
         [CmdOption(Key = "--not-smtp", IsSwitch = true, ResourceId = "CMD_LINE_H5")]
@@ -60,6 +62,10 @@ namespace HomeMailHub
         public bool IsIncommingPgpDecrypt { get; set; } = false;
         [CmdOption(Key = "--pgp-key-server", ResourceId = "CMD_LINE_H7")]
         public string PgpKeyHost { get; set; } = string.Empty;
+        [CmdOption(Key = "--dnsbl-enable", IsSwitch = true, ResourceId = "CHKBOX_SMTPDNSBL")]
+        public bool IsDnsblIpCheck { get; set; } = false;
+        [CmdOption(Key = "--dnsbl-server", ResourceId = "CMD_LINE_H8")]
+        public string DnsblHost { get; set; } = string.Empty;
 
         public bool Check()
         {
@@ -88,6 +94,8 @@ namespace HomeMailHub
 
             if (IsVpnAlways)
                 Settings.Default.IsVpnEnable = true;
+            if (IsDnsblIpCheck)
+                Settings.Default.IsDnsblIpCheck = true;
             if (IsNotPop3Enable)
                 Settings.Default.IsPop3Enable = false;
             if (IsNotSmtpEnable)
@@ -98,6 +106,8 @@ namespace HomeMailHub
                 Settings.Default.IsProxyListRepack = true;
             if (IsSaveAttachments)
                 Settings.Default.IsSaveAttachments = true;
+            if (IsGuiCursesDriver)
+                Settings.Default.IsGuiNetDriver = false;
             if (IsSmtpClientFakeIp)
                 Settings.Default.IsSmtpClientFakeIp = true;
             if (IsAlwaysNewMessageId)
@@ -119,6 +129,9 @@ namespace HomeMailHub
 
             if (!string.IsNullOrWhiteSpace(PgpKeyHost))
                 Settings.Default.PgpKeyHost = PgpKeyHost;
+
+            if (!string.IsNullOrWhiteSpace(DnsblHost))
+                Settings.Default.DnsblHost = DnsblHost;
 
             return true;
         }

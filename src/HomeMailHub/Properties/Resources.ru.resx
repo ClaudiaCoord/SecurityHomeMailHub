@@ -276,6 +276,12 @@
   <data name="CMD_LINE_H7" xml:space="preserve">
     <value>Сервер ключей PGP (hkp://keys.gnupg.net)</value>
   </data>
+  <data name="CMD_LINE_H8" xml:space="preserve">
+    <value>Сервер DNSBL (zen.spamhaus.org)</value>
+  </data>
+  <data name="CMD_LINE_H9" xml:space="preserve">
+    <value>Использовать графический драйвер Curses, по умолчанию NetDriver</value>
+  </data>
   <data name="GUIACCOUNT_FMT1" xml:space="preserve">
     <value>_{0} все {1} аккаунты</value>
   </data>
@@ -565,11 +571,14 @@
   <data name="MENU_MENU" xml:space="preserve">
     <value>_Меню</value>
   </data>
+  <data name="MENU_MESSAGES" xml:space="preserve">
+    <value>_Сообщения</value>
+  </data>
   <data name="MENU_MSGFORWARDS" xml:space="preserve">
     <value>_Переслать</value>
   </data>
   <data name="MENU_MSGSREADALL" xml:space="preserve">
-    <value>_Пометить все прочитанными</value>
+    <value>_Пометить все сообщения прочитанными</value>
   </data>
   <data name="MENU_OPENMSGFROM" xml:space="preserve">
     <value>Открыть _сообщение в ..</value>
@@ -660,6 +669,33 @@
   </data>
   <data name="MENU_SSHSELECT" xml:space="preserve">
     <value>SSH аккаунт выбран</value>
+  </data>
+  <data name="MENU_SUB_COMBINEMSG" xml:space="preserve">
+    <value>_Объединить выбранные сообщения</value>
+  </data>
+  <data name="MENU_SUB_DELETE" xml:space="preserve">
+    <value>_Удалить выбранные сообщения</value>
+  </data>
+  <data name="MENU_SUB_MOVEFOLDER" xml:space="preserve">
+    <value>_Переместить выбранные сообщения в папку</value>
+  </data>
+  <data name="MENU_SUB_MULTISELECT" xml:space="preserve">
+    <value>_Выбор нескольких сообщений</value>
+  </data>
+  <data name="MENU_SUB_OPEN" xml:space="preserve">
+    <value>_Открыть выбранное сообщение</value>
+  </data>
+  <data name="MENU_SUB_READEDFLAG" xml:space="preserve">
+    <value>_Пометить выбранные сообщения</value>
+  </data>
+  <data name="MENU_SUB_READEDMARK" xml:space="preserve">
+    <value>прочитанными</value>
+  </data>
+  <data name="MENU_SUB_REPLAY" xml:space="preserve">
+    <value>_Ответить на выбранное сообщение</value>
+  </data>
+  <data name="MENU_SUB_UNREADEDMARK" xml:space="preserve">
+    <value>непрочитанными</value>
   </data>
   <data name="MENU_UNDELETECONFIRM" xml:space="preserve">
     <value>Показывать предупреждение о возможном восстановлении _сообщений</value>

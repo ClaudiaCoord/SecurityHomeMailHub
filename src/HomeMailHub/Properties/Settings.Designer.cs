@@ -655,5 +655,17 @@ namespace HomeMailHub.Properties {
                 this["DnsblHost"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsGuiNetDriver {
+            get {
+                return ((bool)(this["IsGuiNetDriver"]));
+            }
+            set {
+                this["IsGuiNetDriver"] = value;
+            }
+        }
     }
 }

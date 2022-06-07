@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using HomeMailHub.CmdLine;
 using HomeMailHub.Gui;
 using SecyrityMail;
-using SecyrityMail.Data;
 using SecyrityMail.Utils;
 
 namespace HomeMailHub
@@ -29,6 +28,22 @@ namespace HomeMailHub
                 new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             TaskScheduler.UnobservedTaskException +=
                 new EventHandler<UnobservedTaskExceptionEventArgs>(TaskScheduler_UnobservedTaskException);
+
+            if ((args.Length == 1) && Path.GetExtension(args[0]).Equals(".eml", StringComparison.InvariantCultureIgnoreCase)) {
+                try {
+                    Global.Instance.Config.Copy(new ConfigurationLoad());
+                    Global.Instance.Init();
+                    gui = new(typeof(GuiMessageReadWindow), args[0]);
+                    gui.Init();
+                } catch { }
+                finally {
+                    if (!cancellation.IsCancellationRequested)
+                        cancellation.Cancel();
+                    cancellation.Dispose();
+                    Global.Instance.DeInit();
+                }
+                return;
+            }
 
             options = CmdOption.Parse<Options>(args);
             if (!options.Check())

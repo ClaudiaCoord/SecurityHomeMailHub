@@ -136,6 +136,5 @@ namespace SecyrityMail.MailAccounts
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Save), ex); }
                 return false;
             });
-
     }
 }

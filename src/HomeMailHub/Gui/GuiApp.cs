@@ -21,7 +21,10 @@ namespace HomeMailHub.Gui {
 		private GuiRootStatusBar GuiMainStatusBar;
 		private Toplevel GuiTop;
 
-		private static GuiApp __this = default;
+		private Type RunType = Type.Missing.GetType();
+        private string Args = string.Empty;
+
+        private static GuiApp __this = default;
 		public static GuiApp Get => __this;
 		public GuiRootWindow GetView => GuiMainWindow;
 		public GuiRootStatusBar GetViewBar => GuiMainStatusBar;
@@ -134,11 +137,12 @@ namespace HomeMailHub.Gui {
 		}
 		#endregion
 
-		public GuiApp()
-		{
+		public GuiApp() {
+
 			__this = this;
+			Application.UseSystemConsole = Settings.Default.IsGuiNetDriver;
 			Application.Init();
-			InitStaticGuiApp();
+            InitStaticGuiApp();
 			GuiTop = new Toplevel() {
 				X = 0,
 				Y = 0,
@@ -148,11 +152,31 @@ namespace HomeMailHub.Gui {
 			GuiMainStatusBar = new();
 			GuiMainStatusBar.ColorScheme = GetStatusBarColor();
 			GuiMainWindow = new GuiRootWindow().Init();
-			Init(GuiMainWindow.Views);
-		}
-		~GuiApp() => Dispose();
+            InitRoot(GuiMainWindow.Views);
+        }
+        public GuiApp(Type t, string s) {
 
-		public void LoadWindow(Type t, string s = default) {
+            __this = this;
+			RunType = t;
+			Args = s;
+            Application.UseSystemConsole = true;
+            Application.Init();
+            InitStaticGuiApp();
+            GuiTop = new Toplevel()
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            };
+            GuiMainStatusBar = new();
+            GuiMainStatusBar.ColorScheme = GetStatusBarColor();
+        }
+        ~GuiApp() => Dispose();
+
+		public void Init() => LoadWindow(RunType, Args);
+
+        public void LoadWindow(Type t, string s = default) {
 			try {
 				switch (t.Name) {
 					case nameof(GuiMailAccountWindow):  LoadWindow<GuiMailAccountWindow>(s); break;
@@ -175,10 +199,14 @@ namespace HomeMailHub.Gui {
 				child = new T();
 				if (child is IGuiWindow<T> win) {
 					try {
-						win.Init(s).Load();
-						win.GetTop.Add(GuiMainStatusBar);
-						Application.Run(win.GetTop);
-					} catch (Exception ex) { GuiMainStatusBar.UpdateStatus(GuiStatusItemId.Error, ex.Message); }
+                        win.GetTop.Remove(GuiMainStatusBar);
+                        win.Init(s).Load();
+                        win.GetTop.Add(GuiMainStatusBar);
+                        Application.Run(win.GetTop);
+						if (GuiMainWindow != default)
+                            GuiMainStatusBar.Y = Pos.Bottom(GuiMainWindow);
+                        GuiMainStatusBar.SetNeedsDisplay();
+                    } catch (Exception ex) { GuiMainStatusBar.UpdateStatus(GuiStatusItemId.Error, ex.Message); }
 				}
 			}
 			catch (Exception ex) { GuiMainStatusBar.UpdateStatus(GuiStatusItemId.Error, ex.Message); }
@@ -188,17 +216,17 @@ namespace HomeMailHub.Gui {
 			}
 		}
 
-		private void Init(View[] views) {
+		private void InitRoot(View[] views) {
 			try {
 				foreach (View v in views)
 					GuiTop.Add(v);
-				GuiTop.Add(GuiMainStatusBar);
+                GuiTop.Add(GuiMainStatusBar);
 			} catch (Exception ex) { GuiMainStatusBar.UpdateStatus(GuiStatusItemId.Error, ex.Message); }
 		}
 
 		public void Start() {
 			try { Application.Run(GuiTop); }
-			catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.ToString()); Global.Instance.Log.Add(nameof(GuiApp), ex); }
+			catch (Exception ex) { Global.Instance.Log.Add(nameof(Start), ex); }
 		}
 
 		public void ChildWindowDispose<T>(IGuiWindow<T> child) {

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -36,6 +37,9 @@ namespace SecyrityMail.Messages
         private const string ErrorArrivalDateId = "Arrival-Date";
         private const string DeliveryStatusId = "delivery-status";
         public const string XConfirmReadingToId = "X-Confirm-Reading-To";
+        public const string XSPAM = "(SPAM)";
+
+        private RunOnce runOnce = new();
 
         [XmlElement("id")]
         public int Id { get; set; } = 0;
@@ -73,17 +77,14 @@ namespace SecyrityMail.Messages
             MsgId = mid;
             Size = file.Length;
             FilePath = file.FullName;
-            Folder = file.FullName.Contains(@"\Msg\") ? Global.DirectoryPlace.Msg :
-                (file.FullName.Contains(@"\Bounced\") ? Global.DirectoryPlace.Bounced :
-                (file.FullName.Contains(@"\Error\") ? Global.DirectoryPlace.Error :
-                (file.FullName.Contains(@"\Spam\") ? Global.DirectoryPlace.Spam :
-                Global.DirectoryPlace.None)));
-            DateSerialize = file.CreationTimeUtc;
+            (Global.DirectoryPlace place, string _, DateTimeOffset dt) = Global.GetFolderInfo(file.FullName);
+            Folder = place;
+            if (dt != default) Date = dt;
+            else DateSerialize = file.CreationTimeUtc;
         }
 
         public MailMessage Copy(MailMessage msg, int count) {
-            if (msg == null)
-                return null;
+            if (msg == null) return null;
 
             Id = msg.Id = count;
             Size = msg.Size;
@@ -100,6 +101,8 @@ namespace SecyrityMail.Messages
         public async Task<MailMessage> LoadAndCreate(string file, int count) => await LoadAndCreate(new FileInfo(file), count);
         public async Task<MailMessage> LoadAndCreate(FileInfo file, int count) =>
             await Task.Run(async () => {
+                if (!runOnce.Begin())
+                    return default;
                 MimeMessage mmsg = default(MimeMessage);
                 try {
                     if ((file == null) || (file.Length == 0) || !file.Exists)
@@ -122,6 +125,7 @@ namespace SecyrityMail.Messages
                 finally {
                     if (mmsg != default)
                         try { mmsg.Dispose(); } catch { }
+                    runOnce.End();
                 }
                 return this;
             });
@@ -137,15 +141,18 @@ namespace SecyrityMail.Messages
             Global.DirectoryPlace place, FileInfo msgpath, int count, string rootpath = default,
             bool isdelete = true, bool pgpauto = false, bool localdelivery = true) {
 
+            if (runOnce.IsRunning)
+                return default;
+
             MimeMessage mmsg = default(MimeMessage);
             try {
                 if ((msgpath == null) || (msgpath.Length == 0) || !msgpath.Exists || msgpath.IsReadOnly)
-                    return null;
+                    return default;
 
                 mmsg = await MimeMessage.LoadAsync(msgpath.FullName)
                                         .ConfigureAwait(false);
                 if (mmsg == null)
-                    return null;
+                    return default;
 
                 if (string.IsNullOrWhiteSpace(rootpath))
                     rootpath = Path.GetDirectoryName(Path.GetDirectoryName(msgpath.FullName));
@@ -173,6 +180,8 @@ namespace SecyrityMail.Messages
         public async Task<MailMessage> CreateAndDelivery(
             Global.DirectoryPlace place, MimeMessage mmsg, string rootpath, int count, bool pgpauto = false, bool localdelivery = true) =>
             await Task.Run(async () => {
+                if (!runOnce.Begin())
+                    return default;
                 MimeMessage mmsgTmp = default;
                 try {
                     if ((mmsg == null) || string.IsNullOrWhiteSpace(rootpath))
@@ -185,8 +194,7 @@ namespace SecyrityMail.Messages
                     MsgId  = mmsg.MessageId = GetOrCreateMessageId(Global.Instance.Config.IsAlwaysNewMessageId ? string.Empty : mmsg.MessageId);
                     Folder = place;
 
-                    switch (place)
-                    {
+                    switch (place) {
                         case Global.DirectoryPlace.Msg: {
                                 bool iscrypted = false,
                                      iscrypt = false;
@@ -215,11 +223,7 @@ namespace SecyrityMail.Messages
                                         if (localdelivery && !string.IsNullOrWhiteSpace(mmsg.HtmlBody)) {
 
                                             BodyBuilder builder = new();
-                                            IEnumerable<MimeEntity> attachs = mmsg.Attachments;
-                                            if (attachs != null)
-                                                foreach (var a in attachs)
-                                                    builder.Attachments.Add(a);
-
+                                            CopyAttachments(builder, mmsg.Attachments);
                                             builder.HtmlBody = new ConverterHtmlToHtml().Convert(mmsg);
                                             builder.TextBody = mmsg.TextBody;
 
@@ -227,9 +231,9 @@ namespace SecyrityMail.Messages
                                         }
                                         if (Global.Instance.Config.IsSaveAttachments)
                                             await SaveAttachments(mmsg.Attachments, rootpath, mmsg.MessageId, mmsg.Date)
-                                                    .ConfigureAwait(false);
+                                                  .ConfigureAwait(false);
                                     }
-}
+                                }
                                 catch (Exception ex) { Global.Instance.Log.Add(place.ToString(), ex); }
                                 finally {
                                     if (iscrypted)
@@ -342,10 +346,12 @@ namespace SecyrityMail.Messages
                         Size = f.Length;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(CreateAndDelivery), ex); return null; }
+                finally { runOnce.End(); }
                 return this;
             });
         #endregion
 
+        #region Check
         public bool Check()
         {
             try {
@@ -366,7 +372,80 @@ namespace SecyrityMail.Messages
             catch (Exception ex) { Global.Instance.Log.Add(nameof(Check), ex); }
             return false;
         }
+        #endregion
 
+        #region Move to folder
+        public bool MoveToFolder(Global.DirectoryPlace place, string path = default)
+        {
+            try {
+                if (string.IsNullOrWhiteSpace(FilePath) || !Global.IsAccountFolderValid(place))
+                    return false;
+
+                FileInfo f = new FileInfo(FilePath);
+                if ((f == default) || !f.Exists)
+                    return false;
+
+                (Global.DirectoryPlace placed, string rootdir, DateTimeOffset dt) = Global.GetFolderInfo(FilePath);
+                if ((placed == place) || (place == Global.DirectoryPlace.None))
+                    return false;
+
+                if (string.IsNullOrWhiteSpace(path)) {
+                    if (string.IsNullOrWhiteSpace(rootdir))
+                        return false;
+                    path = Global.GetUserDirectory(rootdir);
+                }
+
+                DirectoryInfo dir = Directory.CreateDirectory(Global.AppendPartDirectory(path, place, dt));
+                f.MoveTo(Path.Combine(
+                            dir.FullName,
+                            Path.GetFileName(FilePath)));
+                f.Refresh();
+                if (f.Exists) {
+                    Folder = place;
+                    FilePath = f.FullName;
+                    if ((place == Global.DirectoryPlace.Spam) && !Subj.Contains(MailMessage.XSPAM))
+                        Subj += $" {XSPAM}";
+                    else if ((placed == Global.DirectoryPlace.Spam) && Subj.Contains(MailMessage.XSPAM)) {
+                        int idx = Subj.IndexOf(XSPAM);
+                        if (idx > 0)
+                            Subj = Subj.Substring(0, idx);
+                        else if (idx == 0) {
+                            if (Subj.Length == XSPAM.Length)
+                                Subj = string.Empty;
+                            else if (Subj.Length > XSPAM.Length)
+                                Subj = Subj.Substring(XSPAM.Length);
+                        }
+                    }
+                    return true;
+                }
+            } catch (Exception ex) { Global.Instance.Log.Add(nameof(MoveToFolder), ex); }
+            return false;
+        }
+        #endregion
+
+        #region MimeMessage to text
+        public async Task<Tuple<MimeMessage, string>> MimeMessageToText() =>
+            await Task.Run(async () => {
+                try {
+                    MimeMessage mmsg = await MimeMessage.LoadAsync(FilePath)
+                                                        .ConfigureAwait(false);
+                    if (mmsg == null)
+                        return new Tuple<MimeMessage, string>(default, string.Empty);
+
+                    StringBuilder sb = new();
+                    sb.AppendLine($"{Environment.NewLine}{Date} - {From}{Environment.NewLine}{Subj}");
+
+                    if (!string.IsNullOrWhiteSpace(mmsg.TextBody))
+                        sb.AppendLine(mmsg.TextBody);
+                    else if (!string.IsNullOrWhiteSpace(mmsg.HtmlBody))
+                        sb.AppendLine(new ConverterHtmlToHtml().ConvertT(mmsg.HtmlBody));
+                    return new Tuple<MimeMessage, string>(mmsg, sb.ToString());
+                } catch { }
+                return new Tuple<MimeMessage, string>(default, string.Empty);
+            });
+        #endregion
+
+        #region Message utils
         private string GetOrCreateMessageId(string id) =>
             string.IsNullOrWhiteSpace(id) ? MimeKit.Utils.MimeUtils.GenerateMessageId(Path.GetRandomFileName()) : id;
 
@@ -413,5 +492,26 @@ namespace SecyrityMail.Messages
             return Path.Combine(path,
                 string.IsNullOrEmpty(name) ? $"{id}-unknown.bin" : $"{id}-{name}");
         }
+
+        public static void CopyAttachments(BodyBuilder builder, IEnumerable<MimeEntity> attachs) {
+            if ((attachs == null) || (attachs.Count() == 0))
+                return;
+            foreach (var a in attachs)
+                builder.Attachments.Add(a);
+        }
+
+        public static string GetMimeEntryName(MimeEntity entry) {
+            string name = string.Empty;
+            if (entry is MessagePart mep) {
+                if (!string.IsNullOrWhiteSpace(mep.ContentDisposition?.FileName))
+                    name = Path.GetFileName(mep.ContentDisposition?.FileName);
+            }
+            else if (entry is MimePart mip) {
+                if (!string.IsNullOrWhiteSpace(mip?.FileName))
+                    name = Path.GetFileName(mip?.FileName);
+            }
+            return name;
+        }
+        #endregion
     }
 }

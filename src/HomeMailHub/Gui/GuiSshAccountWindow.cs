@@ -343,7 +343,7 @@ namespace HomeMailHub.Gui
 						_ = await Load_().ConfigureAwait(false);
 					}, null, null, Key.AltMask | Key.R),
 					null,
-					new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.Q)
+					new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.CursorLeft)
 				}),
 				new MenuBarItem (RES.MENU_ACTION, new MenuItem [] {
 					new MenuItem (string.Format(RES.GUIACCOUNT_FMT1, RES.TAG_ON, tag), string.Empty, async () => {
@@ -430,7 +430,7 @@ namespace HomeMailHub.Gui
 		public async void Load() => _ = await Load_().ConfigureAwait(false);
 		private async Task<bool> Load_() =>
 			await Task.Run(async () => {
-                if (!runOnce.GoRun())
+                if (!runOnce.Begin())
                     return false;
                 try {
                     _ = await LoadSshAccounts_().ConfigureAwait(false);
@@ -438,7 +438,7 @@ namespace HomeMailHub.Gui
                         MenuItem[] mitems = await nameof(GuiSshAccountWindow).LoadMenuUrls().ConfigureAwait(false);
                         Application.MainLoop.Invoke(() => urlmenu.Children = mitems);
                     } catch { }
-                } finally { runOnce.EndRun(); }
+                } finally { runOnce.End(); }
                 return true;
 			});
 
@@ -463,7 +463,7 @@ namespace HomeMailHub.Gui
         #region Delete
         private async void Delete() {
 
-            if (!runOnce.IsRange(data.Count) || !runOnce.GoRun())
+            if (!runOnce.IsRange(data.Count) || !runOnce.Begin())
                 return;
 
             try {
@@ -489,7 +489,7 @@ namespace HomeMailHub.Gui
                     } catch (Exception ex) { ex.StatusBarError(); }
                 }
             }
-            finally { runOnce.EndRun(); }
+            finally { runOnce.End(); }
         }
         #endregion
 
@@ -583,7 +583,7 @@ namespace HomeMailHub.Gui
 
 		private void SelectItem(string s, int id) {
 
-			if (string.IsNullOrEmpty(s) || !runOnce.GoRun(id))
+			if (string.IsNullOrEmpty(s) || !runOnce.Begin(id))
 				return;
 
 			try {
@@ -624,12 +624,12 @@ namespace HomeMailHub.Gui
 				buttonSave.Enabled = buttonClear.Enabled = a.Enable;
 				buttonDelete.Enabled = buttonExport.Enabled = true;
 
-			} finally { runOnce.EndRun(); }
+			} finally { runOnce.End(); }
 		}
 
 		private async void SaveItem() {
 
-			if (!runOnce.GoRun())
+			if (!runOnce.Begin())
 				return;
 
 			try {
@@ -660,7 +660,7 @@ namespace HomeMailHub.Gui
 					account = a;
 					await Global.Instance.SshProxy.Save().ConfigureAwait(false);
 				}
-			} finally { runOnce.EndRun(); }
+			} finally { runOnce.End(); }
 		}
 
 		private SshAccount NewItem() {

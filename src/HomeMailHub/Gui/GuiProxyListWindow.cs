@@ -280,7 +280,7 @@ namespace HomeMailHub.Gui
 					new MenuItem (RES.GUIPROXY_MENU3, "", async () =>
 						_ = await FromDownload(ProxyType.Sock5).ConfigureAwait(false), null, null, Key.AltMask | Key.S),
 					null,
-					new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.Q)
+					new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.CursorLeft)
 				}),
 				urlmenu
 			});
@@ -292,7 +292,7 @@ namespace HomeMailHub.Gui
         #region Select proxy type
 		private async void ProxySelectType_SelectedItemChanged(SelectedItemChangedArgs obj)
         {
-			if ((obj == null) || (obj.SelectedItem < 0) || (obj.SelectedItem >= proxyopt.Length) || !runOnce.GoRun(SetBusy))
+			if ((obj == null) || (obj.SelectedItem < 0) || (obj.SelectedItem >= proxyopt.Length) || !runOnce.Begin(SetBusy))
 				return;
 			try {
 				ustring s = proxyopt[obj.SelectedItem].Replace("_", "");
@@ -311,17 +311,17 @@ namespace HomeMailHub.Gui
 				finally {
 					if (pt == ProxyType.None) {
 						SelectTypeStateChange(false);
-						runOnce.EndRun(SetBusy);
+						runOnce.End(SetBusy);
 					}
 				}
 				if (pt != ProxyType.None) {
 					await LoadProxyList(pt, oldtype, (pt != oldtype) ? data : default).ContinueWith((t) => {
 						SelectTypeStateChange(true);
-						runOnce.EndRun(SetBusy);
+						runOnce.End(SetBusy);
 					}).ConfigureAwait(false);
 				}
 
-			} catch (Exception ex) { ex.StatusBarError(); runOnce.EndRun(SetBusy); }
+			} catch (Exception ex) { ex.StatusBarError(); runOnce.End(SetBusy); }
 		}
 		private void SelectTypeStateChange(bool b) =>
 			Application.MainLoop.Invoke(() => {
@@ -339,7 +339,7 @@ namespace HomeMailHub.Gui
 					RES.GUIPROXY_TXT19.StatusBarText();
 					return false;
 				}
-				if (!runOnce.GoRun(SetBusy))
+				if (!runOnce.Begin(SetBusy))
 					return false;
 
 				try
@@ -362,13 +362,13 @@ namespace HomeMailHub.Gui
 					}
 				}
 				catch (Exception ex) { ex.StatusBarError(); }
-				finally { runOnce.EndRun(SetBusy); }
+				finally { runOnce.End(SetBusy); }
 				return true;
 			});
 
 		private async Task<bool> FromDownload(ProxyType type) =>
 			await Task.Run(async () => {
-				if (!runOnce.GoRun(SetBusy))
+				if (!runOnce.Begin(SetBusy))
 					return false;
 
 				try {
@@ -392,7 +392,7 @@ namespace HomeMailHub.Gui
 					}
 				}
 				catch (Exception ex) { ex.StatusBarError(); }
-				finally { runOnce.EndRun(SetBusy); }
+				finally { runOnce.End(SetBusy); }
 				return true;
 			});
 
@@ -436,7 +436,7 @@ namespace HomeMailHub.Gui
 		#region Clean/Delete
 		private void CleanForm() {
 
-			if (!runOnce.GoRun(SetBusy))
+			if (!runOnce.Begin(SetBusy))
 				return;
 			try {
 				if (IsEmptyForm) {
@@ -454,7 +454,7 @@ namespace HomeMailHub.Gui
 				}
 				Clean();
 			}
-			finally { runOnce.EndRun(SetBusy); }
+			finally { runOnce.End(SetBusy); }
 		}
 		private void Clean() =>
 			Application.MainLoop.Invoke(() => {
@@ -485,7 +485,7 @@ namespace HomeMailHub.Gui
 
         private void Delete() {
 
-			if (!runOnce.IsRange(data.Count) || !runOnce.GoRun(SetBusy))
+			if (!runOnce.IsRange(data.Count) || !runOnce.Begin(SetBusy))
 				return;
 
 			try {
@@ -502,7 +502,7 @@ namespace HomeMailHub.Gui
 				}
 			}
 			catch (Exception ex) { ex.StatusBarError(); }
-			finally { runOnce.EndRun(SetBusy); }
+			finally { runOnce.End(SetBusy); }
 		}
 		#endregion
 
@@ -518,7 +518,7 @@ namespace HomeMailHub.Gui
 
 		private void SelectItem(string s, int id) {
 
-			if (!runOnce.GoRun(id, SetBusy))
+			if (!runOnce.Begin(id, SetBusy))
 				return;
 			try {
 				if (string.IsNullOrEmpty(s)) {
@@ -542,12 +542,12 @@ namespace HomeMailHub.Gui
 				}
 				buttonCheckHost.Enabled =
 				buttonDelete.Enabled = true;
-			} finally { runOnce.EndRun(SetBusy); }
+			} finally { runOnce.End(SetBusy); }
 		}
 
 		private void SaveItem() {
 
-			if (!runOnce.GoRun(SetBusy))
+			if (!runOnce.Begin(SetBusy))
 				return;
 
 			try {
@@ -586,7 +586,7 @@ namespace HomeMailHub.Gui
 				uri = $"{host}:{port}";
 				if (!data.Contains(uri))
 					data.Add(uri);
-			} finally { runOnce.EndRun(SetBusy); }
+			} finally { runOnce.End(SetBusy); }
 		}
 		#endregion
 
@@ -614,7 +614,7 @@ namespace HomeMailHub.Gui
 					RES.GUIPROXY_TXT3.StatusBarText();
 					return;
 				}
-				if (!runOnce.GoRun(SetBusy)) {
+				if (!runOnce.Begin(SetBusy)) {
 					RES.GUIPROXY_TXT4.StatusBarText();
 					return;
 				}
@@ -637,10 +637,10 @@ namespace HomeMailHub.Gui
 												   await LoadProxyList(proxyType, proxyType, list)
 															.ContinueWith((t) => {
                                                                 checkProgress.End();
-                                                                runOnce.EndRun(SetBusy);
+                                                                runOnce.End(SetBusy);
                                                             }).ConfigureAwait(false);
                                                }).ConfigureAwait(false);
-				} catch (Exception ex) { ex.StatusBarError(); runOnce.EndRun(SetBusy); }
+				} catch (Exception ex) { ex.StatusBarError(); runOnce.End(SetBusy); }
 			}
 		}
 
@@ -665,7 +665,7 @@ namespace HomeMailHub.Gui
 					RES.GUIPROXY_TXT6.StatusBarText();
 					return;
 				}
-				if (!runOnce.GoRun(SetBusy)) {
+				if (!runOnce.Begin(SetBusy)) {
 					RES.GUIPROXY_TXT4.StatusBarText();
 					return;
 				}
@@ -687,9 +687,9 @@ namespace HomeMailHub.Gui
 													   buttonCheckHost.ColorScheme = Colors.Base;
 													   string.Empty.StatusBarText();
 												   });
-												   runOnce.EndRun(SetBusy);
+												   runOnce.End(SetBusy);
 											   }).ConfigureAwait(false);
-				} catch (Exception ex) { ex.StatusBarError(); runOnce.EndRun(SetBusy); }
+				} catch (Exception ex) { ex.StatusBarError(); runOnce.End(SetBusy); }
 			}
 		}
 

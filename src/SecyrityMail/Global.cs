@@ -56,6 +56,7 @@ namespace SecyrityMail
         private static CancellationTokenSafe cancellationSmtp = new();
 
         #region Init
+        public void Init() => FindAutoInit();
         public async void Init(CancellationToken ct) {
 
             FindAutoInit();
@@ -108,12 +109,16 @@ namespace SecyrityMail
 
         #region DeInit
         public void DeInit() {
-            Pop3Service.EventCb -= ToMainEvent;
-            SmtpService.EventCb -= ToMainEvent;
-            cancellationPop3.Cancel();
-            cancellationPop3.Dispose();
-            cancellationSmtp.Cancel();
-            cancellationSmtp.Dispose();
+            if (Pop3Service != default) {
+                Pop3Service.EventCb -= ToMainEvent;
+                cancellationPop3.Cancel();
+                cancellationPop3.Dispose();
+            }
+            if (SmtpService != default) {
+                SmtpService.EventCb -= ToMainEvent;
+                cancellationSmtp.Cancel();
+                cancellationSmtp.Dispose();
+            }
             IpAddressInfo.Dispose();
             FindAutoDispose();
         }
@@ -257,6 +262,16 @@ namespace SecyrityMail
             None        // -*-
         }
 
+        public static DirectoryPlace[] AccountPlaces = new DirectoryPlace[] {
+            DirectoryPlace.Msg,
+            DirectoryPlace.Spam,
+            DirectoryPlace.Error,
+            DirectoryPlace.Bounced,
+            DirectoryPlace.Attach,
+            DirectoryPlace.Send,
+            DirectoryPlace.Out
+        };
+
         public static string GetValidFileName(string name) =>
             Path.GetInvalidFileNameChars().Aggregate(name, (current, c) => current.Replace(c.ToString(), "_"));
 
@@ -378,6 +393,49 @@ namespace SecyrityMail
                 default: return Path.Combine(GetRootDirectory(), rootacc, file);
             }
         }
+
+        public static (DirectoryPlace, string, DateTimeOffset) GetFolderInfo(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return (DirectoryPlace.None, string.Empty, default);
+            try {
+                string[] ss = path.Split(new char[] { '/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
+                if ((ss == null) || (ss.Length == 0))
+                    return (DirectoryPlace.None, string.Empty, default);
+
+                bool isplace = false;
+                int year = 0, month = 0, day = 0;
+                string rootdir = string.Empty;
+                DirectoryPlace place = DirectoryPlace.None;
+
+                foreach (string s in ss) {
+                    if (!isplace) {
+                        foreach (DirectoryPlace p in AccountPlaces)
+                            if (p.ToString().Equals(s)) {
+                                place = p;
+                                isplace = true;
+                                break;
+                            }
+                        if (!isplace)
+                            rootdir = s;
+                    } else {
+                        if (year == 0) int.TryParse(s, out year);
+                        else if (month == 0) int.TryParse(s, out month);
+                        else if (day == 0) int.TryParse(s, out day);
+                        else break;
+                    }
+                }
+                if ((year > 0) && (month > 0) && (day > 0))
+                    return (place, rootdir, new DateTimeOffset(year, month, day, 0, 0, 0, TimeSpan.Zero));
+                return (place, rootdir, default);
+
+            } catch { }
+            return (DirectoryPlace.None, string.Empty, default);
+        }
+
+        public static bool IsAccountFolderValid(DirectoryPlace place) =>
+            AccountPlaces.Contains(place);
+
         #endregion
 
         #region local auto initialize

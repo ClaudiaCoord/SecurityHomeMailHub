@@ -24,19 +24,22 @@ namespace HomeMailHub.Gui
         public bool IsRun() => IsLocked;
         public bool IsRun(int id) => IsLocked || (LastId == id);
         public bool IsRange(int count) => (LastId >= 0) && (LastId < count);
+        public bool IsNewId(int id) => (LastId != id) && (id >= 0);
+        public bool IsValidId(int id) => id >= 0;
+        public bool IsValidId() => LastId >= 0;
 
-        public bool GoRun() {
+        public bool Begin() {
             if (IsLocked) return false;
             IsLocked = true;
             return true;
         }
-        public bool GoRun(int id) {
+        public bool Begin(int id) {
             if (IsLocked || (LastId == id)) return false;
             LastId = id;
             IsLocked = true;
             return true;
         }
-        public bool GoRun(Action<bool> action) {
+        public bool Begin(Action<bool> action) {
             if (IsLocked) {
                 action.Invoke(true);
                 return false;
@@ -45,15 +48,15 @@ namespace HomeMailHub.Gui
             action.Invoke(false);
             return true;
         }
-        public bool GoRun(int id, Action<bool> action) {
-            if (!GoRun(id)) return false;
+        public bool Begin(int id, Action<bool> action) {
+            if (!Begin(id)) return false;
             action.Invoke(false);
             return true;
         }
-        public void EndRun() {
+        public void End() {
             if (IsLocked) IsLocked = false;
         }
-        public void EndRun(Action<bool> action) {
+        public void End(Action<bool> action) {
             if (!IsLocked) return;
             IsLocked = false;
             action.Invoke(false);

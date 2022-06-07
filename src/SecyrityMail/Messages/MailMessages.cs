@@ -9,9 +9,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using MimeKit;
 using SecyrityMail.Data;
 using SecyrityMail.Utils;
 
@@ -33,11 +33,7 @@ namespace SecyrityMail.Messages
                     };
         private readonly object __lock = new object();
         private bool isModify = false;
-        private long isBusyLong_ = 0L;
-        private bool IsBusy_ {
-            get => (Interlocked.Read(ref isBusyLong_) == 0L) ? false : true;
-            set =>  Interlocked.Exchange(ref isBusyLong_, value ? 1L : 0L);
-        }
+        private RunOnce runOnce = new();
 
         public MailMessages() { }
         public MailMessages(string dir) {
@@ -62,7 +58,7 @@ namespace SecyrityMail.Messages
         [XmlIgnore]
         public string Counts => Items.Count.ToString();
         [XmlIgnore]
-        public bool IsBusy => IsBusy_;
+        public bool IsBusy => runOnce.IsRunning;
         [XmlIgnore]
         public bool IsModify => isModify;
         [XmlIgnore]
@@ -141,17 +137,123 @@ namespace SecyrityMail.Messages
                 msg = (from i in Items where i.MsgId.Equals(msgid) select i).FirstOrDefault();
             return msg;
         }
-        public List<MailMessage> GetFolder(Global.DirectoryPlace place) {
-            switch (place) {
-                case Global.DirectoryPlace.Msg:
-                case Global.DirectoryPlace.Spam:
-                case Global.DirectoryPlace.Error:
-                case Global.DirectoryPlace.Bounced: break;
-                case Global.DirectoryPlace.Root:
-                default: return Items;
-            }
-            return new(Items.Where(x => x.Folder == place));
+
+        #region Folders
+        public List<MailMessage> GetFromFolder(Global.DirectoryPlace place) {
+            if (Global.IsAccountFolderValid(place))
+                return new(Items.Where(x => x.Folder == place));
+            return Items;
         }
+        public bool MoveToFolder(Global.DirectoryPlace place, MailMessage msg) {
+            if ((msg != null) && msg.MoveToFolder(place, RootDirectory)) {
+                isModify = true;
+                return true;
+            }
+            return false;
+        }
+        public bool MoveToFolder(Global.DirectoryPlace place, int id) {
+            if (id > 0) {
+                MailMessage msg = Find(id);
+                return MoveToFolder(place, msg);
+            }
+            return false;
+        }
+        #endregion
+
+        #region Combine Messages
+        public async Task<bool> CombineMessages(List<int> list)
+        {
+            if (runOnce.IsRunning || (list == null) || (list.Count <= 1))
+                return false;
+            return await Task.Run(async () => {
+                Tuple<MimeMessage, string> ti =
+                    default(Tuple<MimeMessage, string>);
+
+                try {
+                    MailMessage msg = Find(list[0]);
+                    if (msg == null) return false;
+                    ti = await msg.MimeMessageToText()
+                                  .ConfigureAwait(false);
+                    if ((ti == null) || (ti.Item1 == null) || string.IsNullOrWhiteSpace(ti.Item2))
+                        return false;
+
+                    (Global.DirectoryPlace place, string rootdir, DateTimeOffset dt) = Global.GetFolderInfo(msg.FilePath);
+                    if ((place == Global.DirectoryPlace.None) || string.IsNullOrWhiteSpace(rootdir) || (dt == default))
+                        return false;
+
+                    DirectoryInfo attachdir = Directory.CreateDirectory(
+                        Global.AppendPartDirectory(Global.GetUserDirectory(rootdir), Global.DirectoryPlace.Attach, dt));
+
+                    BodyBuilder builder = new();
+                    builder.TextBody = ti.Item2;
+                    MailMessage.CopyAttachments(builder, ti.Item1.Attachments);
+
+                    for (int i = 1; i < list.Count; i++) {
+                        MailMessage pmsg =
+                            default(MailMessage);
+                        Tuple<MimeMessage, string> tp =
+                            default(Tuple<MimeMessage, string>);
+                        bool isAdded = false;
+
+                        try {
+                            pmsg = Find(list[i]);
+                            tp = await pmsg.MimeMessageToText()
+                                          .ConfigureAwait(false);
+                            if ((tp == null) || (tp.Item1 == null) || string.IsNullOrWhiteSpace(tp.Item2))
+                                continue;
+
+                            builder.TextBody += tp.Item2;
+                            IEnumerable<MimeEntity> attachs = tp.Item1.Attachments;
+                            if (attachs != null)
+                                foreach (var a in attachs) {
+                                    try { builder.Attachments.Add(a); } catch { }
+                                    try {
+                                        string name = MailMessage.GetMimeEntryName(a);
+                                        if (string.IsNullOrWhiteSpace(name))
+                                            continue;
+
+                                        (Global.DirectoryPlace pplace, string prootdir, DateTimeOffset pdt) = Global.GetFolderInfo(pmsg.FilePath);
+                                        if ((pplace == Global.DirectoryPlace.None) || string.IsNullOrWhiteSpace(prootdir) || (pdt == default))
+                                            continue;
+
+                                        FileInfo f = new (MailMessage.GetAttachFilePath(
+                                            Global.AppendPartDirectory(Global.GetUserDirectory(rootdir), Global.DirectoryPlace.Attach, dt),
+                                            pmsg.MsgId, name));
+                                        if ((f == null) || !f.Exists || f.IsReadOnly)
+                                            continue;
+                                        f.MoveTo(
+                                            MailMessage.GetAttachFilePath(
+                                                attachdir.FullName,
+                                                pmsg.MsgId, name));
+                                    } catch { }
+                                }
+                            isAdded = true;
+                        }
+                        catch (Exception ex) { Global.Instance.Log.Add(nameof(CombineMessages), ex); }
+                        finally {
+                            if ((tp != null) && (tp.Item1 != null))
+                                tp.Item1.Dispose();
+                            if (isAdded && (pmsg != null)) {
+                                Global.Instance.Log.Add(
+                                    nameof(CombineMessages),
+                                    $"Combine and remove: {pmsg.Id}/{pmsg.MsgId}");
+                                Delete(pmsg);
+                            }
+                        }
+                    }
+                    ti.Item1.Body = builder.ToMessageBody();
+                    await ti.Item1.WriteToAsync(msg.FilePath).ConfigureAwait(false);
+                    return true;
+                }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(CombineMessages), ex); }
+                finally {
+                    if ((ti != null) && (ti.Item1 != null))
+                        ti.Item1.Dispose();
+                }
+                return false;
+            });
+        }
+        #endregion
 
         #region Load* / Save* / Open / Exist / Delete
         public async Task<MailMessages> Open(string email) {
@@ -163,9 +265,8 @@ namespace SecyrityMail.Messages
         }
         public async Task<bool> Load(string path = default)
         {
-            if (IsBusy_)
+            if (!runOnce.Begin())
                 return false;
-            IsBusy_ = true;
             return await Task.Run(() => {
                 try {
                     if (string.IsNullOrWhiteSpace(RootDirectory))
@@ -178,15 +279,14 @@ namespace SecyrityMail.Messages
                     return Copy(path.DeserializeFromFile<MailMessages>());
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Load), ex); }
-                finally { IsBusy_ = false; isModify = false; }
+                finally { isModify = false; runOnce.End(); }
                 return false;
             });
         }
         public async Task<bool> Save(string path = default)
         {
-            if (IsBusy_)
+            if (!runOnce.Begin())
                 return false;
-            IsBusy_ = true;
             return await Task.Run(() => {
                 try {
                     if (string.IsNullOrWhiteSpace(path)) {
@@ -209,7 +309,7 @@ namespace SecyrityMail.Messages
                     return true;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Save), ex); }
-                finally { IsBusy_ = false; isModify = false; }
+                finally { isModify = false; runOnce.End(); }
                 return false;
             });
         }
@@ -252,9 +352,8 @@ namespace SecyrityMail.Messages
         #region Scan*
         public async Task<bool> Scan()
         {
-            if (IsBusy_)
+            if (!runOnce.Begin())
                 return false;
-            IsBusy_ = true;
             return await Task.Run(async () => {
                 try
                 {
@@ -294,7 +393,7 @@ namespace SecyrityMail.Messages
                     }
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(Scan), ex); }
-                finally { IsBusy_ = false; isModify = true; }
+                finally { isModify = true; runOnce.End(); }
                 return Count > 0;
             });
         }
@@ -303,9 +402,8 @@ namespace SecyrityMail.Messages
         #region New Message to send/msg/out*
         public async Task<bool> SpoolOutToOut(string path)
         {
-            if (IsBusy_)
+            if (!runOnce.Begin())
                 return false;
-            IsBusy_ = true;
             return await Task.Run(async () => {
                 try {
                     MailMessage msg = await new MailMessage().CreateAndDelivery(Global.DirectoryPlace.Out, path, (Items.Count + 1))
@@ -318,16 +416,15 @@ namespace SecyrityMail.Messages
                     }
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
-                finally { IsBusy_ = false; }
+                finally { runOnce.End(); }
                 return false;
             });
         }
 
         public async Task<bool> SpoolInToMsg(string path)
         {
-            if (IsBusy_)
+            if (!runOnce.Begin())
                 return false;
-            IsBusy_ = true;
             return await Task.Run(async () => {
                 try {
                     MailMessage msg = await new MailMessage().CreateAndDelivery(Global.DirectoryPlace.Msg, path, (Items.Count + 1))
@@ -340,7 +437,7 @@ namespace SecyrityMail.Messages
                     }
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
-                finally { IsBusy_ = false; }
+                finally { runOnce.End(); }
                 return false;
             });
         }
@@ -349,9 +446,8 @@ namespace SecyrityMail.Messages
         #region Delete One Message*
         public async Task<bool> DeleteMessage(string msgid)
         {
-            if (IsBusy_)
+            if (!runOnce.Begin())
                 return false;
-            IsBusy_ = true;
             return await Task.Run(() => {
                 try {
                     MailMessage msg = Find(msgid);
@@ -361,16 +457,15 @@ namespace SecyrityMail.Messages
                     return true;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
-                finally { IsBusy_ = false; }
+                finally { runOnce.End(); }
                 return false;
             });
         }
 
         public async Task<bool> DeleteMessage(int id)
         {
-            if (IsBusy_)
+            if (!runOnce.Begin())
                 return false;
-            IsBusy_ = true;
             return await Task.Run(() => {
                 try {
                     MailMessage msg = Find(id);
@@ -380,7 +475,7 @@ namespace SecyrityMail.Messages
                     return true;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
-                finally { IsBusy_ = false; }
+                finally { runOnce.End(); }
                 return false;
             });
         }
@@ -389,9 +484,8 @@ namespace SecyrityMail.Messages
         #region Safe Delete*
         public async Task<bool> UnDelete()
         {
-            if (IsBusy_)
+            if (!runOnce.Begin())
                 return false;
-            IsBusy_ = true;
             return await Task.Run(() => {
                 try {
                     if (ItemsDeleted.Count > 0) {
@@ -405,16 +499,15 @@ namespace SecyrityMail.Messages
                     }
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(UnDelete), ex); }
-                finally { IsBusy_ = false; }
+                finally { runOnce.End(); }
                 return false;
             });
         }
 
         public async Task<bool> ClearDeleted()
         {
-            if (IsBusy_)
+            if (!runOnce.Begin())
                 return false;
-            IsBusy_ = true;
             return await Task.Run(() => {
                 try {
                     foreach (MailMessage m in ItemsDeleted) {
@@ -429,7 +522,7 @@ namespace SecyrityMail.Messages
                     return true;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
-                finally { IsBusy_ = false; }
+                finally { runOnce.End(); }
                 return false;
             });
         }

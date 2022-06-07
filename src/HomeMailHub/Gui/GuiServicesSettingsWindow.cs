@@ -1037,7 +1037,7 @@ namespace HomeMailHub.Gui
                         } catch (Exception ex) { ex.StatusBarError(); }
                     }, null, null, Key.AltMask | Key.S),
                     null,
-                    new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.Q)
+                    new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.CursorLeft)
                 }),
                 urlmenu
             });

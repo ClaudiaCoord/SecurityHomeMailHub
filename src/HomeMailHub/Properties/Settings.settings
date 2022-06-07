@@ -161,5 +161,8 @@
     <Setting Name="DnsblHost" Type="System.String" Scope="User">
       <Value Profile="(Default)">zen.spamhaus.org</Value>
     </Setting>
+    <Setting Name="IsGuiNetDriver" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

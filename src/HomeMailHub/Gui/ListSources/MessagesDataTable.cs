@@ -82,6 +82,9 @@ namespace HomeMailHub.Gui.ListSources
         public Global.DirectoryPlace FolderType => placeFolder;
         public string FolderString => (placeFolder == Global.DirectoryPlace.Root) ?
             $"{RES.TAG_FOLDER} {RES.TAG_ALL}" : $"{RES.TAG_FOLDER} {placeFolder}";
+        public MessagesDataTableMultiselect Multiselected { get; } = new();
+
+        public void DataClear() => Clear();
 
         public async new void Dispose() {
 
@@ -89,20 +92,140 @@ namespace HomeMailHub.Gui.ListSources
             base.Dispose();
         }
 
-        public async Task<bool> SafeDelete(string s) {
-            try {
-                if (IsEmpty) return false;
-                bool b = await messages.DeleteMessage(s).ConfigureAwait(false);
-                if (!b || !tableWeak.TryGetTarget(out TableView tv))
+        #region Load
+        public async Task<bool> LoadMessages() =>
+            await Task.Run(async () => {
+                if (messages == default)
+                    messages = await cacheOpener.Open(userId)
+                                                .ConfigureAwait(false);
+                else
+                    messages = await cacheOpener.ReOpen(userId)
+                                                .ConfigureAwait(false);
+                if (messages == default)
                     return false;
-                Deleted++;
+
                 Clear();
-                SortData();
-                Application.MainLoop?.Invoke(() => tv.Table = this);
+                if (!IsEmpty) {
+                    SortData(sortDirections, false);
+                    BuildViewColumns();
+                    TableRefresh();
+                }
                 return true;
-            } catch { }
+            });
+        #endregion
+
+        #region Show Folder
+        public void ShowFolder() => ShowFolder(placeFolder);
+        public void ShowFolder(Global.DirectoryPlace place) {
+            placeFolder = place;
+            Clear();
+            SortData(sortDirections);
+        }
+        #endregion
+
+        #region Message move to Folder
+        public void MoveToFolder(Global.DirectoryPlace place) {
+            try {
+                if (IsEmpty || Multiselected.IsEmpty ||
+                   !Global.IsAccountFolderValid(place)) return;
+
+                for (int i = 0; i < Multiselected.Count; i++) {
+                    try {
+                        int idx = GetId(Multiselected[i]);
+                        if (idx <= 0) continue;
+                        messages.MoveToFolder(place, idx);
+                    } catch { }
+                }
+            } catch (Exception ex) { ex.StatusBarError(); }
+        }
+        #endregion
+
+        #region Merge Message
+        public async Task<bool> CombineMessages() {
+            try {
+                if (IsEmpty || Multiselected.IsEmpty) return false;
+
+                List<int> list = new();
+                for (int i = 0; i < Multiselected.Count; i++) {
+                    try {
+                        int idx = GetId(Multiselected[i]);
+                        if (idx <= 0) continue;
+                        list.Add(idx);
+                    } catch { }
+                }
+                if (list.Count > 0)
+                    return await messages.CombineMessages(list);
+            } catch (Exception ex) { ex.StatusBarError(); }
             return false;
         }
+        #endregion
+
+        #region Read Message
+        public void SetReadMessage(int i, bool b, bool isrefresh = true) {
+            try {
+                MailMessage msg = Get(i);
+                if (msg == null) return;
+                msg.IsRead = b;
+                Application.MainLoop?.Invoke(() => {
+                    try {
+                        base.Rows[i].AcceptChanges();
+                        base.Rows[i][hiddencol] = b;
+                    } catch { }
+                });
+                if (isrefresh) {
+                    messages.OnChange();
+                    TableRefresh();
+                }
+            } catch (Exception ex) { ex.StatusBarError(); }
+        }
+
+        public async Task<bool> SetReadMessages(bool b) =>
+            await Task.Run(() => {
+                try {
+                    if (IsEmpty || Multiselected.IsEmpty) return false;
+
+                    for (int i = 0; i < Multiselected.Count; i++)
+                        SetReadMessage(Multiselected[i], b, false);
+                    messages.OnChange();
+                    TableRefresh();
+                } catch (Exception ex) { ex.StatusBarError(); }
+                return false;
+            });
+
+        public void SetReadAllMessage() {
+            try {
+                List<MailMessage> list = messages.GetFromFolder(placeFolder);
+                for (int i = 0; i < list.Count; i++) list[i].IsRead = true;
+                messages.OnChange();
+                Clear();
+                SortData();
+            } catch (Exception ex) { ex.StatusBarError(); }
+        }
+        #endregion
+
+        #region Safe Delete
+        public async Task<bool> SafeDelete() =>
+            await Task.Run(async () => {
+                try {
+                    if (IsEmpty || Multiselected.IsEmpty) return false;
+
+                    for (int i = 0; i < Multiselected.Count; i++) {
+                        try {
+                            int idx = GetId(Multiselected[i]);
+                            if (idx <= 0) continue;
+                            Deleted++;
+                            _ = await messages.DeleteMessage(idx).ConfigureAwait(false);
+                        } catch (Exception ex) { ex.StatusBarError(); }
+                    }
+                    if ((Deleted > 0) && tableWeak.TryGetTarget(out TableView tv)) {
+                        Clear();
+                        SortData();
+                        Application.MainLoop?.Invoke(() => tv.Table = this);
+                        return true;
+                    }
+                } catch (Exception ex) { ex.StatusBarError(); }
+                return false;
+            });
 
         public async Task<bool> SafeDeleteAll() =>
             await Task.Run(() => {
@@ -141,74 +264,9 @@ namespace HomeMailHub.Gui.ListSources
             } catch { }
             return false;
         }
+        #endregion
 
-        public async Task<bool> LoadMessages() =>
-            await Task.Run(async () => {
-                if (messages == default)
-                    messages = await cacheOpener.Open(userId)
-                                                .ConfigureAwait(false);
-                else
-                    messages = await cacheOpener.ReOpen(userId)
-                                                .ConfigureAwait(false);
-                if (messages == default)
-                    return false;
-
-                Clear();
-                if (!IsEmpty) {
-                    SortData(sortDirections, false);
-                    BuildViewColumns();
-                    TableRefresh();
-                }
-                return true;
-            });
-
-        public void DataClear() => Clear();
-
-        public void ShowSort(TableSort ts) {
-            Clear();
-            SortData(ts);
-        }
-
-        public void ShowFolder(Global.DirectoryPlace place) {
-            placeFolder = place;
-            Clear();
-            SortData(sortDirections);
-        }
-
-        public MailMessage Get(int i) {
-            try {
-                int idx = GetId(i);
-                if (idx < 0) return default;
-                return (from k in messages.Items where k.Id == idx select k).FirstOrDefault();
-            }
-            catch (Exception ex) { ex.StatusBarError(); }
-            return default;
-        }
-
-        public void SetReadMessage(int i, bool b) {
-            try {
-                MailMessage msg = Get(i);
-                if (msg == null) return;
-                msg.IsRead = b;
-                if (messages != null)
-                    messages.OnChange();
-                try {
-                    base.Rows[i].AcceptChanges();
-                    base.Rows[i][hiddencol] = b;
-                    TableRefresh();
-                } catch { }
-            } catch (Exception ex) { ex.StatusBarError(); }
-        }
-
-        public void SetReadAllMessage() {
-            try {
-                List<MailMessage> list = messages.GetFolder(placeFolder);
-                for (int i = 0; i < list.Count; i++) list[i].IsRead = true;
-                Clear();
-                SortData();
-            } catch (Exception ex) { ex.StatusBarError(); }
-        }
-
+        #region Scroll
         public void ScrollToStart() {
             if (!tableWeak.TryGetTarget(out TableView tv))
                 return;
@@ -218,7 +276,9 @@ namespace HomeMailHub.Gui.ListSources
                 tv.SetNeedsDisplay();
             });
         }
+        #endregion
 
+        #region Init
         private void Init(string id, TableView tv) {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentNullException(nameof(userId));
@@ -279,6 +339,14 @@ namespace HomeMailHub.Gui.ListSources
             tv.Style.GetOrCreateColumnStyle(tv.Table.Columns[RES.TAG_MSGREADING]).RepresentationGetter =
                 (k) => (bool)k ? RES.TAG_YES : RES.TAG_NO;
         }
+        #endregion
+
+        #region Show Sort
+        public void ShowSort(TableSort ts)
+        {
+            Clear();
+            SortData(ts);
+        }
 
         private void SortData(TableSort ts = TableSort.None, bool isrefresh = true) {
             if (IsEmpty) return;
@@ -291,29 +359,29 @@ namespace HomeMailHub.Gui.ListSources
 
             switch (ts) {
                 case TableSort.SortUp: {
-                        List<MailMessage> list = messages.GetFolder(placeFolder);
+                        List<MailMessage> list = messages.GetFromFolder(placeFolder);
                         for (int i = list.Count - 1; 0 <= i; i--) RowsAdd(list[i]);
                         break;
                     }
                 case TableSort.SortDown: {
-                        List<MailMessage> list = messages.GetFolder(placeFolder);
+                        List<MailMessage> list = messages.GetFromFolder(placeFolder);
                         for (int i = 0; i < list.Count; i++) RowsAdd(list[i]);
                         break;
                     }
                 case TableSort.SortSubj: {
-                        List<MailMessage> list = messages.GetFolder(placeFolder);
+                        List<MailMessage> list = messages.GetFromFolder(placeFolder);
                         list.Sort(new SubjComparer());
                         for (int i = 0; i < list.Count; i++) RowsAdd(list[i]);
                         break;
                     }
                 case TableSort.SortDate: {
-                        List<MailMessage> list = messages.GetFolder(placeFolder);
+                        List<MailMessage> list = messages.GetFromFolder(placeFolder);
                         list.Sort(new DateComparer());
                         for (int i = 0; i < list.Count; i++) RowsAdd(list[i]);
                         break;
                     }
                 case TableSort.SortFrom: {
-                        List<MailMessage> list = messages.GetFolder(placeFolder);
+                        List<MailMessage> list = messages.GetFromFolder(placeFolder);
                         list.Sort(new FromComparer());
                         for (int i = 0; i < list.Count; i++) RowsAdd(list[i]);
                         break;
@@ -321,6 +389,16 @@ namespace HomeMailHub.Gui.ListSources
             }
             if (isrefresh)
                 TableRefresh();
+        }
+        #endregion
+
+        public MailMessage Get(int i) {
+            try {
+                int idx = GetId(i);
+                if (idx < 0) return default;
+                return (from k in messages.Items where k.Id == idx select k).FirstOrDefault();
+            } catch (Exception ex) { ex.StatusBarError(); }
+            return default;
         }
 
         private void TableRefresh() {

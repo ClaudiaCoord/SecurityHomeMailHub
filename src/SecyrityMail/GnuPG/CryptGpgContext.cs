@@ -11,7 +11,6 @@ using MimeKit;
 using MimeKit.Cryptography;
 using Org.BouncyCastle.Bcpg.OpenPgp;
 using SecyrityMail.Utils;
-using static SecyrityMail.Global;
 
 namespace SecyrityMail.GnuPG
 {
@@ -78,7 +77,7 @@ namespace SecyrityMail.GnuPG
 				} while (false);
 			}
 			catch (Exception ex) { Global.Instance.Log.Add(nameof(CheckInstalled), ex); }
-			Global.Instance.Log.Add(nameof(CheckInstalled), $"You configuration OpenPG empty or not found: '{gnupg}'");
+			Global.Instance.Log.Add(nameof(CheckInstalled), $"You configuration OpenPG/GnuPG empty or not found: '{gnupg}'");
 			return false;
 		}
 
@@ -88,10 +87,10 @@ namespace SecyrityMail.GnuPG
 		public static async Task<bool> ExportAccountToGpg(string pgpbin) =>
 			await Task.Run(async () => {
                 try {
-					string path = Global.GetRootDirectory(DirectoryPlace.Export);
+					string path = Global.GetRootDirectory(Global.DirectoryPlace.Export);
                     CryptGpgAccountsExport export = new CryptGpgAccountsExport();
                     return await export.WriteAll(path, pgpbin).ConfigureAwait(false);
-                } catch (Exception ex) { Global.Instance.Log.Add("Gpg Account Export", ex); }
+                } catch (Exception ex) { Global.Instance.Log.Add("GPG Account Export", ex); }
                 return false;
             });
 
@@ -105,7 +104,7 @@ namespace SecyrityMail.GnuPG
                 try {
                     GenerateKeyPair(mb, Global.Instance.Config.PgpPassword);
                     return true;
-                } catch (Exception ex) { Global.Instance.Log.Add("Gpg Account Create", ex); }
+                } catch (Exception ex) { Global.Instance.Log.Add("GPG Account Create", ex); }
                 return false;
             });
 
@@ -119,7 +118,7 @@ namespace SecyrityMail.GnuPG
                 try {
                     if (string.IsNullOrWhiteSpace(path))
                         path = Path.Combine(
-                            Global.GetRootDirectory(DirectoryPlace.Export),
+                            Global.GetRootDirectory(Global.DirectoryPlace.Export),
                             $"{mb.Address.Replace('@', '-')}-public.key");
 
                     CheckToken();
@@ -127,7 +126,7 @@ namespace SecyrityMail.GnuPG
                     await ExportAsync(new MailboxAddress[] { mb }, fs, true, tokenSafe.Token)
                          .ConfigureAwait(false);
                     return true;
-                } catch (Exception ex) { Global.Instance.Log.Add("Gpg Account Export", ex); }
+                } catch (Exception ex) { Global.Instance.Log.Add("GPG Account Export", ex); }
                 return false;
             });
 
@@ -140,7 +139,7 @@ namespace SecyrityMail.GnuPG
                     using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
                     await ImportAsync(fs, tokenSafe.Token);
                     return true;
-                } catch (Exception ex) { Global.Instance.Log.Add("Gpg Account Import", ex); }
+                } catch (Exception ex) { Global.Instance.Log.Add("GPG Account Import", ex); }
                 return false;
             });
 

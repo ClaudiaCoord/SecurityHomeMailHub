@@ -4,7 +4,6 @@
  * License MIT.
  */
 
-
 using System;
 using System.IO;
 using System.Net;
@@ -537,6 +536,7 @@ namespace SecyrityMail.Servers.POP3
         }
         #endregion
 
+        #region utils
         private async Task<string> CalculateMessages(Pop3Command type = Pop3Command.STAT) =>
             await Task<string>.Run(async () => {
                 try {
@@ -577,5 +577,6 @@ namespace SecyrityMail.Servers.POP3
                 }
                 return false;
             });
+        #endregion
     }
 }

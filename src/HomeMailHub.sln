@@ -14,7 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecyrityMail", "SecyrityMai
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VpnWireGuard", "VpnWireGuard\VpnWireGuard.csproj", "{4808315D-74AB-4B63-9036-47F12CA626A8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "Terminal.Gui\Terminal.Gui.csproj", "{83576343-4BA3-401B-823F-CAA7C81907E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terminal.Gui", "Terminal.Gui.1.6\Terminal.Gui.csproj", "{83576343-4BA3-401B-823F-CAA7C81907E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

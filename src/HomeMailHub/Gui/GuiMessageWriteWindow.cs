@@ -447,7 +447,7 @@ namespace HomeMailHub.Gui
         private async Task Send_() =>
             await Task.Run(async () => {
 
-                if (!runOnce.GoRun())
+                if (!runOnce.Begin())
                     return;
 
                 AutoResetEvent rauto = new AutoResetEvent(false);
@@ -463,7 +463,7 @@ namespace HomeMailHub.Gui
                 catch (Exception ex) { ex.StatusBarError(); }
                 finally {
                     rauto.Dispose();
-                    runOnce.EndRun();
+                    runOnce.End();
                 }
             });
 

@@ -630,7 +630,7 @@ namespace HomeMailHub.Gui
 						_ = await Load_().ConfigureAwait(false);
 					}, null, null, Key.AltMask | Key.R),
 					null,
-					new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.Q)
+					new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.CursorLeft)
 				}),
 				new MenuBarItem (RES.MENU_ACTION, new MenuItem [] {
 					new MenuItem (string.Format(RES.GUIACCOUNT_FMT1, RES.TAG_ON, tag), string.Empty, async () => {
@@ -717,7 +717,7 @@ namespace HomeMailHub.Gui
         #region Delete
         private async void Delete() {
 
-            if (!runOnce.IsRange(data.Count) || !runOnce.GoRun())
+            if (!runOnce.IsRange(data.Count) || !runOnce.Begin())
                 return;
 
             try {
@@ -741,7 +741,7 @@ namespace HomeMailHub.Gui
                     } catch (Exception ex) { ex.StatusBarError(); }
                 }
             }
-            finally { runOnce.EndRun(); }
+            finally { runOnce.End(); }
         }
         #endregion
 
@@ -845,7 +845,7 @@ namespace HomeMailHub.Gui
 
 		private async void SelectItem(string s, int id) {
 
-			if (!runOnce.GoRun(id))
+			if (!runOnce.Begin(id))
 				return;
 
 			try {
@@ -905,12 +905,12 @@ namespace HomeMailHub.Gui
                 ButtonsEnable(true);
                 await ControlPgp().ConfigureAwait(false);
 
-            } finally { runOnce.EndRun(); }
+            } finally { runOnce.End(); }
         }
 
 		private async void SaveItem() {
 
-			if (!runOnce.GoRun())
+			if (!runOnce.Begin())
 				return;
 
 			try {
@@ -938,7 +938,7 @@ namespace HomeMailHub.Gui
 					account = a;
 					await Global.Instance.Accounts.Save().ConfigureAwait(false);
 				}
-			} finally { runOnce.EndRun(); }
+			} finally { runOnce.End(); }
 		}
 		private UserAccount NewItem() {
 

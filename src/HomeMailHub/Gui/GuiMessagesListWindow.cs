@@ -21,9 +21,18 @@ namespace HomeMailHub.Gui
 {
     public class GuiMessagesListWindow : Window, IGuiWindow<GuiMessagesListWindow>
     {
+        public enum SelectorType : int {
+            None = 0,
+            MultiSelect,
+            SingleSelect
+        }
+
         private Toplevel GuiToplevel { get; set; } = default;
         private MenuBar GuiMenu { get; set; } = default;
         private MenuBarItem undeleteMenu { get; set; } = default;
+        private MenuItem [] messagesMenu { get; set; } = default;
+        private MenuItem multiSelectMenu { get; set; } = default;
+        private ContextMenu contextMenu { get; set; } = default;
         private TableView tableView { get; set; } = default;
 
         private Button buttonClose { get; set; } = default;
@@ -60,15 +69,28 @@ namespace HomeMailHub.Gui
         private FrameView frameInfo { get; set; } = default;
         private RadioGroup sortTitle { get; set; } = default;
         private CheckBox readingBox { get; set; } = default;
-        private ProgressBar waitLoadProgress { get; set; } = default;
+        private GuiBusyBar waitBusyBar { get; set; } = default;
 
+        private bool isMultiSelect = false;
+        private bool IsMenuOpen { get; set; } = false;
         private string selectedName { get; set; } = string.Empty;
         private string selectedPath { get; set; } = string.Empty;
         private MessagesDataTable dataTable { get; set; } = default;
-        private Timer systemTimer { get; set; } = default;
         private GuiLinearLayot linearLayot { get; } = new();
+        private GuiRunOnce runOnce { get; } = new();
 
         public Toplevel GetTop => GuiToplevel;
+
+        private bool IsMultiSelect {
+            get => isMultiSelect;
+            set {
+                isMultiSelect = value;
+                Application.MainLoop.Invoke(() => {
+                    tableView.MultiSelect = value;
+                    multiSelectMenu.Checked = value;
+                });
+            }
+        }
 
         public GuiMessagesListWindow() : base(RES.GUIMESSAGE_TITLE1, 0)
         {
@@ -77,9 +99,6 @@ namespace HomeMailHub.Gui
             Width = Dim.Fill();
             Height = Dim.Fill() - 1;
             GuiToplevel = GuiExtensions.CreteTop();
-            systemTimer = new Timer((a) => {
-                Application.MainLoop?.Invoke(() => waitLoadProgress.Pulse());
-            }, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
 
             linearLayot.Add("en", new List<GuiLinearData> {
                 new GuiLinearData(78, 2, false),
@@ -107,6 +126,8 @@ namespace HomeMailHub.Gui
 
         public new void Dispose() {
 
+            if (tableView != null)
+                tableView.KeyUp -= TableView_KeyUp;
             this.GetType().IDisposableObject(this);
             base.Dispose();
         }
@@ -118,6 +139,7 @@ namespace HomeMailHub.Gui
             selectedName = s;
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
+            #region table View
             tableView = new TableView()
             {
                 X = 1,
@@ -125,6 +147,7 @@ namespace HomeMailHub.Gui
                 Width = Dim.Fill() - 1,
                 Height = Dim.Fill() - 8,
                 FullRowSelect = true,
+                MultiSelect = IsMultiSelect,
                 Style = new TableView.TableStyle() {
                     AlwaysShowHeaders = false,
                     ShowVerticalCellLines = true,
@@ -135,20 +158,28 @@ namespace HomeMailHub.Gui
             tableView.CellActivated += TableView_CellActivated;
             tableView.SelectedCellChanged += TableView_SelectedCellChanged;
             tableView.KeyUp += TableView_KeyUp;
+            tableView.MouseClick += (a) => {
+                if (a.MouseEvent.Flags == MouseFlags.Button3Clicked) {
+                    a.Handled = true;
+                    contextMenu.Position = new Point(
+                        (a.MouseEvent.X < 7) ? 7 : a.MouseEvent.X,
+                        (a.MouseEvent.Y >= 2) ? (a.MouseEvent.Y + 2) : a.MouseEvent.Y);
+                    contextMenu.Show();
+                }
+            };
             dataTable = new MessagesDataTable(selectedName, tableView);
             Add(tableView);
+            #endregion
 
-            waitLoadProgress = new ProgressBar()
+            Add(waitBusyBar = new GuiBusyBar()
             {
                 X = 6,
                 Y = 1,
                 Width = 93,
-                Height = 1,
-                Visible = false,
-                ColorScheme = Colors.Base
-            };
-            Add(waitLoadProgress);
+                Height = 1
+            });
 
+            #region frameMsg
             frameMsg = new FrameView(RES.TAG_MESSAGE)
             {
                 X = 1,
@@ -156,75 +187,6 @@ namespace HomeMailHub.Gui
                 Width = 117,
                 Height = 8
             };
-
-            #region frameInfo
-            frameInfo = new FrameView(RES.MENU_MAILACCOUNT.ClearText())
-            {
-                X = Pos.Right(frameMsg) + 1,
-                Y = Pos.Bottom(tableView),
-                Width = Dim.Fill() - 1,
-                Height = 8
-            };
-            frameInfo.Add(infoNameLabel = new Label(RES.TAG_NAME)
-            {
-                X = 1,
-                Y = 1,
-                AutoSize = true
-            });
-            frameInfo.Add(infoNameText = new Label(string.Empty)
-            {
-                X = 12,
-                Y = 1,
-                Width = Dim.Fill() - 2,
-                Height = 1,
-                ColorScheme = GuiApp.ColorDescription
-            });
-            frameInfo.Add(infoLoginLabel = new Label(RES.TAG_LOGIN)
-            {
-                X = 1,
-                Y = 2,
-                AutoSize = true
-            });
-            frameInfo.Add(infoLoginText = new Label(string.Empty)
-            {
-                X = 12,
-                Y = 2,
-                Width = Dim.Fill() - 2,
-                Height = 1,
-                ColorScheme = GuiApp.ColorDescription
-            });
-            frameInfo.Add(infoEmailLabel = new Label(RES.TAG_EMAIL)
-            {
-                X = 1,
-                Y = 3,
-                AutoSize = true
-            });
-            frameInfo.Add(infoEmailText = new Label(string.Empty)
-            {
-                X = 12,
-                Y = 3,
-                Width = Dim.Fill() - 2,
-                Height = 1,
-                ColorScheme = GuiApp.ColorDescription
-            });
-            frameInfo.Add(infoPgpLabel = new Label($"{RES.CHKBOX_PGPAUTODECRYPT.ClearText()}:")
-            {
-                X = 1,
-                Y = 4,
-                AutoSize = true
-            });
-            frameInfo.Add(infoPgpText = new Label(string.Empty)
-            {
-                X = Pos.Right(infoPgpLabel) + 1,
-                Y = 4,
-                Width = Dim.Fill() - 2,
-                Height = 1,
-                ColorScheme = GuiApp.ColorDescription
-            });
-            Add(frameInfo);
-            #endregion
-
-            #region frameMsg
             frameMsg.Add(sortTitle = new RadioGroup(new ustring[] { $" {(char)0x2191}", $"{(char)0x2193} " })
             {
                 X = 107,
@@ -258,7 +220,7 @@ namespace HomeMailHub.Gui
             {
                 X = 18,
                 Y = 1,
-                Width = 15,
+                Width = 58,
                 Height = 1,
                 ColorScheme = GuiApp.ColorDescription
             });
@@ -272,7 +234,7 @@ namespace HomeMailHub.Gui
             {
                 X = 84,
                 Y = 1,
-                Width = 15,
+                Width = 28,
                 Height = 1,
                 ColorScheme = GuiApp.ColorDescription
             });
@@ -286,7 +248,7 @@ namespace HomeMailHub.Gui
             {
                 X = 11,
                 Y = 2,
-                Width = 10,
+                Width = 65,
                 Height = 1,
                 ColorScheme = GuiApp.ColorDescription
             });
@@ -365,15 +327,80 @@ namespace HomeMailHub.Gui
             });
             #endregion
 
+            #region frameInfo
+            frameInfo = new FrameView(RES.MENU_MAILACCOUNT.ClearText())
+            {
+                X = Pos.Right(frameMsg) + 1,
+                Y = Pos.Bottom(tableView),
+                Width = Dim.Fill() - 1,
+                Height = 8
+            };
+            frameInfo.Add(infoNameLabel = new Label(RES.TAG_NAME)
+            {
+                X = 1,
+                Y = 1,
+                AutoSize = true
+            });
+            frameInfo.Add(infoNameText = new Label(string.Empty)
+            {
+                X = 12,
+                Y = 1,
+                Width = Dim.Fill() - 2,
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            frameInfo.Add(infoLoginLabel = new Label(RES.TAG_LOGIN)
+            {
+                X = 1,
+                Y = 2,
+                AutoSize = true
+            });
+            frameInfo.Add(infoLoginText = new Label(string.Empty)
+            {
+                X = 12,
+                Y = 2,
+                Width = Dim.Fill() - 2,
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            frameInfo.Add(infoEmailLabel = new Label(RES.TAG_EMAIL)
+            {
+                X = 1,
+                Y = 3,
+                AutoSize = true
+            });
+            frameInfo.Add(infoEmailText = new Label(string.Empty)
+            {
+                X = 12,
+                Y = 3,
+                Width = Dim.Fill() - 2,
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            frameInfo.Add(infoPgpLabel = new Label($"{RES.CHKBOX_PGPAUTODECRYPT.ClearText()}:")
+            {
+                X = 1,
+                Y = 4,
+                AutoSize = true
+            });
+            frameInfo.Add(infoPgpText = new Label(string.Empty)
+            {
+                X = Pos.Right(infoPgpLabel) + 1,
+                Y = 4,
+                Width = Dim.Fill() - 2,
+                Height = 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            Add(frameInfo);
+            #endregion
+
             buttonClose.Clicked += () => {
                 CloseDialog();
                 Application.RequestStop();
             };
             buttonDelete.Clicked += () => {
-                string s = msgIdText.Text.ToString();
-                if (dataTable.IsEmpty || string.IsNullOrEmpty(s))
-                    return;
-                DeleteDialog(s);
+                if (dataTable.IsEmpty) return;
+                DeleteDialog();
             };
             buttonReply.Clicked += () => {
                 if (dataTable.IsEmpty || string.IsNullOrEmpty(selectedPath))
@@ -389,6 +416,48 @@ namespace HomeMailHub.Gui
             readingBox.Toggled += ReadingBox_Toggled;
             Add(frameMsg);
 
+            multiSelectMenu = RES.MENU_SUB_MULTISELECT.CreateCheckedMenuItem((b) => {
+                if (b) IsMultiSelect = !IsMultiSelect;
+                return IsMultiSelect;
+            }, true);
+
+            messagesMenu = new MenuItem[]
+            {
+                multiSelectMenu,
+                null,
+                new MenuBarItem (RES.MENU_SUB_MOVEFOLDER, new MenuItem [] {
+                    new MenuItem (
+                        $"_{Global.DirectoryPlace.Msg}", "", async () => await MoveToFolder(Global.DirectoryPlace.Msg).ConfigureAwait(false),
+                        () => FolderMoveEnable(Global.DirectoryPlace.Msg)),
+                    new MenuItem (
+                        $"_{Global.DirectoryPlace.Spam}", "", async () => await MoveToFolder(Global.DirectoryPlace.Spam).ConfigureAwait(false),
+                        () => FolderMoveEnable(Global.DirectoryPlace.Spam)),
+                    new MenuItem (
+                        $"_{Global.DirectoryPlace.Error}", "", async () => await MoveToFolder(Global.DirectoryPlace.Error).ConfigureAwait(false),
+                        () => FolderMoveEnable(Global.DirectoryPlace.Error)),
+                    new MenuItem (
+                        $"_{Global.DirectoryPlace.Bounced}", "", async () => await MoveToFolder(Global.DirectoryPlace.Bounced).ConfigureAwait(false),
+                        () => FolderMoveEnable(Global.DirectoryPlace.Bounced))
+                }),
+                new MenuItem(RES.MENU_SUB_COMBINEMSG, "",
+                    async () => await CombineMessages().ConfigureAwait(false),
+                    () => MessagesCombineEnable()),
+                null,
+                new MenuItem(RES.MENU_SUB_OPEN, "", () => buttonOpen.OnClicked(), () => MessagesOptionsOneEnable()),
+                new MenuItem(RES.MENU_SUB_REPLAY, "", () => buttonReply.OnClicked(), () => MessagesOptionsOneEnable()),
+                new MenuItem(RES.MENU_SUB_DELETE, "", () => buttonDelete.OnClicked(), () => MessagesOptionsEnable()),
+                new MenuBarItem (RES.MENU_SUB_READEDFLAG, new MenuItem [] {
+                    new MenuItem (
+                        RES.MENU_SUB_READEDMARK, "", async () => await SetReadMessages(true).ConfigureAwait(false),
+                        () => MessagesOptionsEnable()),
+                    new MenuItem (
+                        RES.MENU_SUB_UNREADEDMARK, "", async () => await SetReadMessages(false).ConfigureAwait(false),
+                        () => MessagesOptionsEnable())
+                }),
+                new MenuItem (RES.MENU_MSGSREADALL, "", () => dataTable.SetReadAllMessage(), () => MessagesOptionsOneEnable())
+            };
+            contextMenu = new ContextMenu(0, 0, new MenuBarItem("", messagesMenu));
+
             undeleteMenu = new MenuBarItem(RES.MENU_DELETEMENU, new MenuItem[] {
                 new MenuItem (
                     RES.MENU_DELETEALL, "", () => DeleteAllDialog(),
@@ -397,19 +466,20 @@ namespace HomeMailHub.Gui
 
             GuiMenu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
+                    new MenuItem (RES.BTN_OPEN, "", () =>
+                        buttonOpen.OnClicked(), () => runOnce.IsValidId(),
+                        null, Key.AltMask | Key.CursorRight),
                     new MenuItem (RES.MENU_RELOAD, "", async () => {
                         dataTable.ScrollToStart();
                         _ = await Load_().ConfigureAwait(false);
                     }, null, null, Key.AltMask | Key.R),
-                    new MenuItem (RES.MENU_MSGSREADALL, "", () => {
-                        dataTable.SetReadAllMessage();
-                    }, null, null, Key.AltMask | Key.A),
                     null,
                     new MenuItem (RES.MENU_CLOSE, "", () => {
                         CloseDialog();
                         Application.RequestStop();
-                    }, null, null, Key.AltMask | Key.Q)
+                    }, null, null, Key.AltMask | Key.CursorLeft)
                 }),
+                new MenuBarItem (RES.MENU_MESSAGES, messagesMenu),
                 undeleteMenu,
                 new MenuBarItem (RES.MENU_SORT, new MenuItem [] {
                     new MenuItem (
@@ -444,9 +514,10 @@ namespace HomeMailHub.Gui
                     new MenuItem (
                         $"{RES.TAG_FOLDER} _{Global.DirectoryPlace.Bounced}", "", async () => await SelectFolder(Global.DirectoryPlace.Bounced).ConfigureAwait(false),
                         () => FolderEnable(Global.DirectoryPlace.Bounced))
-                }),
+                })
             });
 
+            GuiMenu.MenuOpened += (_) => IsMenuOpen = true;
             GuiToplevel.Add(GuiMenu, this);
             return this;
         }
@@ -458,7 +529,7 @@ namespace HomeMailHub.Gui
             await Task.Run(async () => {
                 try {
                     DataClear();
-                    WaitStart();
+                    waitBusyBar.Start();
                     _ = await dataTable.LoadMessages();
                     SetTitle();
                     try {
@@ -471,25 +542,16 @@ namespace HomeMailHub.Gui
                         }
                     } catch (Exception ex) { ex.StatusBarError(); }
                 } catch (Exception ex) { ex.StatusBarError(); }
-                finally { WaitStop(); }
+                finally { waitBusyBar.Stop(); }
                 return true;
             });
         #endregion
-
-        private void WaitStart() {
-            Application.MainLoop?.Invoke(() => waitLoadProgress.Visible = true);
-            systemTimer.Change(TimeSpan.FromMilliseconds(1), TimeSpan.FromMilliseconds(150));
-        }
-        private void WaitStop() {
-            systemTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-            Application.MainLoop?.Invoke(() => waitLoadProgress.Visible = false);
-        }
 
         private void DataClear() {
             Clean();
             SetTitle();
         }
-        private void Clean() {
+        private void Clean() =>
             Application.MainLoop.Invoke(() => {
                 idText.Text =
                 msgIdText.Text =
@@ -501,28 +563,28 @@ namespace HomeMailHub.Gui
                 selectedPath = string.Empty;
                 readingBox.Checked = false;
             });
-        }
 
-        private int __lastId = -1;
         private void Update(MailMessage msg, int id) {
-
-            if (id == __lastId)
-                return;
-            __lastId = id;
-
-            idText.Text = msg.Id.ToString();
-            msgIdText.Text = msg.MsgId;
-            fromText.Text = msg.From;
-            folderText.Text = msg.Folder.ToString();
-            sizeText.Text = msg.Size.Humanize();
-            subjText.Text = msg.Subj;
-            dateText.Text = msg.Date.ToString("dddd, dd MMMM yyyy");
-            readingBox.Checked = msg.IsRead;
-            selectedPath = msg.FilePath;
+            if (!runOnce.Begin(id)) return;
+            try {
+                Application.MainLoop.Invoke(() => {
+                    idText.Text = msg.Id.ToString();
+                    msgIdText.Text = msg.MsgId;
+                    fromText.Text = msg.From;
+                    folderText.Text = msg.Folder.ToString();
+                    sizeText.Text = msg.Size.Humanize();
+                    subjText.Text = msg.Subj;
+                    dateText.Text = msg.Date.ToString("dddd, dd MMMM yyyy");
+                    readingBox.Checked = msg.IsRead;
+                    selectedPath = msg.FilePath;
+                });
+                dataTable.Multiselected.Add(id);
+            } finally { runOnce.End();  }
         }
 
+        #region Gui Setter
         private void TableView_CellActivated(TableView.CellActivatedEventArgs obj) {
-            if (dataTable.IsEmpty)
+            if (dataTable.IsEmpty || tableView.MultiSelect)
                 return;
             if ((obj.Row >= 0) && (obj.Row < dataTable.Count)) {
                 MailMessage msg = dataTable.Get(obj.Row);
@@ -534,7 +596,7 @@ namespace HomeMailHub.Gui
         }
 
         private void TableView_SelectedCellChanged(TableView.SelectedCellChangedEventArgs obj) {
-            if (dataTable.IsEmpty)
+            if (dataTable.IsEmpty || tableView.MultiSelect)
                 return;
             if ((obj.NewRow >= 0) && (obj.NewRow < dataTable.Count)) {
                 MailMessage msg = dataTable.Get(obj.NewRow);
@@ -544,9 +606,20 @@ namespace HomeMailHub.Gui
         }
 
         private void TableView_KeyUp(KeyEventEventArgs obj) {
-            if ((obj != null) && (obj.KeyEvent.Key == Key.Enter) && !string.IsNullOrEmpty(selectedPath)) {
-                if (!string.IsNullOrEmpty(selectedPath))
-                    LocalLauncher<GuiMessageReadWindow>();
+            if (obj != null) {
+                switch (obj.KeyEvent.Key) {
+                    case Key.Enter: {
+                            if (!string.IsNullOrEmpty(selectedPath))
+                                LocalLauncher<GuiMessageReadWindow>();
+                            break;
+                        }
+                    case Key.Esc: {
+                            if (!IsMenuOpen)
+                                buttonClose.OnClicked();
+                            IsMenuOpen = false;
+                            break;
+                        }
+                }
             }
         }
 
@@ -559,22 +632,17 @@ namespace HomeMailHub.Gui
                 await SortDialog(TableSort.SortDown).ConfigureAwait(false);
         }
 
-        private void ReadingBox_Toggled(bool b) {
-            if (__lastId < 0) return;
-            dataTable.SetReadMessage(__lastId, b);
-        }
-
-        private void SetMessageReading() {
-            if (__lastId < 0) return;
-            readingBox.Checked = true;
-            readingBox.SetChildNeedsDisplay();
-            ReadingBox_Toggled(false);
+        private async void ReadingBox_Toggled(bool b) {
+            if (!runOnce.IsValidId()) return;
+            _ = await SetReadMessages(b).ConfigureAwait(false);
         }
 
         private void SetTitle() =>
             Application.MainLoop.Invoke(() =>
                     base.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, dataTable.Count, dataTable.FolderString));
+        #endregion
 
+        #region Close Dialog
         private async void CloseDialog() {
             try {
                 if (dataTable.Deleted > 0) {
@@ -590,21 +658,24 @@ namespace HomeMailHub.Gui
                 }
             } catch { }
         }
+        #endregion
 
-        private async void DeleteDialog(string id) {
+        #region Delete Dialog
+        private async void DeleteDialog() {
             try {
                 if (Properties.Settings.Default.IsConfirmDeleteMessages) {
                     if (MessageBox.Query(50, 7,
                         string.Format(RES.GUIMESSAGE_FMT1, RES.TAG_DELETE),
                         string.Format(RES.GUIMESSAGE_FMT2, RES.TAG_DELETE), RES.TAG_YES, RES.TAG_NO) == 0) {
                         Clean();
-                        _ = await dataTable.SafeDelete(id).ConfigureAwait(false);
+                        _ = await DeleteMessages().ConfigureAwait(false);
                         if (dataTable.Deleted > 0) DeleteMenu();
                         SetTitle();
                     }
                 }
             } catch { }
         }
+
         private async void DeleteAllDialog() {
             try {
                 if (MessageBox.Query(50, 7,
@@ -630,11 +701,11 @@ namespace HomeMailHub.Gui
                         string.Format(RES.MENU_FMT_UNDELETE, dataTable.Deleted), "",
                         async () => {
                             try {
-                                WaitStart();
+                                waitBusyBar.Start();
                                 _ = await dataTable.UnDeleted().ConfigureAwait(false);
                                 DeleteMenu();
                                 SetTitle();
-                            } finally { WaitStop(); }
+                            } finally { waitBusyBar.Stop(); }
                         });
                     items[3] = new MenuItem(
                         string.Format(RES.MENU_FMT_DELETECLEAR, dataTable.Deleted), "",
@@ -643,40 +714,156 @@ namespace HomeMailHub.Gui
                 Application.MainLoop.Invoke(() => undeleteMenu.Children = items);
             } catch { }
         }
+        #endregion
 
+        #region Sort Dialog
         private async Task<bool> SortDialog(TableSort ts) =>
             await Task.Run(() => {
                 try {
-                    WaitStart();
+                    waitBusyBar.Start();
                     dataTable.ShowSort(ts);
                 }
                 catch (Exception ex) { ex.StatusBarError(); }
-                finally { WaitStop(); }
+                finally { waitBusyBar.Stop(); }
                 return true;
             });
         private bool SortEnable(TableSort ts) =>
             !dataTable.IsEmpty && (dataTable.SortDType != ts);
+        #endregion
 
+        #region Select folder
         private async Task<bool> SelectFolder(Global.DirectoryPlace place) =>
             await Task.Run(() => {
                 try {
-                    WaitStart();
+                    waitBusyBar.Start();
                     dataTable.ShowFolder(place);
                     SetTitle();
                 }
                 catch (Exception ex) { ex.StatusBarError(); }
-                finally { WaitStop(); }
+                finally { waitBusyBar.Stop(); }
                 return true;
             });
         private bool FolderEnable(Global.DirectoryPlace place) =>
             !dataTable.IsEmpty && (dataTable.FolderType != place);
+        #endregion
+
+        #region Move to folder
+        private async Task<bool> MoveToFolder(Global.DirectoryPlace place) =>
+            await Task.Run(() => {
+                try {
+                    waitBusyBar.Start();
+
+                    SelectorType st = MessagesSelector();
+                    if (st == SelectorType.None)
+                        return false;
+                    else if (st == SelectorType.SingleSelect)
+                        Application.MainLoop.Invoke(() => folderText.Text = place.ToString());
+
+                    dataTable.MoveToFolder(place);
+                    dataTable.ShowFolder();
+                    SetTitle();
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
+                finally { waitBusyBar.Stop(); }
+                return true;
+            });
+        private bool FolderMoveEnable(Global.DirectoryPlace place) =>
+            !dataTable.IsEmpty && (dataTable.FolderType != place) &&
+            ((IsMultiSelect && (tableView.MultiSelectedRegions.Count > 0)) || (!IsMultiSelect && runOnce.IsValidId()));
+        #endregion
+
+        #region Combine messages
+        private async Task<bool> CombineMessages() =>
+            await Task.Run(async () => {
+                if (!tableView.MultiSelect)
+                    return false;
+                try {
+                    waitBusyBar.Start();
+
+                    SelectorType st = MessagesSelector(false);
+                    if (st != SelectorType.MultiSelect)
+                        return false;
+
+                    _ = await dataTable.CombineMessages().ConfigureAwait(false);
+                    dataTable.ShowFolder();
+                    SetTitle();
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
+                finally { waitBusyBar.Stop(); }
+                return true;
+            });
+        private bool MessagesCombineEnable() =>
+            !dataTable.IsEmpty && IsMultiSelect && (tableView.MultiSelectedRegions.Count > 0);
+        #endregion
+
+        #region Delete messages
+        private async Task<bool> DeleteMessages() =>
+            await Task.Run(async () => {
+                try {
+                    waitBusyBar.Start();
+
+                    SelectorType st = MessagesSelector();
+                    if (st == SelectorType.None)
+                        return false;
+
+                    _ = await dataTable.SafeDelete().ConfigureAwait(false);
+                    dataTable.ShowFolder();
+                    SetTitle();
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
+                finally { waitBusyBar.Stop(); }
+                return true;
+            });
+        #endregion
+
+        #region Set read messages
+        private async Task<bool> SetReadMessages(bool b) =>
+            await Task.Run(async () => {
+                try {
+                    waitBusyBar.Start();
+
+                    SelectorType st = MessagesSelector();
+                    if (st == SelectorType.None)
+                        return false;
+                    else if (st == SelectorType.SingleSelect)
+                        Application.MainLoop.Invoke(() => {
+                            readingBox.Checked = b;
+                            readingBox.SetChildNeedsDisplay();
+                        });
+                    _ = await dataTable.SetReadMessages(b).ConfigureAwait(false);
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
+                finally { waitBusyBar.Stop(); }
+                return true;
+            });
+        #endregion
+
+        private bool MessagesOptionsEnable() =>
+            !dataTable.IsEmpty && ((tableView.MultiSelectedRegions.Count > 0) || runOnce.IsValidId());
+
+        private bool MessagesOptionsOneEnable() =>
+            !dataTable.IsEmpty && !IsMultiSelect && (tableView.MultiSelectedRegions.Count == 0);
+
+        private SelectorType MessagesSelector(bool b = true) {
+            if (tableView.MultiSelect) {
+                if (!dataTable.Multiselected.Add(tableView.MultiSelectedRegions))
+                    return SelectorType.None;
+                IsMultiSelect = false;
+                return SelectorType.MultiSelect;
+            }
+            else if (b && runOnce.IsValidId()) {
+                dataTable.Multiselected.Add(runOnce.LastId);
+                return SelectorType.SingleSelect;
+            }
+            return SelectorType.None;
+        }
 
         private void LocalLauncher<T>() {
             Type type = typeof(T);
             tableView.KeyUp -= TableView_KeyUp;
             GuiApp.Get.LoadWindow(type, selectedPath);
             if (type == typeof(GuiMessageReadWindow))
-                SetMessageReading();
+                ReadingBox_Toggled(true);
             tableView.KeyUp += TableView_KeyUp;
         }
     }

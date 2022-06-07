@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SecyrityMail.Utils;
 
 namespace SecyrityMail.Proxy
 {
@@ -21,15 +22,14 @@ namespace SecyrityMail.Proxy
         private static readonly string SpysmeProxyUrl = "https://spys.me/proxy.txt";
         private static readonly string SpysmeSocksUrl = "https://spys.me/socks.txt";
         private readonly object __lock = new();
-        private bool IsRunning = false;
+        private RunOnce runOnce = new();
 
         #region All Build
         public async Task<bool> AllBuild()
         {
 
-            if (IsRunning)
+            if (!runOnce.Begin())
                 return false;
-            IsRunning = true;
 
             return await Task.Run(async () => {
                 try
@@ -42,7 +42,7 @@ namespace SecyrityMail.Proxy
                     return true;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(AllBuild), ex); }
-                finally { IsRunning = false; }
+                finally { runOnce.End(); }
                 return false;
             });
         }
@@ -51,9 +51,8 @@ namespace SecyrityMail.Proxy
         #region Check Build
         public async Task<bool> CheckBuild(ProxyType type) {
 
-            if (IsRunning)
+            if (!runOnce.Begin())
                 return false;
-            IsRunning = true;
 
             return await Task.Run(() => {
                 try {
@@ -72,7 +71,7 @@ namespace SecyrityMail.Proxy
                     }
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(AllBuild), ex); return false; }
-                finally { IsRunning = false; }
+                finally { runOnce.End(); }
                 return true;
             });
         }
