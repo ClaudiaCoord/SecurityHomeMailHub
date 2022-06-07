@@ -26,6 +26,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore src\HomeMailHub.sln
     - name: Build
-      run: dotnet build --no-restore --configuration Release --arch x64 src\HomeMailHub.sln
+      run: dotnet build --no-restore --configuration Release -a x86 src\HomeMailHub.sln
     - name: Test
       run: dotnet test --no-build --verbosity normal src\HomeMailHub.sln
