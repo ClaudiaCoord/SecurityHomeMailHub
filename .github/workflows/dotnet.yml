@@ -22,10 +22,10 @@ jobs:
     - name: show dir
       run: dir 
     - name: chdir to src
-      run: cd src
+      run: dir src
     - name: Restore dependencies
-      run: dotnet restore HomeMailHub.sln
+      run: dotnet restore src\HomeMailHub.sln
     - name: Build
-      run: dotnet build --no-restore HomeMailHub.sln
+      run: dotnet build --no-restore src\HomeMailHub.sln
     - name: Test
-      run: dotnet test --no-build --verbosity normal HomeMailHub.sln
+      run: dotnet test --no-build --verbosity normal src\HomeMailHub.sln
