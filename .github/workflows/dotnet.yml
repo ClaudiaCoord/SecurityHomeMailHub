@@ -18,7 +18,9 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: path cd
-      run: cd src/
+      run: cd $GITHUB_WORKSPACE
+    - name: show dir
+      run: dir
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
