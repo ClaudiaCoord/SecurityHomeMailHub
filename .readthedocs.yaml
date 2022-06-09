@@ -7,9 +7,9 @@ build:
     python: "3.9"
 
 mkdocs:
-  configuration: docs/readdocs/mkdocs.yml
+  configuration: docs/docs/readdocs/mkdocs.yml
 
 # Optionally declare the Python requirements required to build your docs
 python:
    install:
-   - requirements: docs/readdocs/requirements.txt
+   - requirements: docs/docs/readdocs/requirements.txt
