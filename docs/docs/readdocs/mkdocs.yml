@@ -10,4 +10,26 @@ nav:
 
     - About: docabout.md
 
-theme: bootstrap386
+theme:
+# bootstrap386
+
+  name: material
+
+  palette:
+
+    primary: pink
+
+  features:
+
+    - navigation.tabs
+
+    - navigation.sections
+
+copyright: Copyright &copy; 2018 - 2022 CC
+
+markdown_extensions:
+
+  - pymdownx.highlight
+
+  - pymdownx.superfences
+
