@@ -259,6 +259,24 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Files with *.eml extension.
+        /// </summary>
+        internal static string CHKBOX_ASSOCIATE_EXT_EML {
+            get {
+                return ResourceManager.GetString("CHKBOX_ASSOCIATE_EXT_EML", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Files with *.msg extension.
+        /// </summary>
+        internal static string CHKBOX_ASSOCIATE_EXT_MSG {
+            get {
+                return ResourceManager.GetString("CHKBOX_ASSOCIATE_EXT_MSG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Check incoming From address, anti-SPAM filter.
         /// </summary>
         internal static string CHKBOX_CHECKFROM {
@@ -1145,6 +1163,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на .
+        /// </summary>
+        internal static string GuiSshAccountWindowHelp {
+            get {
+                return ResourceManager.GetString("GuiSshAccountWindowHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на VPN Accounts.
         /// </summary>
         internal static string GUIVPN_TITLE1 {
@@ -1159,6 +1186,15 @@ namespace HomeMailHub.Properties {
         internal static string GUIVPN_TITLE2 {
             get {
                 return ResourceManager.GetString("GUIVPN_TITLE2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на .
+        /// </summary>
+        internal static string GuiVpnAccountWindowHelp {
+            get {
+                return ResourceManager.GetString("GuiVpnAccountWindowHelp", resourceCulture);
             }
         }
         
@@ -1285,6 +1321,24 @@ namespace HomeMailHub.Properties {
         internal static string MENU_DELETEMENU {
             get {
                 return ResourceManager.GetString("MENU_DELETEMENU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Export selected messages in *._eml format.
+        /// </summary>
+        internal static string MENU_EXPORT_EML {
+            get {
+                return ResourceManager.GetString("MENU_EXPORT_EML", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Export selected messages in *._msg format.
+        /// </summary>
+        internal static string MENU_EXPORT_MSG {
+            get {
+                return ResourceManager.GetString("MENU_EXPORT_MSG", resourceCulture);
             }
         }
         
@@ -1969,6 +2023,15 @@ namespace HomeMailHub.Properties {
         internal static string TAG_ALLOWED {
             get {
                 return ResourceManager.GetString("TAG_ALLOWED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Association of files by extension.
+        /// </summary>
+        internal static string TAG_ASSOCIATE {
+            get {
+                return ResourceManager.GetString("TAG_ASSOCIATE", resourceCulture);
             }
         }
         

@@ -183,6 +183,12 @@
   <data name="BTN_STOP" xml:space="preserve">
     <value>_Stop</value>
   </data>
+  <data name="CHKBOX_ASSOCIATE_EXT_EML" xml:space="preserve">
+    <value>Files with *.eml extension</value>
+  </data>
+  <data name="CHKBOX_ASSOCIATE_EXT_MSG" xml:space="preserve">
+    <value>Files with *.msg extension</value>
+  </data>
   <data name="CHKBOX_CHECKFROM" xml:space="preserve">
     <value>Check incoming From address, anti-SPAM filter</value>
   </data>
@@ -460,8 +466,14 @@
   <data name="GUISETTIGS_PGP_DIALOG" xml:space="preserve">
     <value>Select the path to the GnuPG executables</value>
   </data>
+  <data name="GuiSshAccountWindowHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\GuiSshAccountWindowHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GUISSH_TITLE1" xml:space="preserve">
     <value>SSH Accounts</value>
+  </data>
+  <data name="GuiVpnAccountWindowHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\GuiVpnAccountWindowHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="GUIVPN_TITLE1" xml:space="preserve">
     <value>VPN Accounts</value>
@@ -510,6 +522,12 @@
   </data>
   <data name="MENU_DELETEMENU" xml:space="preserve">
     <value>_Delete</value>
+  </data>
+  <data name="MENU_EXPORT_EML" xml:space="preserve">
+    <value>Export selected messages in *._eml format</value>
+  </data>
+  <data name="MENU_EXPORT_MSG" xml:space="preserve">
+    <value>Export selected messages in *._msg format</value>
   </data>
   <data name="MENU_FMT_DELETECLEAR" xml:space="preserve">
     <value>_Permanently delete messages: {0}</value>
@@ -738,6 +756,9 @@
   </data>
   <data name="TAG_ALLOWED" xml:space="preserve">
     <value>Allowed</value>
+  </data>
+  <data name="TAG_ASSOCIATE" xml:space="preserve">
+    <value>Association of files by extension</value>
   </data>
   <data name="TAG_ATTACH" xml:space="preserve">
     <value>Attach</value>

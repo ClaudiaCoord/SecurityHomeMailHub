@@ -97,6 +97,29 @@ namespace SecyrityMail.Messages
             return this;
         }
 
+        #region Load
+        public async Task<bool> Load(string path) =>
+            await Task.Run(() => {
+                try {
+                    MailMessage accs = path.DeserializeFromFile<MailMessage>();
+                    Copy(accs, 0);
+                    return true;
+                } catch (Exception ex) { Global.Instance.Log.Add(nameof(Load), ex); }
+                return false;
+            });
+        #endregion
+
+        #region Save
+        public async Task<bool> Save(string path) =>
+            await Task.Run(() => {
+                try {
+                    path.SerializeToFile<MailMessage>(this);
+                    return true;
+                } catch (Exception ex) { Global.Instance.Log.Add(nameof(Save), ex); }
+                return false;
+            });
+        #endregion
+
         #region LoadAndCreate
         public async Task<MailMessage> LoadAndCreate(string file, int count) => await LoadAndCreate(new FileInfo(file), count);
         public async Task<MailMessage> LoadAndCreate(FileInfo file, int count) =>

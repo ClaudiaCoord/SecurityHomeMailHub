@@ -183,6 +183,12 @@
   <data name="BTN_STOP" xml:space="preserve">
     <value>_Стоп</value>
   </data>
+  <data name="CHKBOX_ASSOCIATE_EXT_EML" xml:space="preserve">
+    <value>Файлы с расширением *.eml</value>
+  </data>
+  <data name="CHKBOX_ASSOCIATE_EXT_MSG" xml:space="preserve">
+    <value>Файлы с расширением *.msg</value>
+  </data>
   <data name="CHKBOX_CHECKFROM" xml:space="preserve">
     <value>Проверить входящий адрес отправителя, спам фильтр</value>
   </data>
@@ -460,8 +466,14 @@
   <data name="GUISETTIGS_PGP_DIALOG" xml:space="preserve">
     <value>Выберите путь к исполняемым файлам GnuPG</value>
   </data>
+  <data name="GuiSshAccountWindowHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiSshAccountWindowHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GUISSH_TITLE1" xml:space="preserve">
     <value>SSH Учетные записи</value>
+  </data>
+  <data name="GuiVpnAccountWindowHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiVpnAccountWindowHelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="GUIVPN_TITLE1" xml:space="preserve">
     <value>VPN Учетные записи</value>
@@ -510,6 +522,12 @@
   </data>
   <data name="MENU_DELETEMENU" xml:space="preserve">
     <value>_Удаление</value>
+  </data>
+  <data name="MENU_EXPORT_EML" xml:space="preserve">
+    <value>Экспортировать выбранные сообщения в формате *._eml</value>
+  </data>
+  <data name="MENU_EXPORT_MSG" xml:space="preserve">
+    <value>Экспортировать выбранные сообщения в формате *._msg</value>
   </data>
   <data name="MENU_FMT_DELETECLEAR" xml:space="preserve">
     <value>_Окочательно удалить сообщения: {0}</value>
@@ -738,6 +756,9 @@
   </data>
   <data name="TAG_ALLOWED" xml:space="preserve">
     <value>Разрешён</value>
+  </data>
+  <data name="TAG_ASSOCIATE" xml:space="preserve">
+    <value>Ассоциация файлов по расширению</value>
   </data>
   <data name="TAG_ATTACH" xml:space="preserve">
     <value>Вложения</value>

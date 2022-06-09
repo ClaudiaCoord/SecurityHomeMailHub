@@ -140,7 +140,7 @@ namespace HomeMailHub.Gui.ListSources
         }
         #endregion
 
-        #region Merge Message
+        #region Combine Message
         public async Task<bool> CombineMessages() {
             try {
                 if (IsEmpty || Multiselected.IsEmpty) return false;
@@ -153,8 +153,10 @@ namespace HomeMailHub.Gui.ListSources
                         list.Add(idx);
                     } catch { }
                 }
-                if (list.Count > 0)
+                if (list.Count > 0) {
+                    Deleted += list.Count - 1;
                     return await messages.CombineMessages(list);
+                }
             } catch (Exception ex) { ex.StatusBarError(); }
             return false;
         }

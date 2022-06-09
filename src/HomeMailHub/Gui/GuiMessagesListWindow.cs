@@ -6,12 +6,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using HomeMailHub.Gui.ListSources;
 using NStack;
-using SecyrityMail.MailAccounts;
 using SecyrityMail;
+using SecyrityMail.MailAccounts;
 using SecyrityMail.Messages;
 using SecyrityMail.Utils;
 using Terminal.Gui;
@@ -28,7 +27,7 @@ namespace HomeMailHub.Gui
         }
 
         private Toplevel GuiToplevel { get; set; } = default;
-        private MenuBar GuiMenu { get; set; } = default;
+        private MenuBar  GuiMenu { get; set; } = default;
         private MenuBarItem undeleteMenu { get; set; } = default;
         private MenuItem [] messagesMenu { get; set; } = default;
         private MenuItem multiSelectMenu { get; set; } = default;
@@ -92,8 +91,7 @@ namespace HomeMailHub.Gui
             }
         }
 
-        public GuiMessagesListWindow() : base(RES.GUIMESSAGE_TITLE1, 0)
-        {
+        public GuiMessagesListWindow() : base(RES.GUIMESSAGE_TITLE1, 0) {
             X = 0;
             Y = 1;
             Width = Dim.Fill();
@@ -547,6 +545,7 @@ namespace HomeMailHub.Gui
             });
         #endregion
 
+        #region Clean
         private void DataClear() {
             Clean();
             SetTitle();
@@ -563,7 +562,9 @@ namespace HomeMailHub.Gui
                 selectedPath = string.Empty;
                 readingBox.Checked = false;
             });
+        #endregion
 
+        #region Update
         private void Update(MailMessage msg, int id) {
             if (!runOnce.Begin(id)) return;
             try {
@@ -581,6 +582,7 @@ namespace HomeMailHub.Gui
                 dataTable.Multiselected.Add(id);
             } finally { runOnce.End();  }
         }
+        #endregion
 
         #region Gui Setter
         private void TableView_CellActivated(TableView.CellActivatedEventArgs obj) {
@@ -844,6 +846,7 @@ namespace HomeMailHub.Gui
         private bool MessagesOptionsOneEnable() =>
             !dataTable.IsEmpty && !IsMultiSelect && (tableView.MultiSelectedRegions.Count == 0);
 
+        #region Messages selector
         private SelectorType MessagesSelector(bool b = true) {
             if (tableView.MultiSelect) {
                 if (!dataTable.Multiselected.Add(tableView.MultiSelectedRegions))
@@ -857,7 +860,9 @@ namespace HomeMailHub.Gui
             }
             return SelectorType.None;
         }
+        #endregion
 
+        #region LocalLauncher
         private void LocalLauncher<T>() {
             Type type = typeof(T);
             tableView.KeyUp -= TableView_KeyUp;
@@ -866,5 +871,6 @@ namespace HomeMailHub.Gui
                 ReadingBox_Toggled(true);
             tableView.KeyUp += TableView_KeyUp;
         }
+        #endregion
     }
 }

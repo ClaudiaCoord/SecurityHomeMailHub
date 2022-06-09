@@ -33,8 +33,9 @@ namespace HomeMailHub.Gui
 		private ListView listView { get; set; } = default;
 		private FrameView frameForm { get; set; } = default;
 		private FrameView frameList { get; set; } = default;
+        private FrameView frameHelp { get; set; } = default;
 
-		private Button buttonPaste { get; set; } = default;
+        private Button buttonPaste { get; set; } = default;
 		private Button buttonSave { get; set; } = default;
 		private Button buttonClear { get; set; } = default;
 		private Button buttonDelete { get; set; } = default;
@@ -48,8 +49,9 @@ namespace HomeMailHub.Gui
 		private Label portLabel { get; set; } = default;
 		private Label proxyLabel { get; set; } = default;
 		private Label expireLabel { get; set; } = default;
+        private Label helpText { get; set; } = default;
 
-		private TextField nameText { get; set; } = default;
+        private TextField nameText { get; set; } = default;
 		private TextField loginText { get; set; } = default;
 		private TextField passText { get; set; } = default;
 		private TextField hostText { get; set; } = default;
@@ -115,12 +117,9 @@ namespace HomeMailHub.Gui
 		{
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
+            #region frameList
             frameList = new FrameView (new Rect (0, 0, 35, 25), RES.TAG_ACCOUNTS) {
 				X = 1,
-				Y = 1
-			};
-			frameForm = new FrameView (new Rect (0, 0, 80, 25), $"{RES.TAG_ACCOUNT} {GetInTitle()}") {
-				X = 37,
 				Y = 1
 			};
 			listView = new ListView (data) {
@@ -136,8 +135,17 @@ namespace HomeMailHub.Gui
 
 			frameList.Add (listView);
 			Add (frameList);
+            #endregion
 
-			frameForm.Add (loginLabel = new Label (RES.TAG_LOGIN) {
+            #region frameForm
+            frameForm = new FrameView($"{RES.TAG_ACCOUNT} {GetInTitle()}")
+            {
+                X = 37,
+                Y = 1,
+				Width = 81,
+				Height = Dim.Fill()
+            };
+            frameForm.Add (loginLabel = new Label (RES.TAG_LOGIN) {
 				X = 1,
 				Y = 1,
 				AutoSize = true
@@ -286,7 +294,29 @@ namespace HomeMailHub.Gui
                 Enabled = false,
 				TabIndex = 17
 			});
-			buttonSave.Clicked += () => SaveItem();
+            Add(frameForm);
+            #endregion
+
+            #region frameHelp
+            frameHelp = new FrameView(RES.TAG_HELP)
+            {
+                X = Pos.Right(frameForm) + 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill()
+            };
+            frameHelp.Add(helpText = new Label()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill() - 1,
+                ColorScheme = GuiApp.ColorDescription
+            });
+            Add(frameHelp);
+            #endregion
+
+            buttonSave.Clicked += () => SaveItem();
 			buttonClear.Clicked += () => Clean();
 			buttonDelete.Clicked += () => Delete();
 			buttonPaste.Clicked += async () => await FromClipBoard().ConfigureAwait(false);
@@ -333,7 +363,6 @@ namespace HomeMailHub.Gui
 					}
 				} catch (Exception ex) { ex.StatusBarError(); }
 			};
-			Add(frameForm);
 
 			urlmenu = new MenuBarItem("_Url", new MenuItem[0]);
 			GuiMenu = new MenuBar (new MenuBarItem [] {
@@ -438,7 +467,11 @@ namespace HomeMailHub.Gui
                         MenuItem[] mitems = await nameof(GuiSshAccountWindow).LoadMenuUrls().ConfigureAwait(false);
                         Application.MainLoop.Invoke(() => urlmenu.Children = mitems);
                     } catch { }
-                } finally { runOnce.End(); }
+                    Application.MainLoop.Invoke(() => {
+                        helpText.Text = RES.GuiSshAccountWindowHelp;
+                    });
+                }
+                finally { runOnce.End(); }
                 return true;
 			});
 

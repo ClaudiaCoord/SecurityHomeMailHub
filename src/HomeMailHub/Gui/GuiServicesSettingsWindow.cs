@@ -12,6 +12,7 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using HomeMailHub.Associate;
 using HomeMailHub.Gui.Dialogs;
 using NStack;
 using SecyrityMail;
@@ -96,6 +97,8 @@ namespace HomeMailHub.Gui
         private CheckBox enableAlwaysNewMessageId { get; set; } = default;
         private CheckBox enableModifyMessageDeliveredLocal { get; set; } = default;
         private CheckBox enableNewMessageSendImmediately { get; set; } = default;
+        private CheckBox enableAssociateEml { get; set; } = default;
+        private CheckBox enableAssociateMsg { get; set; } = default;
 
         private CheckBox enableImapClientMessagePurge { get; set; } = default;
         private CheckBox enableSmtpClientFakeIp { get; set; } = default;
@@ -120,6 +123,7 @@ namespace HomeMailHub.Gui
         private FrameView frameSecureEntry { get; set; } = default;
         private FrameView frameClients { get; set; } = default;
         private FrameView frameClientsLeft { get; set; } = default;
+        private FrameView frameClientsAssociate { get; set; } = default;
         private FrameView framePgp { get; set; } = default;
         private FrameView framePgpLeft { get; set; } = default;
         private FrameView framePgpHelp { get; set; } = default;
@@ -923,7 +927,7 @@ namespace HomeMailHub.Gui
                 X = 1,
                 Y = 0,
                 Width = 115,
-                Height = 14
+                Height = 13
             };
             frameClientsLeft.Add(idleClientsLabel = new Label(RES.TAG_CLIENTSTIMEOUT)
             {
@@ -988,6 +992,35 @@ namespace HomeMailHub.Gui
             enableSmtpClientFakeIp.Toggled += EnableSmtpClientFakeIp_Toggled;
             enableImapClientMessagePurge.Toggled += EnableImapClientMessagePurge_Toggled;
             frameClients.Add(frameClientsLeft);
+            #endregion
+
+            #region Clients Left - Associate files by extension
+            frameClientsAssociate = new FrameView(RES.TAG_ASSOCIATE)
+            {
+                X = 1,
+                Y = Pos.Bottom(frameClientsLeft),
+                Width = 115,
+                Height = 6
+            };
+            frameClientsAssociate.Add(enableAssociateEml = new CheckBox(1, 0, RES.CHKBOX_ASSOCIATE_EXT_EML)
+            {
+                X = 1,
+                Y = 1,
+                Width = 100,
+                Height = 1,
+                Checked = false
+            });
+            frameClientsAssociate.Add(enableAssociateMsg = new CheckBox(1, 0, RES.CHKBOX_ASSOCIATE_EXT_MSG)
+            {
+                X = 1,
+                Y = 2,
+                Width = 100,
+                Height = 1,
+                Checked = false
+            });
+            frameClients.Add(frameClientsAssociate);
+            enableAssociateEml.Toggled += EnableAssociateEml_Toggled;
+            enableAssociateMsg.Toggled += EnableAssociateMsg_Toggled;
             #endregion
 
             #region Clients Help
@@ -1226,6 +1259,12 @@ namespace HomeMailHub.Gui
         private void EnableIpDnsCheck_Toggled(bool b) =>
             Global.Instance.Config.IsAccessIpCheckDns = b;
 
+        private async void EnableAssociateMsg_Toggled(bool b) =>
+            await ToggledAssociate(enableAssociateMsg, "msg", b);
+
+        private async void EnableAssociateEml_Toggled(bool b) =>
+            await ToggledAssociate(enableAssociateEml, "eml", b);
+
         private void Toggled(bool b, bool state, Action act) {
             if (state)
                 act.Invoke();
@@ -1233,6 +1272,28 @@ namespace HomeMailHub.Gui
             buttonPop3Action.Enabled = b;
             buttonPop3Action.ColorScheme = b ? (state ? GuiApp.ColorGreen : GuiApp.ColorRed) : Colors.Base;
             buttonPop3Action.Text = state ? RES.BTN_STOP : RES.BTN_START;
+        }
+
+        private async Task ToggledAssociate(CheckBox box, string ext, bool b) =>
+            await Task.Run(() => {
+                try
+                {
+                    AssociateFileExtension associate = new(ext);
+                    if (associate.IsAssociated() == b)
+                        return;
+                    b = b ? associate.Associate() : associate.DeAssociate();
+                }
+                catch (Exception ex) { ex.StatusBarError(); b = false; }
+                finally {
+                    Application.MainLoop.Invoke(() => box.Checked = b);
+                }
+            });
+        private bool IsAssociate(string ext) {
+            try {
+                AssociateFileExtension associate = new(ext);
+                return associate.IsAssociated();
+            } catch (Exception ex) { ex.StatusBarError(); }
+            return false;
         }
         #endregion
 
@@ -1282,6 +1343,12 @@ namespace HomeMailHub.Gui
                             dnsblSmtpBox.SelectedItem = 0;
                         });
                     }
+                } catch { }
+                try {
+                    Application.MainLoop.Invoke(() => {
+                        enableAssociateEml.Checked = IsAssociate("eml");
+                        enableAssociateMsg.Checked = IsAssociate("msg");
+                    });
                 } catch { }
                 return true;
             });

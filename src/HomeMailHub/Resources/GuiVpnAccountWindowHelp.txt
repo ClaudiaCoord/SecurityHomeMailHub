@@ -1,0 +1,26 @@
+﻿
+Set up connections to WireGuard VPN tunnels that use state-of-the-art cryptography. It is recommended to import the WireGuard configuration files (.conf), or copy their contents using the "Paste" button. Learn more about WireGuard tunnels: https://www.wireguard.com/
+
+Public endpoint (Endpoint):
+IP address and port of VPN access server.
+
+Private key (Private key):
+The WireGuard private key for one host, provided by the VPN provider, is unique.
+
+Pre-shared key:
+The pre-shared key of the WireGuard server, provided by the VPN provider, is unique.
+
+Public key: (Public key):
+The WireGuard public key for one host, provided by the VPN provider, is unique.
+
+IP address:
+The addresses to which the client will bind, either IPv4 or IPv6. Provided by VPN provider
+
+List of allowed networks to use VPN (AllowedIPs):
+The range of IP addresses whose traffic is routed to the VPN tunnel.
+
+DNS:
+The domain name server used to resolve hostnames to IP addresses for VPN clients. It is recommended to leave the value provided by the VPN provider, this will prevent DNS queries from leaking outside the VPN and exposing traffic. Leaks can be checked using http://dnsleak.com.
+
+VPN link check period (Keepalive):
+Send periodic keepalive messages to ensure a working connection.

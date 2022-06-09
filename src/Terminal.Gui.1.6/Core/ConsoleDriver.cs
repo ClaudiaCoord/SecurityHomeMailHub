@@ -1196,22 +1196,22 @@ namespace Terminal.Gui {
         /// <summary>
         /// Un-checked checkmark.
         /// </summary>
-        public Rune UnChecked = (char)0x2219;
+        public Rune UnChecked = (char)0x00b7;
 
 		/// <summary>
 		/// Selected mark.
 		/// </summary>
-		public Rune Selected = '\u25cf';
+		public Rune Selected = (char)0x2219;
 
 		/// <summary>
 		/// Un-selected selected mark.
 		/// </summary>
-		public Rune UnSelected = '\u25cc';
+		public Rune UnSelected = ' ';
 
-		/// <summary>
-		/// Right Arrow.
-		/// </summary>
-		public Rune RightArrow = '\u25ba';
+        /// <summary>
+        /// Right Arrow.
+        /// </summary>
+        public Rune RightArrow = '\u25ba';
 
 		/// <summary>
 		/// Left Arrow.

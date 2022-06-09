@@ -111,6 +111,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Associate\AssociateFileExtension.cs" />
     <Compile Include="CmdLine\CmdOption.cs" />
     <Compile Include="CmdLine\CmdOptionAttribute.cs" />
     <Compile Include="CmdLine\CmdOptionException.cs" />
@@ -230,6 +231,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>dist\gpg4win-vanilla-2.2.0.exe</TargetPath>
     </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\HomeMailHub.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HomeMailHub.png</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -275,11 +280,15 @@
     <Content Include="Resources\GuiServicesSettingsWindowPop3Help.txt" />
     <Content Include="Resources\GuiServicesSettingsWindowSecureHelp.txt" />
     <Content Include="Resources\GuiServicesSettingsWindowSmtpHelp.txt" />
+    <Content Include="Resources\GuiSshAccountWindowHelp.txt" />
+    <Content Include="Resources\GuiVpnAccountWindowHelp.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowClientsHelp.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowPgpHelp.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowPop3Help.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowSecureHelp.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowSmtpHelp.txt" />
+    <Content Include="Resources\ru\GuiSshAccountWindowHelp.txt" />
+    <Content Include="Resources\ru\GuiVpnAccountWindowHelp.txt" />
     <None Include="Resources\GuiMailAccountWindowHelp.txt" />
     <None Include="Resources\ru\GuiMailAccountWindowHelp.txt" />
   </ItemGroup>

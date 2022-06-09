@@ -129,6 +129,7 @@ namespace HomeMailHub.Gui
             int idx = 0;
             List<GuiLinearData> layout = linearLayot.GetDefault();
 
+            #region frameList
             frameList = new FrameView(RES.TAG_ACCOUNTS)
             {
                 X = 1,
@@ -136,29 +137,6 @@ namespace HomeMailHub.Gui
                 Width = 35,
                 Height = Dim.Fill()
             };
-            frameInterface = new FrameView("Interface")
-            {
-                X = Pos.Right(frameList) + 1,
-                Y = 1,
-                Width = 80,
-                Height = 9
-            };
-            framePeer = new FrameView("Peer")
-            {
-                X = Pos.Right(frameList) + 1,
-                Y = Pos.Bottom(frameInterface),
-                Width = 80,
-                Height = 11
-            };
-            frameHelp = new FrameView(RES.TAG_HELP)
-            {
-                X = Pos.Right(frameInterface) + 1,
-                Y = 1,
-                Width = Dim.Fill() - 1,
-                Height = Dim.Fill()
-            };
-
-            #region frameList
             listView = new ListView(data)
             {
                 X = 1,
@@ -176,6 +154,13 @@ namespace HomeMailHub.Gui
             #endregion
 
             #region frameInterface
+            frameInterface = new FrameView("Interface")
+            {
+                X = Pos.Right(frameList) + 1,
+                Y = 1,
+                Width = 80,
+                Height = 9
+            };
             frameInterface.Add(privkeyLabel = new Label("Private Key: ")
             {
                 X = 1,
@@ -223,6 +208,13 @@ namespace HomeMailHub.Gui
             #endregion
 
             #region framePeer
+            framePeer = new FrameView("Peer")
+            {
+                X = Pos.Right(frameList) + 1,
+                Y = Pos.Bottom(frameInterface),
+                Width = 80,
+                Height = 11
+            };
             framePeer.Add(pubkeyLabel = new Label("Public Key: ")
             {
                 X = 1,
@@ -310,6 +302,13 @@ namespace HomeMailHub.Gui
             #endregion
 
             #region frameHelp
+            frameHelp = new FrameView(RES.TAG_HELP)
+            {
+                X = Pos.Right(frameInterface) + 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill()
+            };
             frameHelp.Add(helpText = new Label()
             {
                 X = 1,
@@ -518,6 +517,9 @@ namespace HomeMailHub.Gui
                         MenuItem[] mitems = await nameof(GuiVpnAccountWindow).LoadMenuUrls().ConfigureAwait(false);
                         Application.MainLoop.Invoke(() => urlmenu.Children = mitems);
                     } catch { }
+                    Application.MainLoop.Invoke(() => {
+                        helpText.Text = RES.GuiVpnAccountWindowHelp;
+                    });
                 }
                 finally { runOnce.End(); }
                 return true;
@@ -594,6 +596,7 @@ namespace HomeMailHub.Gui
         }
         #endregion
 
+        #region Clear
         private void DataClear() {
             data.Clear();
             Clean();
@@ -640,6 +643,7 @@ namespace HomeMailHub.Gui
             });
             runOnce.ResetId();
         }
+        #endregion
 
         private void EnableBox_Toggled(bool b) =>
             Application.MainLoop.Invoke(() => {

@@ -16,3 +16,6 @@ Adds a fictitious sender's IP address to the message headers, equal to the addre
 
 Receive external mail only when sending messages:
 The rule disables the schedule for receiving mail from external servers. The actual receipt of mail will occur only when a letter appears that requires sending through external mail providers.
+
+File association:
+Allows you to associate file types (*.eml, *.msg) with this application. This will allow files with the above extensions to be opened in this application.
