@@ -8,7 +8,6 @@ build:
 
 mkdocs:
   configuration: docs/docs/readdocs/mkdocs.yml
-  docs_dir: docs/docs/readdocs
 
 # Optionally declare the Python requirements required to build your docs
 python:
