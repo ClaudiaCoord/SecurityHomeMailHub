@@ -1,0 +1,11 @@
+site_name: Security Home Mail Hub
+
+site_url: https://claudiacoord.github.io/SecurityHomeMailHub/
+
+nav:
+
+    - Home: docindex.md
+
+    - About: docabout.md
+
+theme: bootstrap386
