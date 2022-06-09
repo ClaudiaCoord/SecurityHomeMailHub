@@ -1,7 +1,7 @@
 site_name: Security Home Mail Hub
 
 site_url: https://claudiacoord.github.io/SecurityHomeMailHub/
-
+docs_dir: /docs/docs/readdocs
 nav:
 
     - Home: docindex.md
