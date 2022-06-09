@@ -1,1 +1,1 @@
-pip install mkdocs-bootstrap386
+mkdocs-bootstrap386
