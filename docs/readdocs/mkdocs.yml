@@ -9,8 +9,7 @@ nav:
     - About: docabout.md
 
 theme: bootstrap386
-  palette:
-    primary: orange
+
   features:
     - navigation.tabs
     - navigation.sections
