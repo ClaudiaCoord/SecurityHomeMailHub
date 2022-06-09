@@ -178,7 +178,7 @@ namespace SecyrityMail.Vpn
                     foreach (string s in ss)
                     {
                         if (s.Length == 0) continue;
-                        Match m = Regex.Match(s, @"^(\S+)\s=\s(.+)$",
+                        Match m = Regex.Match(s, @"^(\S+)\s?=\s?(.+)$",
                             RegexOptions.CultureInvariant |
                             RegexOptions.Multiline |
                             RegexOptions.IgnoreCase |
@@ -204,7 +204,7 @@ namespace SecyrityMail.Vpn
                     if (string.IsNullOrWhiteSpace(s))
                         throw new Exception("import string is empty..");
 
-                    Regex r = new(@"\[(?<grp>\w+)\]|(?<key>\w+)\s?=\s?(?<val>[\:\=\.\/A-Za-z0-9]+)\s?",
+                    Regex r = new(@"\[(?<grp>\w+)\]|(?<key>\w+)\s?=\s?(?<val>[\:\=\.\+\/A-Za-z0-9]+)\s?",
                         RegexOptions.CultureInvariant |
                         RegexOptions.Singleline |
                         RegexOptions.IgnoreCase |

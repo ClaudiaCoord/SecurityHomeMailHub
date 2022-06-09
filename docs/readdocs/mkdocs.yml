@@ -2,34 +2,21 @@ site_name: Security Home Mail Hub
 
 site_url: https://claudiacoord.github.io/SecurityHomeMailHub/
 
-docs_dir: docs/docs/readdocs
+docs_dir: docs
 
 nav:
-
     - Home: docindex.md
-
     - About: docabout.md
 
-theme:
-# bootstrap386
-
-  name: material
-
+theme: bootstrap386
   palette:
-
-    primary: pink
-
+    primary: orange
   features:
-
     - navigation.tabs
-
     - navigation.sections
 
-copyright: Copyright &copy; 2018 - 2022 CC
+copyright: Copyright &copy; 2022 CC
 
 markdown_extensions:
-
   - pymdownx.highlight
-
   - pymdownx.superfences
-
