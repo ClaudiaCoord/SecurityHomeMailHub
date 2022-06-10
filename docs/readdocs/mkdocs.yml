@@ -8,6 +8,8 @@ nav:
     - Home: index.md
     - About: about.md
 
+theme: bootstrap386
+
 copyright: Copyright &copy; 2022 CC
 
 theme: bootstrap386
