@@ -10,9 +10,6 @@ nav:
 
 theme: bootstrap386
 
-  features:
-    - navigation.tabs
-    - navigation.sections
 
 copyright: Copyright &copy; 2022 CC
 
