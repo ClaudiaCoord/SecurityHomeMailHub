@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HomeMailHub.Gui.Dialogs;
 using HomeMailHub.Gui.ListSources;
 using NStack;
 using SecyrityMail;
@@ -441,6 +442,9 @@ namespace HomeMailHub.Gui
                     async () => await CombineMessages().ConfigureAwait(false),
                     () => MessagesCombineEnable()),
                 null,
+                new MenuItem(RES.MENU_EXPORT_EML, "", () => ExportDialog(ExportType.Eml), () => MessagesOptionsEnable()),
+                new MenuItem(RES.MENU_EXPORT_MSG, "", () => ExportDialog(ExportType.Msg), () => MessagesOptionsEnable()),
+                null,
                 new MenuItem(RES.MENU_SUB_OPEN, "", () => buttonOpen.OnClicked(), () => MessagesOptionsOneEnable()),
                 new MenuItem(RES.MENU_SUB_REPLAY, "", () => buttonReply.OnClicked(), () => MessagesOptionsOneEnable()),
                 new MenuItem(RES.MENU_SUB_DELETE, "", () => buttonDelete.OnClicked(), () => MessagesOptionsEnable()),
@@ -644,6 +648,23 @@ namespace HomeMailHub.Gui
                     base.Title = string.Format(RES.GUIMESSAGE_FMT3, selectedName, dataTable.Count, dataTable.FolderString));
         #endregion
 
+        #region Export Dialog
+        private async void ExportDialog(ExportType t) {
+            try {
+                GuiSaveDialog d = ((t == ExportType.Msg) ?
+                                    RES.MENU_EXPORT_EML.ClearText() :
+                                    RES.MENU_EXPORT_MSG.ClearText()).GuiSaveDialogs(
+                                        Global.GetRootDirectory(Global.DirectoryPlace.Export));
+                Application.Run(d);
+                if (!d.Canceled) {
+                    string[] ss = d.GuiReturnDialog();
+                    if (ss.Length > 0)
+                        _ = await ExportMessages(t, ss[0]).ConfigureAwait(false);
+                }
+            } catch { }
+        }
+        #endregion
+
         #region Close Dialog
         private async void CloseDialog() {
             try {
@@ -772,6 +793,24 @@ namespace HomeMailHub.Gui
         private bool FolderMoveEnable(Global.DirectoryPlace place) =>
             !dataTable.IsEmpty && (dataTable.FolderType != place) &&
             ((IsMultiSelect && (tableView.MultiSelectedRegions.Count > 0)) || (!IsMultiSelect && runOnce.IsValidId()));
+        #endregion
+
+        #region Export messages
+        private async Task<bool> ExportMessages(ExportType t, string path) =>
+            await Task.Run(async () => {
+                try {
+                    waitBusyBar.Start();
+
+                    SelectorType st = MessagesSelector();
+                    if (st == SelectorType.None)
+                        return false;
+
+                    _ = await dataTable.ExportMessages(t, path).ConfigureAwait(false);
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
+                finally { waitBusyBar.Stop(); }
+                return true;
+            });
         #endregion
 
         #region Combine messages

@@ -7,11 +7,14 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using SecyrityMail;
 using SecyrityMail.Messages;
 using Terminal.Gui;
+using static HomeMailHub.Gui.GuiMessagesListWindow;
 using GuiAttribute = Terminal.Gui.Attribute;
 using RES = HomeMailHub.Properties.Resources;
 
@@ -25,6 +28,13 @@ namespace HomeMailHub.Gui.ListSources
         SortSubj,
         SortDate,
         SortFrom
+    }
+
+    public enum ExportType : int
+    {
+        None = 0,
+        Eml,
+        Msg
     }
 
     internal class SubjComparer : IComparer<MailMessage> {
@@ -138,6 +148,47 @@ namespace HomeMailHub.Gui.ListSources
                 }
             } catch (Exception ex) { ex.StatusBarError(); }
         }
+        #endregion
+
+        #region Export messages
+        public async Task<bool> ExportMessages(ExportType t, string path) =>
+            await Task.Run(async () => {
+                try {
+                    if (IsEmpty || Multiselected.IsEmpty) return false;
+
+                    for (int i = 0; i < Multiselected.Count; i++) {
+                        try {
+                            MailMessage msg = Get(Multiselected[i]);
+                            if (msg == null) continue;
+
+                            string name = Regex.Replace(msg.Subj, @"\p{C}+", string.Empty)
+                                            .Replace('\\', '_')
+                                            .Replace('/', '_')
+                                            .Replace(':', '_')
+                                            .Replace("__", "_")
+                                            .Replace("\"", "")
+                                            .Replace("'", "")
+                                            .Replace(",", "")
+                                            .Replace(".", "")
+                                            .Normalize(),
+                                   store = Path.Combine(path, $"{msg.Id} - {name}");
+                            switch (t) {
+                                case ExportType.Eml: {
+                                        FileInfo f = new FileInfo(msg.FilePath);
+                                        if ((f != null) && f.Exists)
+                                            f.CopyTo($"{store}.eml", true);
+                                        break;
+                                    }
+                                case ExportType.Msg: {
+                                        _ = await msg.Save($"{store}.msg").ConfigureAwait(false);
+                                        break;
+                                    }
+                            }
+                        } catch { }
+                    }
+                } catch (Exception ex) { ex.StatusBarError(); }
+                return false;
+            });
         #endregion
 
         #region Combine Message

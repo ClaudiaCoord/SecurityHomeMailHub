@@ -75,8 +75,8 @@ namespace HomeMailHub.Associate
                 FileReg.CreateSubKey(KeysString[8]).SetValue("", AppIcon);
                 FileReg.CreateSubKey(KeysString[9]).SetValue("", "Text");
 
-                AppReg.CreateSubKey(KeysString[6]).SetValue("", $@"""{AppPath}"" %1");
-                AppReg.CreateSubKey(KeysString[7]).SetValue("", $@"""{AppPath}"" %1");
+                AppReg.CreateSubKey(KeysString[6]).SetValue("", $@"""{AppPath}"" ""%1""");
+                AppReg.CreateSubKey(KeysString[7]).SetValue("", $@"""{AppPath}"" ""%1""");
                 AppReg.CreateSubKey(KeysString[8]).SetValue("", AppIcon);
 
                 AppAssoc.CreateSubKey(KeysString[10]).SetValue(KeysString[11], KeysString[5]);

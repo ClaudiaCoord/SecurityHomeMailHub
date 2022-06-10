@@ -398,8 +398,7 @@ namespace HomeMailHub.Gui
                                 MailMessageCrypt crypt = new();
                                 isdecrypt = await crypt.Decrypt(mmsg, (ex) => ex.StatusBarError());
                             }
-                        }
-                        catch (Exception ex) {
+                        } catch (Exception ex) {
                             Global.Instance.Log.Add(nameof(MailMessageCrypt.Decrypt), ex);
                         }
                     }

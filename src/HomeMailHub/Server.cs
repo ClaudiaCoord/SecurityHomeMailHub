@@ -31,10 +31,10 @@ namespace HomeMailHub
             TaskScheduler.UnobservedTaskException +=
                 new EventHandler<UnobservedTaskExceptionEventArgs>(TaskScheduler_UnobservedTaskException);
 
-            if (args.Length == 1) {
+            if (args.Length > 0) {
                 try {
                     AssociateExtension ae = new();
-                    (bool iscmd, string file) = ae.Parse(args[0]);
+                    (bool iscmd, string file) = ae.Parse(args);
                     if (iscmd) {
                         if (string.IsNullOrWhiteSpace(file))
                             return;
