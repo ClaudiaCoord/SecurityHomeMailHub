@@ -13,3 +13,6 @@ theme: bootstrap386
 
 copyright: Copyright &copy; 2022 CC
 
+plugins:
+    - search
+    
