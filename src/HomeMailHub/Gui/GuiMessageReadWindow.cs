@@ -376,14 +376,16 @@ namespace HomeMailHub.Gui
                         Application.RequestStop();
                         return false;
                     }
+
+                    string folder = string.Empty,
+                           accfolder = string.Empty;
+                    DateTimeOffset msgdt = default;
+                    Global.DirectoryPlace placed;
                     MimeMessage mmsg = rdata.Message;
 
-                    string folder = string.Empty;
                     try {
-                        string[] ss = rdata.Info.DirectoryName.Split(
-                            new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                        if ((ss != null) && ss.Length > 4)
-                            folder = ss[ss.Length - 4];
+                        (placed, accfolder, msgdt) = Global.GetFolderInfo(rdata.Info.DirectoryName);
+                        folder = placed.ToString();
                     } catch { }
 
                     bool iscrypt = false,
@@ -436,8 +438,12 @@ namespace HomeMailHub.Gui
                     try {
 
                         if (((iscrypt && isdecrypt) || !iscrypt) &&
-                            (mmsg.Attachments != null) && (mmsg.Attachments.Count() > 0)) {
+                            (mmsg.Attachments != null) && (mmsg.Attachments.Count() > 0) &&
+                            (msgdt != default) && !string.IsNullOrWhiteSpace(accfolder)) {
+
                             int n = 0;
+                            string path = Global.AppendPartDirectory(
+                                Global.GetUserDirectory(accfolder), Global.DirectoryPlace.Attach, msgdt);
                             MenuItem[] items = new MenuItem[mmsg.Attachments.Count()];
                             for (int i = 0; i < mmsg.Attachments.Count(); i++) {
 
@@ -445,7 +451,7 @@ namespace HomeMailHub.Gui
                                 if (!string.IsNullOrWhiteSpace(name))
                                     items[n++] = new MenuItem(
                                             name.Replace('_', ' '), "",
-                                            () => BrowseAttachFile(selectedPath, mmsg.MessageId, name));
+                                            () => BrowseAttachFile(path, mmsg.MessageId, name));
                             }
                             if (n > 0) {
                                 Application.MainLoop.Invoke(() => {
@@ -636,13 +642,9 @@ namespace HomeMailHub.Gui
         }
 
         private void BrowseAttachFile(string path, string id, string name) {
-            if (string.IsNullOrWhiteSpace(name)) return;
-            (Global.DirectoryPlace _, string rootdir, DateTimeOffset dt) = Global.GetFolderInfo(Path.GetDirectoryName(path));
-            if ((dt == default) || string.IsNullOrWhiteSpace(rootdir))
+            if (string.IsNullOrWhiteSpace(path) || string.IsNullOrWhiteSpace(name))
                 return;
-            MailMessage.GetAttachFilePath(
-                Global.AppendPartDirectory(Global.GetUserDirectory(rootdir), Global.DirectoryPlace.Attach, dt),
-                id, name).BrowseFile();
+            MailMessage.GetAttachFilePath(path, id, name).BrowseFile();
         }
     }
 }

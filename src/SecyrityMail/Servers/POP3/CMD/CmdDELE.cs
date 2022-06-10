@@ -23,7 +23,7 @@ namespace SecyrityMail.Servers.POP3.CMD
                     if ((n = scmd.ParseIntGetArg(2)) <= 0)
                         break;
 
-                    await data.DeleteMessage(n).ConfigureAwait(false);
+                    await data.DeleteById(n).ConfigureAwait(false);
                     await stream.SendClient(Pop3ResponseId.DeleteArgs.Pop3Response(n.ToString()), fslog)
                           .ConfigureAwait(false);
                     return true;

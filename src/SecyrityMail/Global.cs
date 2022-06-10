@@ -45,7 +45,6 @@ namespace SecyrityMail
         ~Global() => DeInit();
         static Global() {
             _ = Global.Instance;
-            //Global.Instance.FindAutoInit();
         }
         private Global() => eventProxy = new EventHandler<EventActionArgs>(Child_ProxyEventCb);
         private EventHandler<EventActionArgs> eventProxy;

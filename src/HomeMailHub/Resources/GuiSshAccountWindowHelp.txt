@@ -1,1 +1,34 @@
 ﻿
+SSH SOCKS proxy tunnel
+Routing network traffic using an encrypted SOCKS4 or SOCKS5 proxy tunnel over a secure SSH connection.
+
+This way all your applications using SOCKS4-5 proxy server will connect to the SSH server and the server will forward all traffic to its actual destination. Your ISP and other third parties will not be able to monitor your traffic and block your access to Internet resources.
+
+Configuring third-party programs to use SSH proxy:
+The application must support work through SOCKS4 or SOCKS5 proxies. After successfully starting the SOCKS4-5 SSH tunnel, you need to configure the application of your choice to use it. Third party app settings:
+
+SOCKS4 you need to specify server 127.0.0.1 and port 33114,
+SOCKS5 you need to specify server 127.0.0.1 and port 33115,
+authorization for local use is not provided.
+If you have registered an SSH tunnel on a site that prints the registration output, copy it and click the "Paste" button. If the data is processed, carefully check it, perhaps some data blocks are not recognized or processed incorrectly.
+
+! If the data from a specific server cannot be fully recognized when pasted,
+! please send the server address to refine the parser of responses from servers.
+
+IP address:
+The address of the SSH server to which the connection will be made is provided by the SSH tunnel provider.
+
+Server port:
+The SSH server port, usually refers to the port range: 22, 143, or ports labeled "Dropbear". Provided by the SSH tunnel provider.
+
+Proxy type:
+Possible choice: SOCKS4 or SOCKS5, which type your connection supports, you need to check with the SSH tunnel provider. Usually it is SOCKS5.
+
+Login:
+The account name provided by the SSH tunnel provider. As a rule, it is filled in by the user himself during registration on the server of the SSH tunnel provider.
+
+Password:
+The account password provided by the SSH tunnel provider. As a rule, it is filled in by the user himself during registration on the server of the SSH tunnel provider.
+
+Import/Export:
+It is possible to import or export the selected account in xml format.

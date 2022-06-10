@@ -498,7 +498,7 @@ namespace SecyrityMail.Servers.POP3
                 case Pop3Command.RSET:
                     {
                         if (storage != default)
-                            _ = await storage.UnDelete().ConfigureAwait(false);
+                            _ = await storage.UnDeleted().ConfigureAwait(false);
                         data.ClearCredentials();
                         await stream.SendClient(Pop3ResponseId.Reset.Pop3Response(), fslog)
                                     .ConfigureAwait(false);

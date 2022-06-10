@@ -7,6 +7,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using HomeMailHub.Associate;
 using HomeMailHub.CmdLine;
 using HomeMailHub.Gui;
 using SecyrityMail;
@@ -31,55 +32,28 @@ namespace HomeMailHub
                 new EventHandler<UnobservedTaskExceptionEventArgs>(TaskScheduler_UnobservedTaskException);
 
             if (args.Length == 1) {
-                do {
-                    string ext = Path.GetExtension(args[0]);
-                    if (string.IsNullOrWhiteSpace(ext))
-                        break;
-                    bool[] b = new bool[2];
-                    b[0] = ext.Equals(".eml", StringComparison.InvariantCultureIgnoreCase);
-                    b[1] = !b[0] ? ext.Equals(".msg", StringComparison.InvariantCultureIgnoreCase) : false;
-                    if (!b[0] && !b[1])
-                        break;
-                    try {
-                        string file = string.Empty;
-                        if (b[0])
-                            file = args[0];
-                        else if (b[1]) {
-                            MailMessage msg = new();
-                            msg.Load(args[0]).Wait();
-                            file = msg.FilePath;
-                        }
+                try {
+                    AssociateExtension ae = new();
+                    (bool iscmd, string file) = ae.Parse(args[0]);
+                    if (iscmd) {
                         if (string.IsNullOrWhiteSpace(file))
                             return;
-                        Global.Instance.Config.Copy(new ConfigurationLoad());
-                        Global.Instance.Init();
-                        gui = new(typeof(GuiMessageReadWindow), file);
-                        gui.Init();
-                    } catch { }
-                    finally {
-                        if (!cancellation.IsCancellationRequested)
-                            cancellation.Cancel();
-                        cancellation.Dispose();
-                        Global.Instance.DeInit();
+                        try {
+                            Global.Instance.Config.Copy(new ConfigurationLoad());
+                            Global.Instance.Init();
+                            gui = new(typeof(GuiMessageReadWindow), file);
+                            gui.Init();
+                        }
+                        catch (Exception ex) { ae.ShowError(ex.Message); }
+                        finally {
+                            if (!cancellation.IsCancellationRequested)
+                                cancellation.Cancel();
+                            cancellation.Dispose();
+                            Global.Instance.DeInit();
+                        }
+                        return;
                     }
-                    return;
-                } while (false);
-            }
-
-            if ((args.Length == 1) && Path.GetExtension(args[0]).Equals(".eml", StringComparison.InvariantCultureIgnoreCase)) {
-                try {
-                    Global.Instance.Config.Copy(new ConfigurationLoad());
-                    Global.Instance.Init();
-                    gui = new(typeof(GuiMessageReadWindow), args[0]);
-                    gui.Init();
                 } catch { }
-                finally {
-                    if (!cancellation.IsCancellationRequested)
-                        cancellation.Cancel();
-                    cancellation.Dispose();
-                    Global.Instance.DeInit();
-                }
-                return;
             }
 
             options = CmdOption.Parse<Options>(args);

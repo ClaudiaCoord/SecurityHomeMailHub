@@ -24,3 +24,6 @@ The domain name server used to resolve hostnames to IP addresses for VPN clients
 
 VPN link check period (Keepalive):
 Send periodic keepalive messages to ensure a working connection.
+
+Import/Export:
+It is possible to import or export the selected account in Wireguard (*.conf) format.

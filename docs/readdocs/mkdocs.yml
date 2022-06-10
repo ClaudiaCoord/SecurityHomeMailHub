@@ -5,14 +5,12 @@ site_url: https://claudiacoord.github.io/SecurityHomeMailHub/
 docs_dir: docs
 
 nav:
-    - Home: docindex.md
-    - About: docabout.md
-
-theme: bootstrap386
-
+    - Home: index.md
+    - About: about.md
 
 copyright: Copyright &copy; 2022 CC
 
+theme: bootstrap386
+
 plugins:
     - search
-    

@@ -216,7 +216,7 @@ namespace HomeMailHub.Gui.ListSources
                             int idx = GetId(Multiselected[i]);
                             if (idx <= 0) continue;
                             Deleted++;
-                            _ = await messages.DeleteMessage(idx).ConfigureAwait(false);
+                            _ = await messages.DeleteById(idx).ConfigureAwait(false);
                         } catch (Exception ex) { ex.StatusBarError(); }
                     }
                     if ((Deleted > 0) && tableWeak.TryGetTarget(out TableView tv)) {
@@ -247,7 +247,7 @@ namespace HomeMailHub.Gui.ListSources
         public async Task<bool> UnDeleted() {
             try {
                 if (messages == default) return false;
-                bool b = await messages.UnDelete().ConfigureAwait(false);
+                bool b = await messages.UnDeleted().ConfigureAwait(false);
                 if (b) {
                     Deleted = 0;
                     Clear();

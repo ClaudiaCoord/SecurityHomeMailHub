@@ -243,6 +243,10 @@ namespace SecyrityMail.Messages
                                     }
                                     if ((iscrypted && iscrypt) || !iscrypted) {
 
+                                        if (Global.Instance.Config.IsSaveAttachments)
+                                            await SaveAttachments(mmsg.Attachments, rootpath, mmsg.MessageId, mmsg.Date)
+                                                  .ConfigureAwait(false);
+
                                         if (localdelivery && !string.IsNullOrWhiteSpace(mmsg.HtmlBody)) {
 
                                             BodyBuilder builder = new();
@@ -252,9 +256,6 @@ namespace SecyrityMail.Messages
 
                                             mmsg.Body = builder.ToMessageBody();
                                         }
-                                        if (Global.Instance.Config.IsSaveAttachments)
-                                            await SaveAttachments(mmsg.Attachments, rootpath, mmsg.MessageId, mmsg.Date)
-                                                  .ConfigureAwait(false);
                                     }
                                 }
                                 catch (Exception ex) { Global.Instance.Log.Add(place.ToString(), ex); }
@@ -292,7 +293,8 @@ namespace SecyrityMail.Messages
                                         To = { from },
                                         Subject = MailerDaemonSubject(mmsgTmp.Subject),
                                         InReplyTo = mmsgTmp.MessageId.ToString(),
-                                        MessageId = GetOrCreateMessageId(string.Empty)
+                                        MessageId = GetOrCreateMessageId(string.Empty),
+                                        Date = mmsgTmp.Date
                                     };
                                 }
                                 catch (Exception ex) { Global.Instance.Log.Add(place.ToString(), ex); }
@@ -353,15 +355,14 @@ namespace SecyrityMail.Messages
                             }
                     }
 
-                    DateTimeOffset dt = Date;
-                    string filename = $"{dt.Hour}-{dt.Minute}-{dt.Second}-{Id}-{MsgId.Replace('@', '_')}.eml";
+                    DateTimeOffset dt = mmsg.Date;
                     FilePath = Path.Combine(
                         Global.AppendPartDirectory(rootpath, place,
                             ((place == Global.DirectoryPlace.Out) || (place == Global.DirectoryPlace.Error)) ? default : dt),
-                        filename);
+                        $"{dt.Hour}-{dt.Minute}-{dt.Second}-{Id}-{MsgId.Replace('@', '_')}.eml");
 
                     await mmsg.WriteToAsync(FilePath).ContinueWith((t) => {
-                        if (mmsgTmp != null) try { mmsgTmp.Dispose(); } catch { } 
+                        if ((mmsgTmp != null) && (mmsg != null)) try { mmsg.Dispose(); } catch { } 
                     }).ConfigureAwait(false);
 
                     FileInfo f = new(FilePath);

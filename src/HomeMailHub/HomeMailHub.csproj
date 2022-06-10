@@ -111,6 +111,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Associate\AssociateExtension.cs" />
     <Compile Include="Associate\AssociateFileExtension.cs" />
     <Compile Include="CmdLine\CmdOption.cs" />
     <Compile Include="CmdLine\CmdOptionAttribute.cs" />

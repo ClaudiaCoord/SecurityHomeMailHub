@@ -92,14 +92,6 @@ namespace SecyrityMail.Messages
             TotalSize += (long)msg.Size;
             OnPropertyChanged(nameof(MailMessages));
         }
-        public MailMessages AddOnce(MailMessage msg) {
-            lock (__lock)
-                Items.Add(msg);
-            isModify = true;
-            TotalSize += (long)msg.Size;
-            OnPropertyChanged(nameof(MailMessages));
-            return this;
-        }
         public MailMessage Get(int i) {
             lock (__lock)
                 return (from x in Items where x.Id == i select x).FirstOrDefault();
@@ -123,6 +115,8 @@ namespace SecyrityMail.Messages
             isModify = true;
             return Items.Count > 0;
         }
+
+        #region Find Message
         public MailMessage Find(int id) {
             if ((id <= 0) || (Items.Count == 0)) return default;
             MailMessage msg;
@@ -137,6 +131,7 @@ namespace SecyrityMail.Messages
                 msg = (from i in Items where i.MsgId.Equals(msgid) select i).FirstOrDefault();
             return msg;
         }
+        #endregion
 
         #region Folders
         public List<MailMessage> GetFromFolder(Global.DirectoryPlace place) {
@@ -255,7 +250,7 @@ namespace SecyrityMail.Messages
         }
         #endregion
 
-        #region Load* / Save* / Open / Exist / Delete
+        #region Base Messages Open/Load*/Save*
         public async Task<MailMessages> Open(string email) {
             RootDirectory = Global.GetUserDirectory(email);
             _ = await Load();
@@ -313,7 +308,9 @@ namespace SecyrityMail.Messages
                 return false;
             });
         }
+        #endregion
 
+        #region Base Messages Exist/Delete
         public bool MailMessagesExist() {
             if (string.IsNullOrWhiteSpace(RootDirectory))
                 return false;
@@ -338,14 +335,6 @@ namespace SecyrityMail.Messages
             }
             catch (Exception ex) { Global.Instance.Log.Add(nameof(MailMessagesDelete), ex); }
             finally { isModify = false; }
-        }
-        #endregion
-
-        #region Sort*
-        public void Sort() {
-            if (Count > 0)
-                lock (__lock)
-                    Items = Items.OrderBy(o => o.Id).ToList();
         }
         #endregion
 
@@ -399,52 +388,8 @@ namespace SecyrityMail.Messages
         }
         #endregion
 
-        #region New Message to send/msg/out*
-        public async Task<bool> SpoolOutToOut(string path)
-        {
-            if (!runOnce.Begin())
-                return false;
-            return await Task.Run(async () => {
-                try {
-                    MailMessage msg = await new MailMessage().CreateAndDelivery(Global.DirectoryPlace.Out, path, (Items.Count + 1))
-                                                             .ConfigureAwait(false);
-                    if (msg != null) {
-                        Add(msg);
-
-                        isModify = true;
-                        return true;
-                    }
-                }
-                catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
-                finally { runOnce.End(); }
-                return false;
-            });
-        }
-
-        public async Task<bool> SpoolInToMsg(string path)
-        {
-            if (!runOnce.Begin())
-                return false;
-            return await Task.Run(async () => {
-                try {
-                    MailMessage msg = await new MailMessage().CreateAndDelivery(Global.DirectoryPlace.Msg, path, (Items.Count + 1))
-                                                             .ConfigureAwait(false);
-                    if (msg != null) {
-                        Add(msg);
-
-                        isModify = true;
-                        return true;
-                    }
-                }
-                catch (Exception ex) { Global.Instance.Log.Add(nameof(ClearDeleted), ex); }
-                finally { runOnce.End(); }
-                return false;
-            });
-        }
-        #endregion
-
-        #region Delete One Message*
-        public async Task<bool> DeleteMessage(string msgid)
+        #region Safe Message DeleteById/UnDeleted/ClearDeleted
+        public async Task<bool> DeleteByMsgId(string msgid)
         {
             if (!runOnce.Begin())
                 return false;
@@ -462,7 +407,7 @@ namespace SecyrityMail.Messages
             });
         }
 
-        public async Task<bool> DeleteMessage(int id)
+        public async Task<bool> DeleteById(int id)
         {
             if (!runOnce.Begin())
                 return false;
@@ -479,10 +424,8 @@ namespace SecyrityMail.Messages
                 return false;
             });
         }
-        #endregion
 
-        #region Safe Delete*
-        public async Task<bool> UnDelete()
+        public async Task<bool> UnDeleted()
         {
             if (!runOnce.Begin())
                 return false;
@@ -498,7 +441,7 @@ namespace SecyrityMail.Messages
                         return true;
                     }
                 }
-                catch (Exception ex) { Global.Instance.Log.Add(nameof(UnDelete), ex); }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(UnDeleted), ex); }
                 finally { runOnce.End(); }
                 return false;
             });

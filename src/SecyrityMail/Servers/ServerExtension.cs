@@ -4,7 +4,6 @@
  * License MIT.
  */
 
-
 using System;
 using System.IO;
 using System.Linq;
@@ -56,10 +55,9 @@ namespace SecyrityMail.Servers
         public static async Task<string> CheckMessageId(this FileInfo f) =>
             await Task<bool>.Run(async () => {
                 try {
-                    MimeMessage msg = MimeMessage.Load(f.FullName);
+                    MimeMessage msg = await MimeMessage.LoadAsync(f.FullName).ConfigureAwait(false);
                     string s = msg.MessageId;
-                    if (string.IsNullOrWhiteSpace(s))
-                    {
+                    if (string.IsNullOrWhiteSpace(s)) {
                         string domain = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
                         s = $"{Guid.NewGuid().ToString().Replace("-", "")}@{domain}";
                         msg.MessageId = s;
