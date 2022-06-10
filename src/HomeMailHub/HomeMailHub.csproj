@@ -119,6 +119,7 @@
     <Compile Include="ConfigurationLoad.cs" />
     <Compile Include="ConfigurationSave.cs" />
     <Compile Include="Gui\GuiBusyBar.cs" />
+    <Compile Include="Gui\GuiFrameList.cs" />
     <Compile Include="Gui\GuiLinearLayot.cs" />
     <Compile Include="Gui\GuiMessageForwardsDialog.cs" />
     <Compile Include="Gui\GuiProgressBar.cs" />
@@ -141,8 +142,10 @@
     <Compile Include="Gui\GuiUtils.cs" />
     <Compile Include="Gui\GuiVpnAccountWindow.cs" />
     <Compile Include="Gui\IGuiLogWindow.cs" />
+    <Compile Include="Gui\ListSources\ListViewItem.cs" />
     <Compile Include="Gui\ListSources\MessagesDataTable.cs" />
     <Compile Include="Gui\ListSources\MessagesDataTableMultiselect.cs" />
+    <Compile Include="Gui\ListSources\WindowListManagerBase.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

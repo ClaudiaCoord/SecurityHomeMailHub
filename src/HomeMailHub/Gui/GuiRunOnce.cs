@@ -9,24 +9,30 @@ using System.Threading;
 
 namespace HomeMailHub.Gui
 {
-    internal class GuiRunOnce
+    public class GuiRunOnce
     {
         private long __lock = 0, __last = -1L;
         public bool IsLocked {
             get => Interlocked.Read(ref __lock) != 0L;
             private set => Interlocked.Exchange(ref __lock, value ? 1L : 0L);
         }
-        public int LastId {
+        public int Id {
             get => (int)Interlocked.Read(ref __last);
             private set => Interlocked.Exchange(ref __last, (long)value);
         }
+        public string Ids { get; private set; } = string.Empty;
 
         public bool IsRun() => IsLocked;
-        public bool IsRun(int id) => IsLocked || (LastId == id);
-        public bool IsRange(int count) => (LastId >= 0) && (LastId < count);
-        public bool IsNewId(int id) => (LastId != id) && (id >= 0);
+        public bool IsRun(int id) => IsLocked || (Id == id);
+        public bool IsRange(int count) => (Id >= 0) && (Id < count);
+        public bool IsNewId(int id) => (Id != id) && (id >= 0);
         public bool IsValidId(int id) => id >= 0;
-        public bool IsValidId() => LastId >= 0;
+        public bool IsValidId() => Id >= 0;
+        public bool IsValidIds() => !string.IsNullOrWhiteSpace(Ids);
+        public void ChangeId(int id) => Id = id;
+        public void ChangeId(string s) => Ids = (!Ids.Equals(s)) ? s : Ids;
+        public void ChangeId(int id, string s) { Id = id; ChangeId(s); }
+        public void ResetId() { Id = -1; Ids = string.Empty; }
 
         public bool Begin() {
             if (IsLocked) return false;
@@ -34,8 +40,16 @@ namespace HomeMailHub.Gui
             return true;
         }
         public bool Begin(int id) {
-            if (IsLocked || (LastId == id)) return false;
-            LastId = id;
+            if (IsLocked || (Id == id)) return false;
+            Id = id;
+            IsLocked = true;
+            return true;
+        }
+        public bool Begin(int id, string ids)
+        {
+            if (IsLocked || (Id == id)) return false;
+            Id = id;
+            Ids = ids;
             IsLocked = true;
             return true;
         }
@@ -61,7 +75,6 @@ namespace HomeMailHub.Gui
             IsLocked = false;
             action.Invoke(false);
         }
-        public void ResetId() => LastId = -1;
-        public override string ToString() => $"lock:{IsLocked}, id:{LastId}";
+        public override string ToString() => $"lock:{IsLocked}, id:{Id}, Ids:{Ids}";
     }
 }

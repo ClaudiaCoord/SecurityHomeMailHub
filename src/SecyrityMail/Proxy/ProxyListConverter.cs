@@ -149,7 +149,7 @@ namespace SecyrityMail.Proxy
         public async Task<bool> SpysMeConvert(ProxyType type = ProxyType.All) =>
             await Task.Run(() => {
                 try {
-                    using HttpClient client = new HttpClient();
+                    HttpClient client = Global.ClientHTTP.Value;
 
                     if ((type == ProxyType.Http) || (type == ProxyType.Https) || (type == ProxyType.All)) {
                         string s1 = client.GetStringAsync(SpysmeProxyUrl).ConfigureAwait(false).GetAwaiter().GetResult();

@@ -489,7 +489,7 @@ namespace HomeMailHub.Gui
 				return;
 
 			try {
-				string s = data[runOnce.LastId];
+				string s = data[runOnce.Id];
 				if (string.IsNullOrWhiteSpace(s))
 					s = "unknown";
 
@@ -497,7 +497,7 @@ namespace HomeMailHub.Gui
 					$"{RES.GUIPROXY_TXT12} '{s}'",
 					$"{RES.GUIPROXY_TXT13} '{s}' ?", RES.TAG_YES, RES.TAG_NO) == 0) {
 					try {
-                        DataRemove(runOnce.LastId);
+                        DataRemove(runOnce.Id);
 					} catch (Exception ex) { ex.StatusBarError(); }
 				}
 			}

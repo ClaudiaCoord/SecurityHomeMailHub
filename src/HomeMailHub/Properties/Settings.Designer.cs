@@ -667,5 +667,41 @@ namespace HomeMailHub.Properties {
                 this["IsGuiNetDriver"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsSpamCheckAkismet {
+            get {
+                return ((bool)(this["IsSpamCheckAkismet"]));
+            }
+            set {
+                this["IsSpamCheckAkismet"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SpamCheckAkismetKey {
+            get {
+                return ((string)(this["SpamCheckAkismetKey"]));
+            }
+            set {
+                this["SpamCheckAkismetKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsAkismetLearn {
+            get {
+                return ((bool)(this["IsAkismetLearn"]));
+            }
+            set {
+                this["IsAkismetLearn"] = value;
+            }
+        }
     }
 }

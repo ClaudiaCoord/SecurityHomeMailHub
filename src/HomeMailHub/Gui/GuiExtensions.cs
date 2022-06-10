@@ -78,7 +78,13 @@ namespace HomeMailHub.Gui
 				Height = Dim.Fill ()
 			};
 
-		private static string GetLocalPath () =>
+        public static void SetLinearLayout(this Button btn, GuiLinearData data, Pos x, Pos y) {
+            btn.X = x + data.X;
+            btn.Y = y + data.Y;
+            btn.AutoSize = data.AutoSize;
+        }
+
+        private static string GetLocalPath () =>
 			Path.Combine (Path.GetDirectoryName (Assembly.GetExecutingAssembly().Location), "mail");
 	}
 }

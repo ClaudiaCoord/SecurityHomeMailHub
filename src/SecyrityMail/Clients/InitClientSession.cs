@@ -11,7 +11,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using MailKit;
 using MailKit.Net.Proxy;
-using SecyrityMail.IPFilters;
+using SecyrityMail.MailFilters;
 using SecyrityMail.MailAccounts;
 using SecyrityMail.Proxy;
 using SecyrityMail.Proxy.SshProxy;

@@ -53,6 +53,7 @@ namespace HomeMailHub.Gui
         private Label forbidenEntryLabel { get; set; } = default;
         private Label spamCheckCountLabel { get; set; } = default;
         private Label spamClientIdleLabel { get; set; } = default;
+        private Label spamAkismetLabel { get; set; } = default;
         private Label idleClientsLabel { get; set; } = default;
         private Label checkMailClientsLabel { get; set; } = default;
         private Label helpClientsText { get; set; } = default;
@@ -77,6 +78,7 @@ namespace HomeMailHub.Gui
         private TextField entrySelectText { get; set; } = default;
         private TextField spamCheckCountText { get; set; } = default;
         private TextField spamClientIdleText { get; set; } = default;
+        private TextField spamAkismetText { get; set; } = default;
         private TextField idleClientsText { get; set; } = default;
         private TextField checkMailClientsText { get; set; } = default;
 
@@ -105,6 +107,8 @@ namespace HomeMailHub.Gui
         private CheckBox enableReceiveOnSend { get; set; } = default;
         private CheckBox enableIpDnsCheck { get; set; } = default;
         private CheckBox enableDnsbl { get; set; } = default;
+        private CheckBox enableAkismet { get; set; } = default;
+        private CheckBox enableAkismetLearn { get; set; } = default;
 
         private TabView   tabView { get; set; } = default;
         private ListView  listForbidenRouteView { get; set; } = default;
@@ -116,6 +120,7 @@ namespace HomeMailHub.Gui
         private FrameView frameSMTPLeft { get; set; } = default;
         private FrameView frameSMTPRight { get; set; } = default;
         private FrameView frameDNSBLRight { get; set; } = default;
+        private FrameView frameAkismetRight { get; set; } = default;
         private FrameView frameSecure { get; set; } = default;
         private FrameView frameSecureLeft { get; set; } = default;
         private FrameView frameSecureRight { get; set; } = default;
@@ -470,19 +475,11 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsSmtpLog
             });
-            frameSMTP.Add(buttonSmtpAction = new Button(Global.Instance.IsSmtpRun ? RES.BTN_STOP : RES.BTN_START)
-            {
-                X = 43,
-                Y = 7,
-                AutoSize = true,
-                ColorScheme = Global.Instance.IsSmtpRun ? GuiApp.ColorGreen : GuiApp.ColorRed
-            });
             enableSmtpLog.Toggled += EnableSmtpLog_Toggled;
             enableSmtpAllOutPgpSign.Toggled += EnableSmtpAllOutPgpSign_Toggled;
             enableSmtpAllOutPgpCrypt.Toggled += EnableSmtpAllOutPgpCrypt_Toggled;
             enableSmtpDeliveryLocal.Toggled += EnableSmtpDeliveryLocal_Toggled;
             enableSmtpCheckFrom.Toggled += EnableSmtpCheckFrom_Toggled;
-            buttonSmtpAction.Clicked += ButtonSmtpAction_Clicked;
             frameSMTP.Add(frameSMTPRight);
             #endregion
 
@@ -519,6 +516,58 @@ namespace HomeMailHub.Gui
             enableDnsbl.Toggled += (b) => Global.Instance.Config.IsDnsblIpCheck = b;
             dnsblSmtpBox.SelectedItemChanged += DnsblSmtpBox_SelectedItemChanged;
             frameSMTP.Add(frameDNSBLRight);
+            #endregion
+
+            #region Akismet filter Right
+            frameAkismetRight = new FrameView(RES.TAG_AKISMET)
+            {
+                X = 1,
+                Y = Pos.Bottom(frameSMTPLeft),
+                Width = 52,
+                Height = 8
+            };
+            frameAkismetRight.Add(spamAkismetLabel = new Label(RES.TAG_APIKEY)
+            {
+                X = 1,
+                Y = 1,
+                AutoSize = true
+            });
+            frameAkismetRight.Add(spamAkismetText = new TextField(Global.Instance.Config.SpamCheckAkismetKey)
+            {
+                X = labelOffset + 2,
+                Y = 1,
+                Width = 35,
+                Height = 1,
+                ColorScheme = GuiApp.ColorField
+            });
+            frameAkismetRight.Add(enableAkismet = new CheckBox(RES.CHKBOX_AKISMET_ENABLE)
+            {
+                X = 1,
+                Y = 3,
+                Width = 30,
+                Height = 1,
+                Checked = Global.Instance.Config.IsSpamCheckAkismet
+            });
+            frameAkismetRight.Add(enableAkismetLearn = new CheckBox(RES.CHKBOX_AKISMET_LEARN)
+            {
+                X = 1,
+                Y = 4,
+                Width = 30,
+                Height = 1,
+                Checked = Global.Instance.Config.IsAkismetLearn
+            });
+            enableAkismet.Toggled += (b) => Global.Instance.Config.IsSpamCheckAkismet = b;
+            enableAkismetLearn.Toggled += (b) => Global.Instance.Config.IsAkismetLearn = b;
+            spamAkismetText.TextChanged += (s) => Global.Instance.Config.SpamCheckAkismetKey = s.ToString();
+            frameSMTP.Add(frameAkismetRight);
+            frameSMTP.Add(buttonSmtpAction = new Button(Global.Instance.IsSmtpRun ? RES.BTN_STOP : RES.BTN_START)
+            {
+                X = Pos.Left(frameSMTPRight) - 9,
+                Y = Pos.Bottom(frameAkismetRight),
+                AutoSize = true,
+                ColorScheme = Global.Instance.IsSmtpRun ? GuiApp.ColorGreen : GuiApp.ColorRed
+            });
+            buttonSmtpAction.Clicked += ButtonSmtpAction_Clicked;
             #endregion
 
             #region SMTP Help
@@ -1298,9 +1347,9 @@ namespace HomeMailHub.Gui
         #endregion
 
         #region Load
-        public async void Load() => _ = await Load_().ConfigureAwait(false);
+        public async void Load() => _ = await Loading().ConfigureAwait(false);
 
-        private async Task<bool> Load_() =>
+        private async Task<bool> Loading() =>
             await Task.Run(async () => {
             try {
                 int idx = -1;

@@ -64,6 +64,10 @@ namespace HomeMailHub
         public List<string> ForbidenRouteList { get; set; } = default;
         public List<string> ForbidenEntryList { get; set; } = default;
 
+        public bool IsSpamCheckAkismet { get; set; }
+        public bool IsAkismetLearn { get; set; }
+        public string SpamCheckAkismetKey { get; set; }
+
         public bool IsProxyCheckRun { get; } /* no set */
         public bool IsVpnTunnelRunning { get; } /* no set */
         public bool IsVpnBegin { get; } /* no set */
@@ -124,6 +128,10 @@ namespace HomeMailHub
             PgpPassword = string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpPassword) ? string.Empty : Properties.Settings.Default.PgpPassword;
             PgpKeyHost = string.IsNullOrWhiteSpace(Properties.Settings.Default.PgpKeyHost) ? string.Empty : Properties.Settings.Default.PgpKeyHost;
 
+            SpamCheckAkismetKey = Properties.Settings.Default.SpamCheckAkismetKey;
+            IsSpamCheckAkismet = !string.IsNullOrWhiteSpace(SpamCheckAkismetKey) && Properties.Settings.Default.IsSpamCheckAkismet;
+            IsAkismetLearn = !string.IsNullOrWhiteSpace(SpamCheckAkismetKey) && Properties.Settings.Default.IsAkismetLearn;
+
             CheckMailPeriod = (!double.IsNaN(Properties.Settings.Default.CheckMailPeriod) &&
                 (Properties.Settings.Default.CheckMailPeriod > 0.0) && (Properties.Settings.Default.CheckMailPeriod < 721.0)) ?
                     TimeSpan.FromHours(Properties.Settings.Default.CheckMailPeriod) : Timeout.InfiniteTimeSpan;
@@ -166,6 +174,6 @@ namespace HomeMailHub
             }
         }
 
-        public void Copy(IConfiguration cfg) { }
+        public void Copy(IConfiguration cfg, bool isfull = true) { }
     }
 }

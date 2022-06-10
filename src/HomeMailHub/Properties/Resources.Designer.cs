@@ -259,6 +259,24 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Enable incoming mail check.
+        /// </summary>
+        internal static string CHKBOX_AKISMET_ENABLE {
+            get {
+                return ResourceManager.GetString("CHKBOX_AKISMET_ENABLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Enable self-learning mode.
+        /// </summary>
+        internal static string CHKBOX_AKISMET_LEARN {
+            get {
+                return ResourceManager.GetString("CHKBOX_AKISMET_LEARN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Files with *.eml extension.
         /// </summary>
         internal static string CHKBOX_ASSOCIATE_EXT_EML {
@@ -1163,7 +1181,14 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на .
+        ///   Ищет локализованную строку, похожую на 
+        ///SSH SOCKS proxy tunnel
+        ///Routing network traffic using an encrypted SOCKS4 or SOCKS5 proxy tunnel over a secure SSH connection.
+        ///
+        ///This way all your applications using SOCKS4-5 proxy server will connect to the SSH server and the server will forward all traffic to its actual destination. Your ISP and other third parties will not be able to monitor your traffic and block your access to Internet resources.
+        ///
+        ///Configuring third-party programs to use SSH proxy:
+        ///The application must support work through SOCKS4  [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string GuiSshAccountWindowHelp {
             get {
@@ -1190,7 +1215,17 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на .
+        ///   Ищет локализованную строку, похожую на 
+        ///Set up connections to WireGuard VPN tunnels that use state-of-the-art cryptography. It is recommended to import the WireGuard configuration files (.conf), or copy their contents using the &quot;Paste&quot; button. Learn more about WireGuard tunnels: https://www.wireguard.com/
+        ///
+        ///Public endpoint (Endpoint):
+        ///IP address and port of VPN access server.
+        ///
+        ///Private key (Private key):
+        ///The WireGuard private key for one host, provided by the VPN provider, is unique.
+        ///
+        ///Pre-shared key:
+        ///The pre-shared key of the WireGuard s [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string GuiVpnAccountWindowHelp {
             get {
@@ -1325,20 +1360,11 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Export selected messages in *._eml format.
+        ///   Ищет локализованную строку, похожую на Export selected messages in.
         /// </summary>
-        internal static string MENU_EXPORT_EML {
+        internal static string MENU_EXPORT_FORMAT {
             get {
-                return ResourceManager.GetString("MENU_EXPORT_EML", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Export selected messages in *._msg format.
-        /// </summary>
-        internal static string MENU_EXPORT_MSG {
-            get {
-                return ResourceManager.GetString("MENU_EXPORT_MSG", resourceCulture);
+                return ResourceManager.GetString("MENU_EXPORT_FORMAT", resourceCulture);
             }
         }
         
@@ -2009,6 +2035,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Akismet spam filter.
+        /// </summary>
+        internal static string TAG_AKISMET {
+            get {
+                return ResourceManager.GetString("TAG_AKISMET", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на all.
         /// </summary>
         internal static string TAG_ALL {
@@ -2023,6 +2058,15 @@ namespace HomeMailHub.Properties {
         internal static string TAG_ALLOWED {
             get {
                 return ResourceManager.GetString("TAG_ALLOWED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на API Key:.
+        /// </summary>
+        internal static string TAG_APIKEY {
+            get {
+                return ResourceManager.GetString("TAG_APIKEY", resourceCulture);
             }
         }
         
@@ -2306,6 +2350,24 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Data cannot be imported, invalid data format.
+        /// </summary>
+        internal static string TAG_IMPORTDATA_WARNING {
+            get {
+                return ResourceManager.GetString("TAG_IMPORTDATA_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Interface.
+        /// </summary>
+        internal static string TAG_INTERFACE {
+            get {
+                return ResourceManager.GetString("TAG_INTERFACE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Login:.
         /// </summary>
         internal static string TAG_LOGIN {
@@ -2437,6 +2499,15 @@ namespace HomeMailHub.Properties {
         internal static string TAG_PATH {
             get {
                 return ResourceManager.GetString("TAG_PATH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Peer.
+        /// </summary>
+        internal static string TAG_PEER {
+            get {
+                return ResourceManager.GetString("TAG_PEER", resourceCulture);
             }
         }
         

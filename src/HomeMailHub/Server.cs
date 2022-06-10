@@ -11,7 +11,6 @@ using HomeMailHub.Associate;
 using HomeMailHub.CmdLine;
 using HomeMailHub.Gui;
 using SecyrityMail;
-using SecyrityMail.Messages;
 using SecyrityMail.Utils;
 
 namespace HomeMailHub
@@ -31,6 +30,7 @@ namespace HomeMailHub
             TaskScheduler.UnobservedTaskException +=
                 new EventHandler<UnobservedTaskExceptionEventArgs>(TaskScheduler_UnobservedTaskException);
 
+            #region Associate extension handle
             if (args.Length > 0) {
                 try {
                     AssociateExtension ae = new();
@@ -55,6 +55,7 @@ namespace HomeMailHub
                     }
                 } catch { }
             }
+            #endregion
 
             options = CmdOption.Parse<Options>(args);
             if (!options.Check())

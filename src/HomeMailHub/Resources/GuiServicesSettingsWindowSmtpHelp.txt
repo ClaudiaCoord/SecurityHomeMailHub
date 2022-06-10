@@ -17,3 +17,6 @@ Detailed logging of SMTP mail sessions. Useful when there are problems with sett
 
 DNSBL filter:
 Enables IP address checking when receiving messages on an external DNSBL server, increases resistance to spam attacks. (anti-spam)
+
+Akismet SPAM message check:
+To use Akismet's integrated anti-spam protection, you will need an API key to enable the integration, the key can be obtained at https://akismet.com/signup/?plan=developer.

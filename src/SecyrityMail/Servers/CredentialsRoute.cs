@@ -9,9 +9,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using MimeKit;
 using SecyrityMail.Data;
+using SecyrityMail.MailFilters;
 using SecyrityMail.Messages;
 
 namespace SecyrityMail.Servers
@@ -132,6 +134,9 @@ namespace SecyrityMail.Servers
 
         #region Message delivery Store
         public async Task<MessageStoreReturn> MessageStore(MimeMessage mmsg, Action<MailEventId, string, object> act) =>
+            await MessageStore(mmsg, null, act).ConfigureAwait(false);
+
+        public async Task<MessageStoreReturn> MessageStore(MimeMessage mmsg, EndPoint ip, Action<MailEventId, string, object> act) =>
             await Task.Run(async () => {
                 try {
                     if (mmsg == default)
@@ -140,23 +145,39 @@ namespace SecyrityMail.Servers
                     _ = await CheckDelivery(mmsg).ConfigureAwait(false);
 
                     try {
+                        SpamType spamtype = SpamType.None;
+
                         foreach (var t in MailOutList) {
                             MailMessage msg = default;
                             mmsg.To.Clear();
                             mmsg.To.Add(new MailboxAddress(t.Item3.Item1, t.Item3.Item2));
 
-                            if (t.Item1 || (t.Item2 == Global.DirectoryPlace.Error))
-                                msg = await LocalDelivery(t.Item2, t.Item4, t.Item3.Item2, mmsg, t.Item5)
+                            if (t.Item1 || (t.Item2 == Global.DirectoryPlace.Error) || (t.Item2 == Global.DirectoryPlace.Spam)) {
+
+                                if (spamtype == SpamType.None)
+                                    spamtype = await Global.Instance.SpamFilters.Check(mmsg, ip).ConfigureAwait(false);
+
+                                Global.DirectoryPlace place = spamtype switch {
+                                    SpamType.Error => Global.DirectoryPlace.Error,
+                                    SpamType.Spam => Global.DirectoryPlace.Spam,
+                                    _ => t.Item2
+                                };
+                                msg = await LocalDelivery(place, t.Item4, t.Item3.Item2, mmsg, t.Item5)
                                             .ConfigureAwait(false);
-                            else
+                            } else
                                 msg = await OutDelivery(t.Item2, t.Item4, mmsg)
                                             .ConfigureAwait(false);
 
-                            if (msg != null)
-                                act.Invoke(
-                                    (t.Item2 == Global.DirectoryPlace.Error) ? MailEventId.DeliveryErrorMessage :
-                                        (t.Item1 ? MailEventId.DeliveryLocalMessage : MailEventId.DeliveryOutMessage),
-                                    $"{t.Item3.Item1} {t.Item3.Item2}", msg);
+                            if (msg != null) {
+                                MailEventId mid = t.Item2 switch {
+                                    Global.DirectoryPlace.Error => MailEventId.DeliveryErrorMessage,
+                                    Global.DirectoryPlace.Spam => MailEventId.DeliverySpamMessage,
+                                    Global.DirectoryPlace.Msg => MailEventId.DeliveryLocalMessage,
+                                    Global.DirectoryPlace.Out => MailEventId.DeliveryOutMessage,
+                                    _ => MailEventId.DeliverySendMessage
+                                };
+                                act.Invoke(mid, $"{t.Item3.Item1} {t.Item3.Item2}", msg);
+                            }
                         }
                         return MessageStoreReturn.MessageDelivered;
                     }

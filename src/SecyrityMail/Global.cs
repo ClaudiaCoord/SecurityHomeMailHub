@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
@@ -19,7 +20,7 @@ using SecyrityMail.Clients.IMAP;
 using SecyrityMail.Clients.POP3;
 using SecyrityMail.Clients.SMTP;
 using SecyrityMail.Data;
-using SecyrityMail.IPFilters;
+using SecyrityMail.MailFilters;
 using SecyrityMail.MailAccounts;
 using SecyrityMail.MailAddress;
 using SecyrityMail.Messages;
@@ -194,6 +195,10 @@ namespace SecyrityMail
         public SmtpClientStat SmtpClientStat { get; } = new();
         #endregion
 
+        #region Mail Spam checker
+        public SpamFilter SpamFilters { get; } = new();
+        #endregion
+
         #region Mail Accounts
         private UserAccounts accounts = new();
         public UserAccounts Accounts {
@@ -217,6 +222,7 @@ namespace SecyrityMail
                     _ = await SshProxy.Save(b).ConfigureAwait(false);
                     _ = await VpnAccounts.Save(b).ConfigureAwait(false);
                     _ = await EmailAddresses.Save(b).ConfigureAwait(false);
+                    _ = await ((Configuration)Config).Save().ConfigureAwait(false);
                 }
                 catch (Exception ex) { Log.Add(nameof(AccountsBackup), ex); }
                 return true;
@@ -231,6 +237,7 @@ namespace SecyrityMail
                     _ = await VpnAccounts.Load(b).ConfigureAwait(false);
                     _ = await VpnAccounts.RandomSelect().ConfigureAwait(false);
                     _ = await EmailAddresses.Load(b).ConfigureAwait(false);
+                    _ = await ((Configuration)Config).Load().ConfigureAwait(false);
                 }
                 catch (Exception ex) { Log.Add(nameof(AccountsRestore), ex); }
                 return true;
@@ -240,6 +247,10 @@ namespace SecyrityMail
 
         #region Addresses Book
         public AddressesBook EmailAddresses { get; } = new();
+        #endregion
+
+        #region HTTP client
+        public static Lazy<HttpClient> ClientHTTP { get; } = new (() => new HttpClient());
         #endregion
 
         #region Paths

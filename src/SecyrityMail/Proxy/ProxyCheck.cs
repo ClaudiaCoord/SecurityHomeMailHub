@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MailKit.Net.Proxy;
-using SecyrityMail.IPFilters;
+using SecyrityMail.MailFilters;
 
 namespace SecyrityMail.Proxy
 {

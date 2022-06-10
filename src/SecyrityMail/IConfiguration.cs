@@ -53,6 +53,8 @@ namespace SecyrityMail
         bool IsAccessIpCheckDns { get; set; }
         bool IsDnsblIpCheck { get; set; }
         bool IsCheckMailRun { get; }
+        bool IsSpamCheckAkismet { get; set; }
+        bool IsAkismetLearn { get; set; }
 
         string ServicesInterfaceName { get; set; }
         string ServicesInterfaceIp { get; set; }
@@ -62,6 +64,7 @@ namespace SecyrityMail
         string PgpPassword { get; set; }
         string PgpKeyHost { get; set; }
         string DnsblHost { get; set; }
+        string SpamCheckAkismetKey { get; set; }
 
         double Pop3ClientIdle { get; set; }
         int Pop3ServicePort { get; set; }
@@ -76,6 +79,6 @@ namespace SecyrityMail
 
         string CheckProxyEndPointUrl { get; set; }
 
-        void Copy(IConfiguration cfg);
+        void Copy(IConfiguration cfg, bool isfull = true);
     }
 }

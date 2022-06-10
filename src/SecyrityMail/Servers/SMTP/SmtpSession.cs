@@ -610,7 +610,7 @@ namespace SecyrityMail.Servers.SMTP
                             $"Receive SPAM message ?, from '{data.From}'/'{data.UserAccount?.Email}' - {IpEndPoint}");
                 }
                 try {
-                    MessageStoreReturn msr = await data.MessageRoute.MessageStore(mmsg, OnCallEvent)
+                    MessageStoreReturn msr = await data.MessageRoute.MessageStore(mmsg, stream.IpEndPoint, OnCallEvent)
                                                                     .ConfigureAwait(false);
                     switch (msr) {
                         case MessageStoreReturn.MessageNull:

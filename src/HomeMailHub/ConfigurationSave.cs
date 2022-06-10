@@ -65,6 +65,9 @@ namespace HomeMailHub
                 Properties.Settings.Default.VpnDnsDefault = cfg.VpnDnsDefault;
                 Properties.Settings.Default.ServicesInterfaceName = cfg.ServicesInterfaceName;
                 Properties.Settings.Default.ServicesInterfaceIp = cfg.ServicesInterfaceIp;
+                Properties.Settings.Default.SpamCheckAkismetKey = cfg.SpamCheckAkismetKey;
+                Properties.Settings.Default.IsSpamCheckAkismet = cfg.IsSpamCheckAkismet;
+                Properties.Settings.Default.IsAkismetLearn = cfg.IsAkismetLearn;
 
                 Properties.Settings.Default.ForbidenRouteList = new();
                 if ((cfg.ForbidenRouteList != default) && (cfg.ForbidenRouteList.Count > 0))

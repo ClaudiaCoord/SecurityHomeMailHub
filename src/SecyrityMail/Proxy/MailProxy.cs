@@ -6,7 +6,6 @@
 
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using SecyrityMail.Data;
-using SecyrityMail.IPFilters;
+using SecyrityMail.MailFilters;
 using SecyrityMail.Proxy.SshProxy;
 
 namespace SecyrityMail.Proxy

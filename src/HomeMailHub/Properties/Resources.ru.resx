@@ -183,6 +183,12 @@
   <data name="BTN_STOP" xml:space="preserve">
     <value>_Стоп</value>
   </data>
+  <data name="CHKBOX_AKISMET_ENABLE" xml:space="preserve">
+    <value>Включить проверку входящей почты</value>
+  </data>
+  <data name="CHKBOX_AKISMET_LEARN" xml:space="preserve">
+    <value>Включить режим самообучения</value>
+  </data>
   <data name="CHKBOX_ASSOCIATE_EXT_EML" xml:space="preserve">
     <value>Файлы с расширением *.eml</value>
   </data>
@@ -523,11 +529,8 @@
   <data name="MENU_DELETEMENU" xml:space="preserve">
     <value>_Удаление</value>
   </data>
-  <data name="MENU_EXPORT_EML" xml:space="preserve">
-    <value>Экспортировать выбранные сообщения в формате *._eml</value>
-  </data>
-  <data name="MENU_EXPORT_MSG" xml:space="preserve">
-    <value>Экспортировать выбранные сообщения в формате *._msg</value>
+  <data name="MENU_EXPORT_FORMAT" xml:space="preserve">
+    <value>_Экспортировать выбранные сообщения в формате</value>
   </data>
   <data name="MENU_FMT_DELETECLEAR" xml:space="preserve">
     <value>_Окочательно удалить сообщения: {0}</value>
@@ -751,11 +754,17 @@
   <data name="TAG_ACCOUNTS" xml:space="preserve">
     <value>Учетные записи</value>
   </data>
+  <data name="TAG_AKISMET" xml:space="preserve">
+    <value>Спам-фильтр Акисмет</value>
+  </data>
   <data name="TAG_ALL" xml:space="preserve">
     <value>все</value>
   </data>
   <data name="TAG_ALLOWED" xml:space="preserve">
     <value>Разрешён</value>
+  </data>
+  <data name="TAG_APIKEY" xml:space="preserve">
+    <value>Ключ API:</value>
   </data>
   <data name="TAG_ASSOCIATE" xml:space="preserve">
     <value>Ассоциация файлов по расширению</value>
@@ -850,6 +859,12 @@
   <data name="TAG_IDLE" xml:space="preserve">
     <value>Ждать:</value>
   </data>
+  <data name="TAG_IMPORTDATA_WARNING" xml:space="preserve">
+    <value>Данные не могут быть импортированы, неверный формат данных</value>
+  </data>
+  <data name="TAG_INTERFACE" xml:space="preserve">
+    <value>Интерфейс</value>
+  </data>
   <data name="TAG_LOGIN" xml:space="preserve">
     <value>Логин:</value>
   </data>
@@ -897,6 +912,9 @@
   </data>
   <data name="TAG_PATH" xml:space="preserve">
     <value>Путь:</value>
+  </data>
+  <data name="TAG_PEER" xml:space="preserve">
+    <value>Конфигурация узла</value>
   </data>
   <data name="TAG_PGPKEY_CRYPT" xml:space="preserve">
     <value>Ключ шифрования</value>

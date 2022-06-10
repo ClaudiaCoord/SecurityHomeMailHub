@@ -183,6 +183,12 @@
   <data name="BTN_STOP" xml:space="preserve">
     <value>_Stop</value>
   </data>
+  <data name="CHKBOX_AKISMET_ENABLE" xml:space="preserve">
+    <value>Enable incoming mail check</value>
+  </data>
+  <data name="CHKBOX_AKISMET_LEARN" xml:space="preserve">
+    <value>Enable self-learning mode</value>
+  </data>
   <data name="CHKBOX_ASSOCIATE_EXT_EML" xml:space="preserve">
     <value>Files with *.eml extension</value>
   </data>
@@ -523,11 +529,8 @@
   <data name="MENU_DELETEMENU" xml:space="preserve">
     <value>_Delete</value>
   </data>
-  <data name="MENU_EXPORT_EML" xml:space="preserve">
-    <value>Export selected messages in *._eml format</value>
-  </data>
-  <data name="MENU_EXPORT_MSG" xml:space="preserve">
-    <value>Export selected messages in *._msg format</value>
+  <data name="MENU_EXPORT_FORMAT" xml:space="preserve">
+    <value>Export selected messages in</value>
   </data>
   <data name="MENU_FMT_DELETECLEAR" xml:space="preserve">
     <value>_Permanently delete messages: {0}</value>
@@ -751,11 +754,17 @@
   <data name="TAG_ACCOUNTS" xml:space="preserve">
     <value>Accounts</value>
   </data>
+  <data name="TAG_AKISMET" xml:space="preserve">
+    <value>Akismet spam filter</value>
+  </data>
   <data name="TAG_ALL" xml:space="preserve">
     <value>all</value>
   </data>
   <data name="TAG_ALLOWED" xml:space="preserve">
     <value>Allowed</value>
+  </data>
+  <data name="TAG_APIKEY" xml:space="preserve">
+    <value>API Key:</value>
   </data>
   <data name="TAG_ASSOCIATE" xml:space="preserve">
     <value>Association of files by extension</value>
@@ -850,6 +859,12 @@
   <data name="TAG_IDLE" xml:space="preserve">
     <value>Idle:</value>
   </data>
+  <data name="TAG_IMPORTDATA_WARNING" xml:space="preserve">
+    <value>Data cannot be imported, invalid data format</value>
+  </data>
+  <data name="TAG_INTERFACE" xml:space="preserve">
+    <value>Interface</value>
+  </data>
   <data name="TAG_LOGIN" xml:space="preserve">
     <value>Login:</value>
   </data>
@@ -894,6 +909,9 @@
   </data>
   <data name="TAG_PATH" xml:space="preserve">
     <value>Path:</value>
+  </data>
+  <data name="TAG_PEER" xml:space="preserve">
+    <value>Peer</value>
   </data>
   <data name="TAG_PGPKEY_CRYPT" xml:space="preserve">
     <value>Crypt key</value>

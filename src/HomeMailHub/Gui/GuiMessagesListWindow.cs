@@ -442,12 +442,13 @@ namespace HomeMailHub.Gui
                     async () => await CombineMessages().ConfigureAwait(false),
                     () => MessagesCombineEnable()),
                 null,
-                new MenuItem(RES.MENU_EXPORT_EML, "", () => ExportDialog(ExportType.Eml), () => MessagesOptionsEnable()),
-                new MenuItem(RES.MENU_EXPORT_MSG, "", () => ExportDialog(ExportType.Msg), () => MessagesOptionsEnable()),
-                null,
                 new MenuItem(RES.MENU_SUB_OPEN, "", () => buttonOpen.OnClicked(), () => MessagesOptionsOneEnable()),
                 new MenuItem(RES.MENU_SUB_REPLAY, "", () => buttonReply.OnClicked(), () => MessagesOptionsOneEnable()),
                 new MenuItem(RES.MENU_SUB_DELETE, "", () => buttonDelete.OnClicked(), () => MessagesOptionsEnable()),
+                new MenuBarItem (RES.MENU_EXPORT_FORMAT, new MenuItem [] {
+                    new MenuItem("*.eml", "", () => ExportDialog(ExportType.Eml), () => MessagesOptionsEnable()),
+                    new MenuItem("*.msg", "", () => ExportDialog(ExportType.Msg), () => MessagesOptionsEnable())
+                }),
                 new MenuBarItem (RES.MENU_SUB_READEDFLAG, new MenuItem [] {
                     new MenuItem (
                         RES.MENU_SUB_READEDMARK, "", async () => await SetReadMessages(true).ConfigureAwait(false),
@@ -652,8 +653,8 @@ namespace HomeMailHub.Gui
         private async void ExportDialog(ExportType t) {
             try {
                 GuiSaveDialog d = ((t == ExportType.Msg) ?
-                                    RES.MENU_EXPORT_EML.ClearText() :
-                                    RES.MENU_EXPORT_MSG.ClearText()).GuiSaveDialogs(
+                                    $"{RES.MENU_EXPORT_FORMAT} *.msg".ClearText() :
+                                    $"{RES.MENU_EXPORT_FORMAT} *.eml".ClearText()).GuiSaveDialogs(
                                         Global.GetRootDirectory(Global.DirectoryPlace.Export));
                 Application.Run(d);
                 if (!d.Canceled) {
@@ -894,7 +895,7 @@ namespace HomeMailHub.Gui
                 return SelectorType.MultiSelect;
             }
             else if (b && runOnce.IsValidId()) {
-                dataTable.Multiselected.Add(runOnce.LastId);
+                dataTable.Multiselected.Add(runOnce.Id);
                 return SelectorType.SingleSelect;
             }
             return SelectorType.None;

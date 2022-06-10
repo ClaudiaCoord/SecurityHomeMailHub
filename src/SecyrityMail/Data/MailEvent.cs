@@ -19,6 +19,7 @@ namespace SecyrityMail.Data
         DeliverySendMessage,
         DeliveryLocalMessage,
         DeliveryErrorMessage,
+        DeliverySpamMessage,
         DeleteMessage,
         DateExpired,
         BeginInit,

@@ -23,7 +23,7 @@ namespace SecyrityMail.Vpn
     public class VpnInterface
     {
         [XmlIgnore]
-        const string DnsDefault = "1.1.1.1, 1.0.0.1, 8.8.8.8, 8.8.4.4";
+        public const string DnsDefault = "1.1.1.1, 1.0.0.1, 8.8.8.8, 8.8.4.4";
 
         [XmlElement("PrivateKey")]
         public string PrivateKey { get; set; } = string.Empty;
@@ -46,7 +46,8 @@ namespace SecyrityMail.Vpn
     {
         [XmlIgnore]
         const string AllowedIPsAll = "0.0.0.0/0, ::/0";
-        const string AllowedIPsDefault = "0.0.0.0/0";
+        [XmlIgnore]
+        public const string AllowedIPsDefault = "0.0.0.0/0";
 
         [XmlElement("PublicKey")]
         public string PublicKey { get; set; } = string.Empty;

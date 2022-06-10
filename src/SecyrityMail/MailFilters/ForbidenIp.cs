@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using SecyrityMail.Data;
 using SecyrityMail.Utils;
 
-namespace SecyrityMail.IPFilters
+namespace SecyrityMail.MailFilters
 {
     public class ForbidenIp : IAutoInit
     {

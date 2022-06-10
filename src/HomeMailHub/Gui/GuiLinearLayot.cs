@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace HomeMailHub.Gui
 {
-    internal class GuiLinearData
+    public class GuiLinearData
     {
         public int X = 0, Y = 0, Width = 0, Height = 1;
         public bool AutoSize = false;

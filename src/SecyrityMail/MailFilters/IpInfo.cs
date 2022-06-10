@@ -17,7 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MaxMind.Db;
 
-namespace SecyrityMail.IPFilters
+namespace SecyrityMail.MailFilters
 {
     public static class IpAddressInfo
     {

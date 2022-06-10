@@ -9,7 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace SecyrityMail.IPFilters
+namespace SecyrityMail.MailFilters
 {
     public class DnsblFilter
     {

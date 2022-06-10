@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using HomeMailHub.Gui.Dialogs;
+using HomeMailHub.Gui.ListSources;
 using NStack;
 using SecyrityMail;
 using SecyrityMail.Proxy;
@@ -18,29 +18,18 @@ using RES = HomeMailHub.Properties.Resources;
 
 namespace HomeMailHub.Gui
 {
-    public class GuiSshAccountWindow : Window, IGuiWindow<GuiSshAccountWindow> {
+    public class GuiSshAccountWindow : WindowListManagerBase<SshAccount>, IGuiWindow<GuiSshAccountWindow>
+    {
 		private const int labelOffset = 12;
-		private static readonly string tag = "SSH";
-		private static readonly string [] extension = new string [] { ".conf", ".cnf", ".xml" };
 		private static readonly ustring[] proxyopt = new ustring[] { "None", "SshSock4", "SshSock5" };
 		private static ustring GetInTitle(ProxyType type = ProxyType.None) =>
 			(type == ProxyType.SshSock4) ? proxyopt[1] :
 				((type == ProxyType.SshSock5) ? proxyopt[2] : proxyopt[0]);
 
-		private Toplevel GuiToplevel { get; set; } = default;
 		private MenuBar GuiMenu { get; set; } = default;
 		private MenuBarItem urlmenu { get; set; } = default;
-		private ListView listView { get; set; } = default;
 		private FrameView frameForm { get; set; } = default;
-		private FrameView frameList { get; set; } = default;
         private FrameView frameHelp { get; set; } = default;
-
-        private Button buttonPaste { get; set; } = default;
-		private Button buttonSave { get; set; } = default;
-		private Button buttonClear { get; set; } = default;
-		private Button buttonDelete { get; set; } = default;
-		private Button buttonImport { get; set; } = default;
-		private Button buttonExport { get; set; } = default;
 
 		private Label nameLabel { get; set; } = default;
 		private Label loginLabel { get; set; } = default;
@@ -65,49 +54,42 @@ namespace HomeMailHub.Gui
 
         private bool isNotExpire { get; set; } = true;
 		private DateTime expireStore { get; set; } = DateTime.MinValue;
-		private string selectedName { get; set; } = string.Empty;
-		private SshAccount account { get; set; } = default;
-		private GuiRunOnce runOnce = new();
-		private List<string> data = new();
         private GuiLinearLayot linearLayot { get; } = new();
 
-        public Toplevel GetTop => GuiToplevel;
-
-        private bool IsEmptyForm =>
-            string.IsNullOrWhiteSpace(loginText.Text.ToString()) ||
-            string.IsNullOrWhiteSpace(passText.Text.ToString()) ||
-            string.IsNullOrWhiteSpace(hostText.Text.ToString()) ||
-            string.IsNullOrWhiteSpace(nameText.Text.ToString());
-
-        public GuiSshAccountWindow () : base (RES.GUISSH_TITLE1, 0)
+        public GuiSshAccountWindow () : base(RES.GUISSH_TITLE1, "SSH", new string[] { ".conf", ".cnf", ".xml" })
 		{
-			X = 0;
-			Y = 1;
-			Width = Dim.Fill ();
-			Height = Dim.Fill () - 1;
-			GuiToplevel = GuiExtensions.CreteTop();
-
             linearLayot.Add("en", new List<GuiLinearData> {
-                new GuiLinearData(12, 16, true),
-                new GuiLinearData(21, 16, true),
-                new GuiLinearData(31, 16, true),
-                new GuiLinearData(42, 16, true),
-                new GuiLinearData(53, 16, true),
-                new GuiLinearData(33, 7, true)
+                new GuiLinearData(53, 7, true),
+
+                new GuiLinearData(2, 1, true),
+                new GuiLinearData(12, 1, true),
+                new GuiLinearData(27, 1, true),
+                new GuiLinearData(41, 1, true),
+
+                new GuiLinearData(2,  3, true),
+                new GuiLinearData(11, 3, true),
+                new GuiLinearData(21, 3, true),
+                new GuiLinearData(32, 3, true),
+                new GuiLinearData(43, 3, true),
             });
             linearLayot.Add("ru", new List<GuiLinearData> {
-                new GuiLinearData(12, 16, true),
-                new GuiLinearData(26, 16, true),
-                new GuiLinearData(39, 16, true),
-                new GuiLinearData(51, 16, true),
-                new GuiLinearData(62, 16, true),
-                new GuiLinearData(30, 7, true)
+                new GuiLinearData(50, 7, true),
+
+                new GuiLinearData(2, 1, true),
+                new GuiLinearData(12, 1, true),
+                new GuiLinearData(27, 1, true),
+                new GuiLinearData(41, 1, true),
+
+                new GuiLinearData(2,  3, true),
+                new GuiLinearData(16, 3, true),
+                new GuiLinearData(29, 3, true),
+                new GuiLinearData(41, 3, true),
+                new GuiLinearData(52, 3, true)
             });
         }
 
         public new void Dispose() {
 
-			account = default;
 			this.GetType().IDisposableObject(this);
 			base.Dispose();
 		}
@@ -115,36 +97,24 @@ namespace HomeMailHub.Gui
 		#region Init
 		public GuiSshAccountWindow Init(string __)
 		{
+			int idx = 0;
             List<GuiLinearData> layout = linearLayot.GetDefault();
+            Pos posright = Pos.Right(base.frameList),
+                posbottom;
 
             #region frameList
-            frameList = new FrameView (new Rect (0, 0, 35, 25), RES.TAG_ACCOUNTS) {
-				X = 1,
-				Y = 1
-			};
-			listView = new ListView (data) {
-				X = 1,
-				Y = 1,
-				Width = Dim.Fill () - 4,
-				Height = Dim.Fill () - 4,
-				AllowsMarking = true,
-				AllowsMultipleSelection = false
-			};
-			listView.OpenSelectedItem += ListView_OpenSelectedItem;
-			listView.SelectedItemChanged += ListView_SelectedItemChanged;
-
-			frameList.Add (listView);
-			Add (frameList);
+            /* see WindowListManagerBase<T1> */
             #endregion
 
             #region frameForm
             frameForm = new FrameView($"{RES.TAG_ACCOUNT} {GetInTitle()}")
             {
-                X = 37,
+                X = Pos.Right(frameList) + 1,
                 Y = 1,
-				Width = 81,
-				Height = Dim.Fill()
+				Width = 80,
+				Height = 15
             };
+			posbottom = Pos.Bottom(frameForm);
             frameForm.Add (loginLabel = new Label (RES.TAG_LOGIN) {
 				X = 1,
 				Y = 1,
@@ -153,7 +123,7 @@ namespace HomeMailHub.Gui
 			frameForm.Add (loginText = new TextField (string.Empty) {
 				X = labelOffset,
 				Y = 1,
-				Width = 30,
+				Width = 50,
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
 			});
@@ -165,7 +135,7 @@ namespace HomeMailHub.Gui
 			frameForm.Add (passText = new TextField (string.Empty) {
 				X = labelOffset,
 				Y = 3,
-				Width = 30,
+				Width = 50,
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
 			});
@@ -177,7 +147,7 @@ namespace HomeMailHub.Gui
 			frameForm.Add (hostText = new TextField (string.Empty) {
 				X = labelOffset,
 				Y = 5,
-				Width = 30,
+				Width = 50,
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
 			});
@@ -193,12 +163,6 @@ namespace HomeMailHub.Gui
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
 			});
-			frameForm.Add(buttonPaste = new Button(10, 19, RES.BTN_PASTE)
-			{
-                X = layout[5].X,
-                Y = layout[5].Y,
-                AutoSize = layout[5].AutoSize,
-			});
 			frameForm.Add(proxyLabel = new Label(RES.TAG_TYPE)
 			{
 				X = 1,
@@ -209,7 +173,7 @@ namespace HomeMailHub.Gui
 			{
 				X = labelOffset,
 				Y = 9,
-				Width = 30,
+				Width = 50,
 				Height = 4,
 				ReadOnly = true,
 				ColorScheme = GuiApp.ColorField
@@ -225,76 +189,62 @@ namespace HomeMailHub.Gui
 			{
 				X = labelOffset,
 				Y = 11,
-				Width = 30,
+				Width = 50,
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
 			});
-            nameText.TextChanged += NameText_TextChanged;
-            frameForm.Add (expireLabel = new Label (RES.TAG_EXPIRE) {
-				X = 1,
-				Y = 14,
-				AutoSize = true
-			});
-			frameForm.Add (expireDate = new DateField (3, 12, DateTime.Now) {
-				X = labelOffset,
-				Y = 14,
-				Width = 12,
-				Height = 1,
-				Enabled = !isNotExpire,
-				ColorScheme = GuiApp.ColorField
-			});
-			frameForm.Add (expireBox = new CheckBox (1, 0, RES.CHKBOX_EXPIRE) {
-				X = labelOffset + 15,
-				Y = 14,
-				Width = 10,
-				Height = 1,
-				Checked = isNotExpire
-			});
-			frameForm.Add (enableBox = new CheckBox (1, 0, RES.TAG_ENABLE) {
-				X = labelOffset + 29,
-				Y = 14,
-				Width = 10,
-				Height = 1,
-				Checked = true
-			});
-			expireBox.Toggled += IsExpireBox_Toggled;
-			enableBox.Toggled += EnableBox_Toggled;
 
-			frameForm.Add (buttonSave = new Button (10, 19, RES.BTN_SAVE) {
-                X = layout[0].X,
-                Y = layout[0].Y,
-                AutoSize = layout[0].AutoSize,
-				Enabled = false,
-				TabIndex = 13
-			});
-			frameForm.Add (buttonClear = new Button (10, 19, RES.BTN_CLEAR) {
-                X = layout[1].X,
-                Y = layout[1].Y,
-                AutoSize = layout[1].AutoSize,
-                Enabled = false,
-				TabIndex = 14
-			});
-			frameForm.Add (buttonDelete = new Button (10, 19, RES.BTN_DELETE) {
-                X = layout[2].X,
-                Y = layout[2].Y,
-                AutoSize = layout[2].AutoSize,
-                Enabled = false,
-				TabIndex = 15
-			});
-			frameForm.Add (buttonImport = new Button (10, 19, RES.BTN_IMPORT) {
-                X = layout[3].X,
-                Y = layout[3].Y,
-                AutoSize = layout[3].AutoSize,
-                TabIndex = 16
-			});
-			frameForm.Add (buttonExport = new Button (10, 19, RES.BTN_EXPORT) {
-                X = layout[4].X,
-                Y = layout[4].Y,
-                AutoSize = layout[4].AutoSize,
-                Enabled = false,
-				TabIndex = 17
-			});
+            nameText.KeyUp += (_) => base.ButtonsEnable(false, !IsEmptyForm);
+            loginText.KeyUp += (_) => base.ButtonsEnable(false, !IsEmptyForm);
+            passText.KeyUp += (_) => base.ButtonsEnable(false, !IsEmptyForm);
+
+            buttonPaste.SetLinearLayout(layout[idx++], 0, 0);
+            frameForm.Add(buttonPaste);
             Add(frameForm);
+            #endregion
+
+            #region Main window
+            Add(expireLabel = new Label(RES.TAG_EXPIRE)
+            {
+                X = posright + layout[idx].X,
+                Y = posbottom + layout[idx].Y,
+                AutoSize = layout[idx++].AutoSize
+            });
+            Add(expireDate = new DateField(DateTime.Now)
+            {
+                X = posright + layout[idx].X,
+                Y = posbottom + layout[idx++].Y,
+                Width = 12,
+                Height = 1,
+                Enabled = !isNotExpire,
+                ColorScheme = GuiApp.ColorField
+            });
+            Add(expireBox = new CheckBox(RES.CHKBOX_EXPIRE)
+            {
+                X = posright + layout[idx].X,
+                Y = posbottom + layout[idx++].Y,
+                Width = 10,
+                Height = 1,
+                Checked = isNotExpire
+            });
+            Add(enableBox = new CheckBox(RES.TAG_ENABLE)
+            {
+                X = posright + layout[idx].X,
+                Y = posbottom + layout[idx++].Y,
+                Width = 10,
+                Height = 1,
+                Checked = true
+            });
+            expireBox.Toggled += IsExpireBox_Toggled;
+            enableBox.Toggled += EnableBox_Toggled;
+
+            buttonSave.SetLinearLayout(layout[idx++],   posright, posbottom);
+            buttonClear.SetLinearLayout(layout[idx++],  posright, posbottom);
+            buttonDelete.SetLinearLayout(layout[idx++], posright, posbottom);
+            buttonImport.SetLinearLayout(layout[idx++], posright, posbottom);
+            buttonExport.SetLinearLayout(layout[idx++], posright, posbottom);
+
+            Add(buttonSave, buttonClear, buttonDelete, buttonImport, buttonExport);
             #endregion
 
             #region frameHelp
@@ -316,60 +266,12 @@ namespace HomeMailHub.Gui
             Add(frameHelp);
             #endregion
 
-            buttonSave.Clicked += () => SaveItem();
-			buttonClear.Clicked += () => Clean();
-			buttonDelete.Clicked += () => Delete();
-			buttonPaste.Clicked += async () => await FromClipBoard().ConfigureAwait(false);
-			buttonImport.Clicked += async () => {
-				GuiOpenDialog d = string.Format(RES.GUIACCOUNT_FMT6, RES.TAG_OPEN_IMPORT, tag).GuiOpenDialogs(true, extension);
-				Application.Run(d);
-				if (!d.Canceled) {
-					try {
-						string[] ss = d.GuiReturnDialog();
-						if (ss.Length > 0) {
-							foreach (string s in ss) {
-								try {
-									SshAccount a = new();
-									bool b = await a.Load(s).ConfigureAwait(false);
-									AddItem(a, b);
-								} catch (Exception ex) { ex.StatusBarError(); }
-							}
-							_ = await Global.Instance.SshProxy.Save().ConfigureAwait(false);
-                            _ = await LoadSshAccounts_().ConfigureAwait(false);
-                        }
-					} catch (Exception ex) { ex.StatusBarError(); }
-				}
-			};
-			buttonExport.Clicked += async () => {
-				try {
-					if (account == default) {
-						if (string.IsNullOrEmpty(selectedName))
-							return;
-
-						account = (from i in Global.Instance.SshProxy.Items
-								   where i.Name.Equals(selectedName)
-								   select i).FirstOrDefault();
-						if (account == default)
-							return;
-					}
-					GuiSaveDialog d = string.Format(RES.GUIACCOUNT_FMT6, RES.TAG_SAVE_EXPORT, selectedName).GuiSaveDialogs(extension);
-					Application.Run(d);
-					if (!d.Canceled) {
-						try {
-							string[] ss = d.GuiReturnDialog();
-							if (ss.Length > 0)
-								_ = await account.Save(ss[0]).ConfigureAwait(false);
-						} catch (Exception ex) { ex.StatusBarError(); }
-					}
-				} catch (Exception ex) { ex.StatusBarError(); }
-			};
-
 			urlmenu = new MenuBarItem("_Url", new MenuItem[0]);
 			GuiMenu = new MenuBar (new MenuBarItem [] {
 				new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
 					new MenuItem (RES.MENU_RELOAD, "", async () => {
 						_ = await Global.Instance.SshProxy.Load().ConfigureAwait(false);
-						_ = await Load_().ConfigureAwait(false);
+						_ = await Loading().ConfigureAwait(false);
 					}, null, null, Key.AltMask | Key.R),
 					null,
 					new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.CursorLeft)
@@ -417,176 +319,148 @@ namespace HomeMailHub.Gui
         #endregion
 
         #region Load
-        private async Task<bool> FromClipBoard() =>
-			await Task.Run(() => {
-				try {
-
-					if (Clipboard.Contents.IsEmpty)
-						return false;
-
-					Clean();
-					SshAccountConverter converter = new(Clipboard.Contents.ToString());
-					if (converter.Convert()) {
-
-						SshAccount a = converter.Account;
-						Application.MainLoop.Invoke(() => {
-							nameText.Text = a.Name;
-							loginText.Text = a.Login;
-							passText.Text = a.Pass;
-							hostText.Text = a.Host;
-							portText.Text = a.Port.ToString();
-							proxyType.SelectedItem = ProxyTypeSelect(a.Type);
-							frameForm.Title = string.IsNullOrWhiteSpace(a.Name) ?
-								$"{RES.TAG_ACCOUNT} {a.Host}" : $"{RES.TAG_ACCOUNT} {a.Login} - {a.Name}";
-
-							expireLabel.ColorScheme = Colors.Base;
-							enableBox.Checked = true;
-							EnableBox_Toggled(a.Enable);
-							expireStore = a.Expired;
-							expireDate.Date = expireStore;
-							expireBox.Checked = a.Expired == DateTime.MinValue;
-							expireDate.Enabled = a.Enable && !expireBox.Checked;
-							account = a;
-							selectedName = a.Name;
-							buttonSave.Enabled = buttonClear.Enabled = buttonDelete.Enabled = true;
-						});
-                        return true;
-					}
-				} catch (Exception ex) { ex.StatusBarError(); }
-				return false;
-			});
-
-		public async void Load() => _ = await Load_().ConfigureAwait(false);
-		private async Task<bool> Load_() =>
+        public async void Load() => _ = await Loading().ConfigureAwait(false);
+		private async Task<bool> Loading() =>
 			await Task.Run(async () => {
-                if (!runOnce.Begin())
+                if (!base.runOnce.Begin())
                     return false;
                 try {
-                    _ = await LoadSshAccounts_().ConfigureAwait(false);
+                    _ = await base.LoadAccounts(Global.Instance.SshProxy.Items).ConfigureAwait(false);
                     try {
                         MenuItem[] mitems = await nameof(GuiSshAccountWindow).LoadMenuUrls().ConfigureAwait(false);
                         Application.MainLoop.Invoke(() => urlmenu.Children = mitems);
-                    } catch { }
-                    Application.MainLoop.Invoke(() => {
-                        helpText.Text = RES.GuiSshAccountWindowHelp;
-                    });
-                }
-                finally { runOnce.End(); }
-                return true;
-			});
-
-        private async Task<bool> LoadSshAccounts_() =>
-            await Task.Run(async () => {
-                try {
-                    DataClear();
-                    foreach (SshAccount a in Global.Instance.SshProxy.Items)
-                        data.Add(a.Name);
-                    await listView.SetSourceAsync(data).ConfigureAwait(false);
-					Application.MainLoop.Invoke(() => {
-						buttonSave.Enabled = true;
-                        frameList.Title = selectedName.GetListTitle(data.Count);
-					});
-                    Clean();
+                    } catch (Exception ex) { ex.StatusBarError(); }
+                    Application.MainLoop.Invoke(() => helpText.Text = RES.GuiSshAccountWindowHelp);
                 }
                 catch (Exception ex) { ex.StatusBarError(); }
+                finally { base.runOnce.End(); }
                 return true;
-            });
+			});
         #endregion
 
-        #region Delete
-        private async void Delete() {
+        #region Virtual override
+        protected override bool IsEmptyForm =>
+            string.IsNullOrWhiteSpace(loginText.Text.ToString()) ||
+            string.IsNullOrWhiteSpace(passText.Text.ToString()) ||
+            string.IsNullOrWhiteSpace(hostText.Text.ToString()) ||
+            string.IsNullOrWhiteSpace(nameText.Text.ToString());
 
-            if (!runOnce.IsRange(data.Count) || !runOnce.Begin())
-                return;
-
-            try {
-                string s = data[runOnce.LastId];
-                if (string.IsNullOrWhiteSpace(s))
-                    return;
-
-                if (MessageBox.Query(50, 7,
-                    string.Format(RES.GUIACCOUNT_FMT5, RES.BTN_DELETE.ClearText(), s),
-                    string.Format(RES.GUIACCOUNT_FMT3, RES.BTN_DELETE.ClearText(), s), RES.TAG_YES, RES.TAG_NO) == 0) {
-                    try {
-                        SshAccount a = (from i in Global.Instance.SshProxy.Items
-                                        where i.Name.Equals(s)
-                                        select i).FirstOrDefault();
-                        if (a == default)
-                            return;
-
-                        DataRemove(a.Name);
-                        Global.Instance.SshProxy.Items.Remove(a);
-                        _ = await Global.Instance.SshProxy.Save().ConfigureAwait(false);
-                        _ = await LoadSshAccounts_().ConfigureAwait(false);
-                        runOnce.ResetId();
-                    } catch (Exception ex) { ex.StatusBarError(); }
-                }
-            }
-            finally { runOnce.End(); }
+        protected override void VirtualEnableToggled(bool b) {
+            loginText.Enabled =
+            passText.Enabled =
+            hostText.Enabled =
+            portText.Enabled =
+            nameText.Enabled =
+            expireDate.Enabled = b;
         }
-        #endregion
 
-        private void DataClear() {
-			data.Clear();
-            Clean();
+        protected override void VirtualClean() {
+            nameText.Text =
+            passText.Text =
+            portText.Text =
+            hostText.Text =
+            loginText.Text = string.Empty;
+            proxyType.SelectedItem = 0;
+            enableBox.Checked = false;
+
+            isNotExpire = false;
+            expireDate.Date = DateTime.Now.AddDays(7.0);
+            expireDate.Enabled = !isNotExpire;
+            expireBox.Checked = isNotExpire;
+            expireLabel.ColorScheme = Colors.Base;
+            frameForm.Title = RES.TAG_ACCOUNT;
+        }
+
+        protected override async Task<bool> VirtualSaveAll() =>
+            await Global.Instance.SshProxy.Save().ConfigureAwait(false);
+
+        protected override void VirtualAddItem(SshAccount acc) =>
+            Global.Instance.SshProxy.Add(acc);
+
+        protected override SshAccount VirtualGetItem(string s) =>
+            (from i in Global.Instance.SshProxy.Items
+             where i.Name.Equals(s)
+             select i).FirstOrDefault();
+
+        protected override SshAccount VirtualNewItem() {
+            string host = loginText.Text.ToString();
+            if (string.IsNullOrEmpty(host))
+                return default;
+            int idx = host.IndexOf(':');
+            if (idx > 0)
+                host = host.Substring(0, idx);
+            SshAccount a = new();
+            a.Name = host;
+            return a;
+        }
+
+        protected override void VirtualBuildItem(SshAccount acc) =>
             Application.MainLoop.Invoke(() => {
-                frameList.Title = selectedName.GetListTitle(0);
-                listView.SetSource(data);
-                listView.SetNeedsDisplay();
+                acc.Enable = enableBox.Checked;
+                acc.Expired = expireDate.Date;
+
+                acc.Login = loginText.Text.ToString();
+                acc.Pass = passText.Text.ToString();
+                acc.Host = hostText.Text.ToString();
+                acc.Name = nameText.Text.ToString();
+                acc.Type = ProxyTypeSelect(proxyType.SelectedItem);
+                if (int.TryParse(portText.Text.ToString(), out int port))
+                    acc.Port = port;
             });
+
+        protected override void VirtualSelectItem(SshAccount acc) {
+
+            runOnce.ChangeId(acc.Name);
+
+            Application.MainLoop.Invoke(() => {
+
+                nameText.Text = acc.Name;
+                loginText.Text = acc.Login;
+                passText.Text = acc.Pass;
+                hostText.Text = acc.Host;
+                portText.Text = acc.Port.ToString();
+                proxyType.SelectedItem = ProxyTypeSelect(acc.Type);
+                frameForm.Title = string.IsNullOrWhiteSpace(acc.Name) ?
+                    $"{RES.TAG_ACCOUNT} {GetInTitle(acc.Type)}" : $"{RES.TAG_ACCOUNT} {GetInTitle(acc.Type)} - {acc.Name}";
+
+                if (acc.IsExpired)
+                    expireLabel.ColorScheme = GuiApp.ColorWarning;
+                else
+                    expireLabel.ColorScheme = Colors.Base;
+
+                enableBox.Checked = acc.Enable;
+                EnableBox_Toggled(acc.Enable);
+                expireStore = acc.Expired;
+                expireDate.Date = expireStore;
+                expireBox.Checked = acc.Expired == DateTime.MinValue;
+                expireDate.Enabled = acc.Enable && !expireBox.Checked;
+                ButtonsEnable(true, acc.Enable);
+            });
+        }
+
+        protected override void VirtualDeleteItem(SshAccount acc) =>
+            Global.Instance.SshProxy.Items.Remove(acc);
+
+        protected override async Task<SshAccount> VirtualImportClipBoard(string s) =>
+            await Task.Run(() => {
+                SshAccountConverter converter = new(s);
+                return converter.Convert() ? converter.Account : null;
+            });
+
+        protected override async Task<SshAccount> VirtualImportFile(string s) {
+            SshAccount a = new();
+            bool b = await a.Load(s).ConfigureAwait(false);
+            return b ? a : null;
+        }
+
+		protected override async Task<string> VirtualExport(SshAccount acc, string s) {
+			bool b = await acc.Save(s).ConfigureAwait(false);
+			if (!b) return "Export error..";
+			return string.Empty;
 		}
-        private void DataRemove(string s) {
-            data.Remove(s);
-            Clean();
-            Application.MainLoop.Invoke(() => {
-                frameList.Title = selectedName.GetListTitle(data.Count);
-                listView.SetSource(data);
-                listView.SetNeedsDisplay();
-            });
-        }
-        private void Clean() {
-			Application.MainLoop.Invoke(() => {
-				nameText.Text =
-				passText.Text =
-				portText.Text =
-				hostText.Text =
-				loginText.Text = string.Empty;
-				proxyType.SelectedItem = 0;
-				enableBox.Checked = false;
-				expireDate.Date = DateTime.Now.AddDays(7.0);
-				expireDate.Enabled = false;
-				expireBox.Checked = true;
+        #endregion
 
-                buttonClear.Enabled =
-                buttonSave.Enabled =
-                buttonDelete.Enabled =
-                buttonExport.Enabled = false;
-                buttonImport.Enabled =
-                buttonPaste.Enabled = true;
-
-                account = default;
-                selectedName = string.Empty;
-                frameForm.Title = RES.TAG_ACCOUNT;
-            });
-            runOnce.ResetId();
-        }
-
-        private void EnableBox_Toggled(bool b) =>
-            Application.MainLoop.Invoke(() => {
-                loginText.Enabled =
-                passText.Enabled =
-                hostText.Enabled =
-                portText.Enabled =
-                nameText.Enabled =
-                expireDate.Enabled = b;
-                buttonClear.Enabled =
-                buttonDelete.Enabled =
-                buttonExport.Enabled = !IsEmptyForm && b;
-                buttonPaste.Enabled =
-                buttonImport.Enabled =
-                buttonSave.Enabled = true;
-            });
-
+        #region Is expire box toggled
         private void IsExpireBox_Toggled(bool b) =>
 			Application.MainLoop.Invoke(() => {
 				isNotExpire = b;
@@ -600,131 +474,10 @@ namespace HomeMailHub.Gui
 					expireDate.Date = expireStore;
 				}
 			});
+        #endregion
 
-        private void NameText_TextChanged(ustring s) =>
-            buttonClear.Enabled = buttonSave.Enabled = !string.IsNullOrWhiteSpace(s.ToString());
-
-        private void ListView_OpenSelectedItem(ListViewItemEventArgs obj) { runOnce.ResetId(); SelectedListItem(obj); }
-		private void ListView_SelectedItemChanged(ListViewItemEventArgs obj) => SelectedListItem(obj);
-
-		private void SelectedListItem(ListViewItemEventArgs obj) {
-			if (obj == null)
-				return;
-			if ((obj.Item >= 0) && (obj.Item < data.Count))
-				SelectItem(data[obj.Item], obj.Item);
-		}
-
-		private void SelectItem(string s, int id) {
-
-			if (string.IsNullOrEmpty(s) || !runOnce.Begin(id))
-				return;
-
-			try {
-				SshAccount a = (from i in Global.Instance.SshProxy.Items
-								where i.Name.Equals(s)
-								select i).FirstOrDefault();
-
-				if (a == default) {
-					buttonSave.Enabled = buttonClear.Enabled =
-					buttonDelete.Enabled = buttonExport.Enabled = false;
-					return;
-				}
-
-				selectedName = s;
-
-				nameText.Text = a.Name;
-				loginText.Text = a.Login;
-				passText.Text = a.Pass;
-				hostText.Text = a.Host;
-				portText.Text = a.Port.ToString();
-				proxyType.SelectedItem = ProxyTypeSelect(a.Type);
-				frameForm.Title = string.IsNullOrWhiteSpace(a.Name) ?
-					$"{RES.TAG_ACCOUNT} {GetInTitle(a.Type)}" : $"{RES.TAG_ACCOUNT} {GetInTitle(a.Type)} - {a.Name}";
-
-				if (a.IsExpired)
-					expireLabel.ColorScheme = GuiApp.ColorWarning;
-				else
-					expireLabel.ColorScheme = Colors.Base;
-
-				enableBox.Checked = a.Enable;
-				EnableBox_Toggled(a.Enable);
-				expireStore = a.Expired;
-				expireDate.Date = expireStore;
-				expireBox.Checked = a.Expired == DateTime.MinValue;
-				expireDate.Enabled = a.Enable && !expireBox.Checked;
-				account = a;
-
-				buttonSave.Enabled = buttonClear.Enabled = a.Enable;
-				buttonDelete.Enabled = buttonExport.Enabled = true;
-
-			} finally { runOnce.End(); }
-		}
-
-		private async void SaveItem() {
-
-			if (!runOnce.Begin())
-				return;
-
-			try {
-				selectedName = nameText.Text.ToString();
-                bool b = string.IsNullOrEmpty(selectedName);
-				if (b) {
-					SshAccount a = NewItem();
-					if (a == default)
-						return;
-					BuildItem(a);
-					AddItem(a, b);
-					account = a;
-					selectedName = a.Name;
-                    _ = await Global.Instance.SshProxy.Save().ConfigureAwait(false);
-                    _ = await LoadSshAccounts_().ConfigureAwait(false);
-                } else {
-					SshAccount a = (from i in Global.Instance.SshProxy.Items
-									where i.Name.Equals(selectedName)
-									select i).FirstOrDefault();
-					if (a == default) {
-						b = true;
-						a = NewItem();
-						if (a == default)
-							return;
-					}
-					BuildItem(a);
-					AddItem(a, b);
-					account = a;
-					await Global.Instance.SshProxy.Save().ConfigureAwait(false);
-				}
-			} finally { runOnce.End(); }
-		}
-
-		private SshAccount NewItem() {
-			if (string.IsNullOrEmpty(loginText.Text.ToString()))
-				return default;
-			return new SshAccount();
-		}
-
-		private void BuildItem(SshAccount a) {
-			a.Enable = enableBox.Checked;
-			a.Expired = expireDate.Date;
-
-			a.Login = loginText.Text.ToString();
-			a.Pass = passText.Text.ToString();
-			a.Host = hostText.Text.ToString();
-            a.Name = nameText.Text.ToString();
-            a.Type = ProxyTypeSelect(proxyType.SelectedItem);
-			if (int.TryParse(portText.Text.ToString(), out int port))
-				a.Port = port;
-		}
-
-		private async void AddItem(SshAccount a, bool b) {
-			if (!b) return;
-			try {
-				Global.Instance.SshProxy.Add(a);
-				data.Add(a.Name);
-				await listView.SetSourceAsync(data).ConfigureAwait(false);
-			} catch (Exception ex) { ex.StatusBarError(); }
-		}
-
-		private int ProxyTypeSelect(ProxyType opt) =>
+        #region Proxy type select
+        private int ProxyTypeSelect(ProxyType opt) =>
 			opt switch
 			{
 				ProxyType.None => 0,
@@ -741,6 +494,6 @@ namespace HomeMailHub.Gui
 				2 => ProxyType.SshSock5,
 				_ => ProxyType.None
 			};
-
-	}
+        #endregion
+    }
 }

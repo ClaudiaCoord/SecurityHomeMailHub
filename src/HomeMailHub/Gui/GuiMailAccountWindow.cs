@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HomeMailHub.Gui.Dialogs;
+using HomeMailHub.Gui.ListSources;
 using MailKit.Security;
 using NStack;
 using SecyrityMail;
@@ -19,18 +20,16 @@ using RES = HomeMailHub.Properties.Resources;
 
 namespace HomeMailHub.Gui
 {
-
     public enum InMailType : int {
 		None = 0,
 		IMAP,
 		POP3
     }
 
-	public class GuiMailAccountWindow : Window, IGuiWindow<GuiMailAccountWindow> {
+	public class GuiMailAccountWindow : WindowListManagerBase<UserAccount>, IGuiWindow<GuiMailAccountWindow>
+    {
 		private const int labelOffset = 10;
-		private const string tag = "Mail";
         private readonly object __pgpLock = new();
-        private static readonly string [] extension = new string[] { ".conf", ".cnf", ".xml" };
         private static readonly string [] extpgp = new string [] { ".key", ".public", ".private", ".asc" };
 		private static readonly ustring [] ssltlsopt = new ustring [] { "None", "SslOnConnect", "StartTls", "Auto" };
 		private static readonly ustring [] typeopt = new ustring [] { "_POP3", "_IMAP" };
@@ -38,16 +37,9 @@ namespace HomeMailHub.Gui
 			((type == InMailType.None) ? $"{typeopt[0]}/{typeopt[1]}" :
 				((type == InMailType.IMAP) ? typeopt[1] : typeopt[0])).Replace("_", "");
 
-		private Toplevel GuiToplevel { get; set; } = default;
 		private MenuBar  GuiMenu { get; set; } = default;
         private MenuBarItem urlmenu { get; set; } = default;
-        private ListView listView { get; set; } = default;
 
-		private Button buttonSave { get; set; } = default;
-		private Button buttonClear { get; set; } = default;
-		private Button buttonDelete { get; set; } = default;
-		private Button buttonImport { get; set; } = default;
-		private Button buttonExport { get; set; } = default;
         private Button buttonPgpImport { get; set; } = default;
         private Button buttonPgpExport { get; set; } = default;
         private Button buttonPgpCreate { get; set; } = default;
@@ -74,7 +66,6 @@ namespace HomeMailHub.Gui
 
 		private FrameView frameIn { get; set; } = default;
 		private FrameView frameOut { get; set; } = default;
-		private FrameView frameList { get; set; } = default;
         private FrameView framePgp { get; set; } = default;
         private FrameView frameUser { get; set; } = default;
         private FrameView frameHelp { get; set; } = default;
@@ -101,31 +92,12 @@ namespace HomeMailHub.Gui
         private CheckBox pgpAutoBox { get; set; } = default;
         private RadioGroup mailInType { get; set; } = default;
 
-        public Toplevel GetTop => GuiToplevel;
-
-		private string selectedName { get; set; } = string.Empty;
-		private UserAccount account { get; set; } = default;
 		private InMailType inMailType { get; set; } = InMailType.None;
-		private GuiRunOnce runOnce = new();
-		private List<string> data = new();
         private GuiLinearLayot linearLayot { get; } = new();
 		private AccountGpgKeys accountGpg { get; set; } = default;
 
-        private bool IsEmptyForm =>
-            string.IsNullOrWhiteSpace(loginText.Text.ToString()) ||
-            string.IsNullOrWhiteSpace(passText.Text.ToString());
-
-        private void ButtonsEnable(bool b) =>
-            buttonSave.Enabled = buttonClear.Enabled = buttonDelete.Enabled = buttonExport.Enabled = b;
-
-        public GuiMailAccountWindow() : base (RES.GUIMAIL_TITLE1, 0)
+        public GuiMailAccountWindow() : base(RES.GUIMAIL_TITLE1, "User", new string[] { ".conf", ".cnf", ".xml" })
 		{
-			X = 0;
-			Y = 1;
-			Width = Dim.Fill ();
-			Height = Dim.Fill () - 1;
-			GuiToplevel = GuiExtensions.CreteTop ();
-
             linearLayot.Add("en", new List<GuiLinearData> {
                 new GuiLinearData(1,  7, true),
                 new GuiLinearData(12, 7, true),
@@ -152,7 +124,6 @@ namespace HomeMailHub.Gui
 
         public new void Dispose() {
 
-			account = default;
 			this.GetType().IDisposableObject(this);
 			base.Dispose();
 		}
@@ -162,62 +133,21 @@ namespace HomeMailHub.Gui
 		{
 			int idx = 0;
             List<GuiLinearData> layout = linearLayot.GetDefault();
-
-            frameList = new FrameView (RES.TAG_ACCOUNTS) {
-				X = 1,
-				Y = 1,
-                Width = 35,
-                Height = Dim.Fill()
-            };
-			frameIn = new FrameView (GetInTitle()) {
-				X = Pos.Right(frameList) + 1,
-				Y = 1,
-                Width = 40,
-                Height = 9
-            };
-			frameOut = new FrameView ("SMTP") {
-				X = Pos.Right(frameIn) + 1,
-                Y = 1,
-                Width = 40,
-                Height = 9
-            };
-			frameUser = new FrameView (RES.TAG_ACCOUNT) {
-				X = Pos.Right(frameList) + 1,
-				Y = 10,
-				Width = 50,
-				Height = Dim.Fill() - 5
-            };
-            framePgp = new FrameView(RES.MENU_PGPKEYS.ClearText()) {
-                X = Pos.Right(frameUser) + 1,
-                Y = 10,
-                Width = 30,
-                Height = Dim.Fill() - 5
-            };
-            frameHelp = new FrameView(RES.TAG_HELP)
-            {
-                X = Pos.Right(frameOut) + 1,
-                Y = 1,
-                Width = Dim.Fill() - 1,
-                Height = Dim.Fill()
-            };
+            Pos posright = Pos.Right(base.frameList),
+                posbottom;
 
             #region frameList
-            listView = new ListView (data) {
-				X = 1,
-				Y = 1,
-				Width = Dim.Fill () - 4,
-				Height = Dim.Fill () - 1,
-				AllowsMarking = true,
-				AllowsMultipleSelection = false
-			};
-			listView.OpenSelectedItem += ListView_OpenSelectedItem;
-			listView.SelectedItemChanged += ListView_SelectedItemChanged;
-
-			frameList.Add (listView);
-			Add (frameList);
+            /* see WindowListManagerBase<T1> */
             #endregion
 
             #region frameIn
+            frameIn = new FrameView(GetInTitle())
+            {
+                X = posright + 1,
+                Y = 1,
+                Width = 40,
+                Height = 9
+            };
             frameIn.Add (hostInLabel = new Label (RES.TAG_HOST) {
 				X = 1,
 				Y = 1,
@@ -268,6 +198,13 @@ namespace HomeMailHub.Gui
             #endregion
 
             #region frameOut
+            frameOut = new FrameView("SMTP")
+            {
+                X = Pos.Right(frameIn) + 1,
+                Y = 1,
+                Width = 40,
+                Height = 9
+            };
             frameOut.Add (hostOutLabel = new Label (RES.TAG_HOST) {
 				X = 1,
 				Y = 1,
@@ -310,6 +247,14 @@ namespace HomeMailHub.Gui
             #endregion
 
             #region frameUser
+            frameUser = new FrameView(RES.TAG_ACCOUNT)
+            {
+                X = posright + 1,
+                Y = 10,
+                Width = 50,
+                Height = Dim.Fill() - 5
+            };
+            posbottom = Pos.Bottom(frameUser);
             frameUser.Add (loginLabel = new Label (RES.TAG_LOGIN) {
 				X = 1,
 				Y = 1,
@@ -358,12 +303,19 @@ namespace HomeMailHub.Gui
 				Height = 1,
 				ColorScheme = GuiApp.ColorField
 			});
-            loginText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
-            passText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm);
+            loginText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm, !IsEmptyForm);
+            passText.KeyUp += (_) => ButtonsEnable(!IsEmptyForm, !IsEmptyForm);
             Add(frameUser);
             #endregion
 
             #region framePgp
+            framePgp = new FrameView(RES.MENU_PGPKEYS.ClearText())
+            {
+                X = Pos.Right(frameUser) + 1,
+                Y = 10,
+                Width = 30,
+                Height = Dim.Fill() - 5
+            };
             framePgp.Add(pgpKeyIdLabel = new Label(RES.TAG_PGPKEY_ID)
             {
                 X = 1,
@@ -455,6 +407,13 @@ namespace HomeMailHub.Gui
             #endregion
 
             #region frameHelp
+            frameHelp = new FrameView(RES.TAG_HELP)
+            {
+                X = Pos.Right(frameOut) + 1,
+                Y = 1,
+                Width = Dim.Fill() - 1,
+                Height = Dim.Fill()
+            };
             frameHelp.Add(helpText = new Label()
             {
                 X = 1,
@@ -469,69 +428,48 @@ namespace HomeMailHub.Gui
             #region main Windows
             Add(enableBox = new CheckBox(RES.TAG_ENABLE)
             {
-                X = Pos.Right(frameList) + layout[idx].X,
-                Y = Pos.Bottom(frameUser) + layout[idx++].Y,
+                X = posright + layout[idx].X,
+                Y = posbottom + layout[idx++].Y,
                 Width = 10,
                 Height = 1,
                 Checked = true
             });
             Add(pgpAutoBox = new CheckBox(RES.CHKBOX_PGPAUTODECRYPT)
             {
-                X = Pos.Right(frameList) + layout[idx].X,
-                Y = Pos.Bottom(frameUser) + layout[idx++].Y,
+                X = posright + layout[idx].X,
+                Y = posbottom + layout[idx++].Y,
                 Width = 10,
                 Height = 1,
                 Checked = false,
                 Enabled = false
             });
             enableBox.Toggled += EnableBox_Toggled;
-            pgpAutoBox.Toggled += PgpAutoBox_Toggled;
-
-            Add(buttonSave = new Button(RES.BTN_SAVE)
-            {
-                X = Pos.Right(frameList) + layout[idx].X,
-                Y = Pos.Bottom(frameUser) + layout[idx].Y,
-                AutoSize = layout[idx++].AutoSize,
-                TabIndex = 13
-            });
-            Add(buttonClear = new Button(RES.BTN_CLEAR)
-            {
-                X = Pos.Right(frameList) + layout[idx].X,
-                Y = Pos.Bottom(frameUser) + layout[idx].Y,
-                AutoSize = layout[idx++].AutoSize,
-                TabIndex = 14
-            });
-            Add(buttonDelete = new Button(RES.BTN_DELETE)
-            {
-                X = Pos.Right(frameList) + layout[idx].X,
-                Y = Pos.Bottom(frameUser) + layout[idx].Y,
-                AutoSize = layout[idx++].AutoSize,
-                TabIndex = 15
-            });
-            Add(buttonImport = new Button(RES.BTN_IMPORT)
-            {
-                X = Pos.Right(frameList) + layout[idx].X,
-                Y = Pos.Bottom(frameUser) + layout[idx].Y,
-                AutoSize = layout[idx++].AutoSize,
-                TabIndex = 16
-            });
-            Add(buttonExport = new Button(RES.BTN_EXPORT)
-            {
-                X = Pos.Right(frameList) + layout[idx].X,
-                Y = Pos.Bottom(frameUser) + layout[idx].Y,
-                AutoSize = layout[idx++].AutoSize,
-                TabIndex = 17
-            });
             #endregion
 
             #region Buttons
+            {
+                Button btn = buttonPaste;
+                buttonPaste = default;
+                if (btn != default)
+                    btn.Dispose();
+            }
+            buttonSave.SetLinearLayout(layout[idx++], posright, posbottom);
+            buttonClear.SetLinearLayout(layout[idx++], posright, posbottom);
+            buttonDelete.SetLinearLayout(layout[idx++], posright, posbottom);
+            buttonImport.SetLinearLayout(layout[idx++], posright, posbottom);
+            buttonExport.SetLinearLayout(layout[idx++], posright, posbottom);
+
+            Add(buttonSave, buttonClear, buttonDelete, buttonImport, buttonExport);
+            #endregion
+
+            #region Buttons command
             buttonPgpImport.Clicked += async () => {
                 try {
                     if ((accountGpg == null) || !accountGpg.CanImport) {
                         Application.MainLoop.Invoke(() => buttonPgpImport.Enabled = false);
 						return;
                     }
-                    GuiOpenDialog d = $"{RES.MENU_PGPKEY_IMPORT.ClearText()} - {selectedName}"
+                    GuiOpenDialog d = $"{RES.MENU_PGPKEY_IMPORT.ClearText()} - {runOnce.Ids}"
 															   .GuiOpenDialogs(true, extpgp);
                     Application.Run(d);
                     if (!d.Canceled) {
@@ -549,7 +487,7 @@ namespace HomeMailHub.Gui
                         Application.MainLoop.Invoke(() => buttonPgpExport.Enabled = false);
                         return;
                     }
-                    GuiSaveDialog d = $"{RES.MENU_PGPKEY_EXPORT.ClearText()} - {selectedName}"
+                    GuiSaveDialog d = $"{RES.MENU_PGPKEY_EXPORT.ClearText()} - {runOnce.Ids}"
 															   .GuiSaveDialogs(
 																	Global.GetRootDirectory(Global.DirectoryPlace.Export),
 																	extpgp);
@@ -569,57 +507,13 @@ namespace HomeMailHub.Gui
                     }
                     if (MessageBox.Query(50, 7,
                         RES.MENU_PGPKEYS.ClearText(),
-                        $"{RES.MENU_PGPKEY_CREATE.ClearText()} - {selectedName} ?", RES.TAG_YES, RES.TAG_NO) == 0) {
+                        $"{RES.MENU_PGPKEY_CREATE.ClearText()} - {runOnce.Ids} ?", RES.TAG_YES, RES.TAG_NO) == 0) {
                         _ = await accountGpg.GenerateKeyPairAsync().ContinueWith(async (t) => {
                             _ = await ControlPgp().ConfigureAwait(false);
                         }).ConfigureAwait(false);
                     }
                 } catch (Exception ex) { ex.StatusBarError(); }
             };
-            buttonSave.Clicked += () => SaveItem();
-			buttonClear.Clicked += () => Clean();
-			buttonDelete.Clicked += () => Delete();
-			buttonImport.Clicked += async () => {
-				GuiOpenDialog d = string.Format(RES.GUIACCOUNT_FMT6, RES.TAG_OPEN_IMPORT, tag).GuiOpenDialogs(true, extension);
-				Application.Run(d);
-				if (!d.Canceled) {
-					try {
-						string[] ss = d.GuiReturnDialog();
-						if (ss.Length > 0) {
-							foreach (string s in ss) {
-								try {
-									UserAccount a = new ();
-									bool b = await a.Load(s).ConfigureAwait(false);
-									AddItem(a, b);
-								}
-								catch (Exception ex) { ex.StatusBarError(); }
-							}
-							_ = await Global.Instance.Accounts.Save().ConfigureAwait(false);
-						}
-					} catch (Exception ex) { ex.StatusBarError(); }
-				}
-			};
-			buttonExport.Clicked += async () => {
-				if (account == default) {
-					if (string.IsNullOrEmpty(selectedName))
-						return;
-
-					account = (from i in Global.Instance.Accounts.Items
-							   where i.Email.Equals(selectedName)
-							   select i).FirstOrDefault();
-					if (account == default)
-						return;
-				}
-				GuiSaveDialog d = string.Format(RES.GUIACCOUNT_FMT6, RES.TAG_SAVE_EXPORT, selectedName).GuiSaveDialogs(extension);
-				Application.Run(d);
-				if (!d.Canceled) {
-					try {
-						string[] ss = d.GuiReturnDialog();
-						if (ss.Length > 0)
-							_ = await account.Save(ss[0]).ConfigureAwait(false);
-					} catch (Exception ex) { ex.StatusBarError(); }
-				}
-			};
             #endregion
 
             urlmenu = new MenuBarItem("_Url", new MenuItem[0]);
@@ -627,7 +521,7 @@ namespace HomeMailHub.Gui
 				new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
 					new MenuItem (RES.MENU_RELOAD, "", async () => {
 						_ = await Global.Instance.Accounts.Load().ConfigureAwait(false);
-						_ = await Load_().ConfigureAwait(false);
+						_ = await Loading().ConfigureAwait(false);
 					}, null, null, Key.AltMask | Key.R),
 					null,
 					new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.CursorLeft)
@@ -694,54 +588,200 @@ namespace HomeMailHub.Gui
         #endregion
 
         #region Load
-        public async void Load() => _ = await Load_().ConfigureAwait(false);
-		private async Task<bool> Load_() =>
-			await Task.Run(async () => {
-				DataClear();
-				try {
-					foreach (UserAccount a in Global.Instance.Accounts.Items)
-						data.Add(a.Email);
-					await listView.SetSourceAsync(data).ConfigureAwait(false);
-					Clean();
-                    Application.MainLoop.Invoke(() => frameList.Title = selectedName.GetListTitle(data.Count));
-                } catch (Exception ex) { ex.StatusBarError(); }
+        public async void Load() => _ = await Loading().ConfigureAwait(false);
+        private async Task<bool> Loading() =>
+            await Task.Run(async () => {
+                if (!base.runOnce.Begin())
+                    return false;
                 try {
-                    MenuItem[] mitems = await nameof(GuiMailAccountWindow).LoadMenuUrls().ConfigureAwait(false);
-                    Application.MainLoop.Invoke(() => urlmenu.Children = mitems);
-                } catch { }
-                Application.MainLoop.Invoke(() => helpText.Text = RES.GuiMailAccountWindowHelp);
+                    _ = await base.LoadAccounts(Global.Instance.Accounts.Items).ConfigureAwait(false);
+                    try {
+                        MenuItem[] mitems = await nameof(GuiMailAccountWindow).LoadMenuUrls().ConfigureAwait(false);
+                        Application.MainLoop.Invoke(() => urlmenu.Children = mitems);
+                    }
+                    catch (Exception ex) { ex.StatusBarError(); }
+                    Application.MainLoop.Invoke(() => helpText.Text = RES.GuiMailAccountWindowHelp);
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
+                finally { base.runOnce.End(); }
                 return true;
-			});
+            });
         #endregion
 
-        #region Delete
-        private async void Delete() {
+        #region Virtual override
+        protected override bool IsEmptyForm =>
+            string.IsNullOrWhiteSpace(loginText.Text.ToString()) ||
+            string.IsNullOrWhiteSpace(passText.Text.ToString());
 
-            if (!runOnce.IsRange(data.Count) || !runOnce.Begin())
-                return;
+        protected override void VirtualEnableToggled(bool b) {
+            hostInText.Enabled =
+            portInText.Enabled =
+            hostOutText.Enabled =
+            portOutText.Enabled =
+            tlsInText.Enabled =
+            tlsOutText.Enabled =
+            loginText.Enabled =
+            passText.Enabled =
+            emailText.Enabled =
+            nameText.Enabled =
+            pgpAutoBox.Enabled = b;
+        }
 
-            try {
-                string s = data[runOnce.LastId];
-                if (string.IsNullOrWhiteSpace(s))
-                    return;
+        protected override void VirtualClean() {
+            hostInText.Text =
+            hostOutText.Text =
+            loginText.Text =
+            passText.Text =
+            emailText.Text =
+            nameText.Text = string.Empty;
+            portInText.Text = "110";
+            portOutText.Text = "25";
 
-                if (MessageBox.Query(50, 7,
-                    string.Format(RES.GUIACCOUNT_FMT5, RES.TAG_DELETE, s),
-                    string.Format(RES.GUIACCOUNT_FMT3, RES.TAG_DELETE, s), RES.TAG_YES, RES.TAG_NO) == 0) {
-                    try {
-                        UserAccount a = (from i in Global.Instance.Accounts.Items
-                                         where i.Email.Equals(s)
-                                         select i).FirstOrDefault();
-                        if (a == default)
-                            return;
+            pgpKeyIdText.Text =
+            pgpKeySignText.Text =
+            pgpKeyCountText.Text =
+            pgpKeyCryptText.Text =
+            pgpKeyDecryptText.Text = string.Empty;
 
-                        DataRemove(a.Email);
-                        Global.Instance.Accounts.Items.Remove(a);
-                        _ = await Global.Instance.Accounts.Save().ConfigureAwait(false);
-                    } catch (Exception ex) { ex.StatusBarError(); }
+            buttonPgpCreate.Enabled =
+            buttonPgpImport.Enabled =
+            buttonPgpExport.Enabled =
+            buttonPgpExport.Visible = false;
+            buttonPgpCreate.Visible = true;
+
+            enableBox.Checked = false;
+            pgpAutoBox.Checked = false;
+            enableBox.Enabled = false;
+            pgpAutoBox.Enabled = false;
+            tlsInText.SelectedItem = 0;
+            tlsOutText.SelectedItem = 0;
+            enableBox.Checked = true;
+            inMailType = InMailType.None;
+            frameIn.Title = GetInTitle();
+            frameUser.Title = RES.TAG_ACCOUNT;
+        }
+
+        protected override async Task<bool> VirtualSaveAll() =>
+            await Global.Instance.Accounts.Save().ConfigureAwait(false);
+
+        protected override void VirtualAddItem(UserAccount acc) =>
+            Global.Instance.Accounts.Add(acc);
+
+        protected override UserAccount VirtualGetItem(string s) =>
+            Global.Instance.FindFromEmail(s);
+
+        protected override UserAccount VirtualNewItem() {
+            string email = emailText.Text.ToString();
+            if (string.IsNullOrEmpty(email))
+                return default;
+            return new UserAccount();
+        }
+
+        protected override void VirtualBuildItem(UserAccount acc) =>
+            Application.MainLoop.Invoke(() => {
+
+                string s = nameText.Text.ToString();
+                if (string.IsNullOrEmpty(s)) {
+                    int idx = s.IndexOf('@');
+                    if (idx > 0)
+                        s = s.Substring(0, idx);
+                    acc.Name = s;
+                } else {
+                    acc.Name = s;
                 }
-            }
-            finally { runOnce.End(); }
+
+                acc.Login = loginText.Text.ToString();
+                acc.Pass = passText.Text.ToString();
+                acc.EmailAddress = emailText.Text.ToString();
+                acc.Enable = enableBox.Checked;
+                acc.IsPgpAutoDecrypt = pgpAutoBox.Checked;
+
+                acc.SmtpAddr = hostOutText.Text.ToString();
+                if (int.TryParse(portOutText.Text.ToString(), out int oport))
+                    acc.SmtpPort = oport;
+                acc.SmtpSecure = SecureOptionsSelect(tlsOutText.SelectedItem);
+
+                if (inMailType == InMailType.IMAP) {
+                    acc.ImapAddr = hostInText.Text.ToString();
+                    if (int.TryParse(portInText.Text.ToString(), out int iport))
+                        acc.ImapPort = iport;
+                    acc.ImapSecure = SecureOptionsSelect(tlsInText.SelectedItem);
+                }
+                else if (inMailType == InMailType.POP3) {
+                    acc.Pop3Addr = hostInText.Text.ToString();
+                    if (int.TryParse(portInText.Text.ToString(), out int iport))
+                        acc.Pop3Port = iport;
+                    acc.Pop3Secure = SecureOptionsSelect(tlsInText.SelectedItem);
+                }
+            });
+
+        protected override async void VirtualSelectItem(UserAccount acc) {
+
+            runOnce.ChangeId(acc.Email);
+
+            Application.MainLoop.Invoke(() => {
+
+                if (!acc.IsEmptyImapReceive) {
+                    hostInText.Text = acc.ImapAddr;
+                    portInText.Text = acc.ImapPort.ToString();
+                    tlsInText.SelectedItem = SecureOptionsSelect(acc.ImapSecure);
+                    inMailType = InMailType.IMAP;
+                    frameIn.Title = GetInTitle(inMailType);
+                } else if (!acc.IsEmptyPop3Receive) {
+                    hostInText.Text = acc.Pop3Addr;
+                    portInText.Text = acc.Pop3Port.ToString();
+                    tlsInText.SelectedItem = SecureOptionsSelect(acc.Pop3Secure);
+                    inMailType = InMailType.POP3;
+                    frameIn.Title = GetInTitle(inMailType);
+                } else {
+                    hostInText.Text = string.Empty;
+                    portInText.Text = string.Empty;
+                    tlsInText.SelectedItem = 0;
+                    inMailType = InMailType.None;
+                    frameIn.Title = GetInTitle(inMailType);
+                }
+
+                if (!acc.IsEmptySend) {
+                    hostOutText.Text = acc.SmtpAddr;
+                    portOutText.Text = acc.SmtpPort.ToString();
+                    tlsOutText.SelectedItem = SecureOptionsSelect(acc.SmtpSecure);
+                } else {
+                    hostOutText.Text = string.Empty;
+                    portOutText.Text = string.Empty;
+                    tlsOutText.SelectedItem = 0;
+                }
+
+                frameUser.Title = string.IsNullOrWhiteSpace(acc.Name) ?
+                    $"{RES.TAG_ACCOUNT} :: {acc.Email}" : $"{RES.TAG_ACCOUNT} :: {acc.Name} - {acc.Email}";
+
+                loginText.Text = acc.Login;
+                passText.Text = acc.Pass;
+                emailText.Text = acc.Email;
+                nameText.Text = acc.Name;
+                pgpAutoBox.Checked = acc.IsPgpAutoDecrypt;
+                pgpAutoBox.Enabled = true;
+                enableBox.Enabled = true;
+
+                enableBox.Checked = acc.Enable;
+                EnableBox_Toggled(acc.Enable);
+                ButtonsEnable(true, acc.Enable);
+            });
+            _ = await ControlPgp().ConfigureAwait(false);
+        }
+
+        protected override void VirtualDeleteItem(UserAccount acc) =>
+            Global.Instance.Accounts.Items.Remove(acc);
+
+        protected override async Task<UserAccount> VirtualImportFile(string s) {
+            UserAccount a = new();
+            bool b = await a.Load(s).ConfigureAwait(false);
+            return b ? a : null;
+        }
+
+        protected override async Task<string> VirtualExport(UserAccount acc, string s) {
+            bool b = await acc.Save(s).ConfigureAwait(false);
+            if (!b) return "Export error..";
+            return string.Empty;
         }
         #endregion
 
@@ -754,262 +794,18 @@ namespace HomeMailHub.Gui
 			frameIn.Title = s;
 		}
 
-		private void DataClear() {
-			data.Clear();
-			Clean();
-            Application.MainLoop.Invoke(() => {
-				frameList.Title = string.Empty.GetListTitle(0);
-				listView.SetSource(data);
-                listView.SetNeedsDisplay();
-            });
-		}
-        private void DataRemove(string s) {
-            data.Remove(s);
-            Clean();
-            Application.MainLoop.Invoke(() => {
-                frameList.Title = string.Empty.GetListTitle(data.Count);
-                listView.SetSource(data);
-                listView.SetNeedsDisplay();
-            });
-        }
-		private void Clean() {
-			Application.MainLoop.Invoke(() => {
-				hostInText.Text =
-				hostOutText.Text =
-				loginText.Text =
-				passText.Text =
-				emailText.Text =
-				nameText.Text = string.Empty;
-				portInText.Text = "110";
-				portOutText.Text = "25";
-
-                pgpKeyIdText.Text =
-                pgpKeySignText.Text =
-				pgpKeyCountText.Text =
-				pgpKeyCryptText.Text =
-				pgpKeyDecryptText.Text = string.Empty;
-
-                buttonPgpCreate.Enabled =
-				buttonPgpImport.Enabled =
-                buttonPgpExport.Enabled =
-                buttonPgpExport.Visible = false;
-                buttonPgpCreate.Visible = true;
-
-                enableBox.Checked = false;
-				pgpAutoBox.Checked = false;
-				enableBox.Enabled = false;
-				pgpAutoBox.Enabled = false;
-				tlsInText.SelectedItem = 0;
-				tlsOutText.SelectedItem = 0;
-				enableBox.Checked = true;
-				inMailType = InMailType.None;
-				selectedName = string.Empty;
-				frameIn.Title = GetInTitle();
-				ButtonsEnable(false);
-			});
-			DisposeControlPgp();
-            runOnce.ResetId();
-        }
-
-		private void EnableBox_Toggled(bool b) =>
-			Application.MainLoop.Invoke(() => {
-                hostInText.Enabled =
-				portInText.Enabled =
-				hostOutText.Enabled =
-				portOutText.Enabled =
-				tlsInText.Enabled =
-				tlsOutText.Enabled =
-				loginText.Enabled =
-				passText.Enabled =
-				emailText.Enabled =
-				nameText.Enabled =
-				pgpAutoBox.Enabled = b;
-                ButtonsEnable(b);
-            });
-
-		private void PgpAutoBox_Toggled(bool b) {
-			if (account != default)
-                account.IsPgpAutoDecrypt = b;
-        }
-
-        private void ListView_OpenSelectedItem(ListViewItemEventArgs obj) => SelectedListItem(obj);
-		private void ListView_SelectedItemChanged(ListViewItemEventArgs obj) => SelectedListItem(obj);
-
-		private void SelectedListItem(ListViewItemEventArgs obj) {
-			if (obj == null)
-				return;
-			System.Diagnostics.Debug.WriteLine($"\t{obj.Item} -> {data.Count}");
-			if ((obj.Item >= 0) && (obj.Item < data.Count))
-				SelectItem(data[obj.Item], obj.Item);
-		}
-
-		private async void SelectItem(string s, int id) {
-
-			if (!runOnce.Begin(id))
-				return;
-
-			try {
-				if (string.IsNullOrEmpty(s))
-					return;
-				UserAccount a = (from i in Global.Instance.Accounts.Items
-								 where i.Email.Equals(s)
-								 select i).FirstOrDefault();
-				if (a == default)
-					return;
-
-				selectedName = s;
-
-				if (!a.IsEmptyImapReceive) {
-					hostInText.Text = a.ImapAddr;
-					portInText.Text = a.ImapPort.ToString();
-					tlsInText.SelectedItem = SecureOptionsSelect(a.ImapSecure);
-					inMailType = InMailType.IMAP;
-					frameIn.Title = GetInTitle(inMailType);
-				}
-				else if (!a.IsEmptyPop3Receive) {
-					hostInText.Text = a.Pop3Addr;
-					portInText.Text = a.Pop3Port.ToString();
-					tlsInText.SelectedItem = SecureOptionsSelect(a.Pop3Secure);
-					inMailType = InMailType.POP3;
-					frameIn.Title = GetInTitle(inMailType);
-				}
-				else {
-					hostInText.Text = string.Empty;
-					portInText.Text = string.Empty;
-					tlsInText.SelectedItem = 0;
-					inMailType = InMailType.None;
-					frameIn.Title = GetInTitle(inMailType);
-				}
-				if (!a.IsEmptySend) {
-					hostOutText.Text = a.SmtpAddr;
-					portOutText.Text = a.SmtpPort.ToString();
-					tlsOutText.SelectedItem = SecureOptionsSelect(a.SmtpSecure);
-				}
-				else {
-					hostOutText.Text = string.Empty;
-					portOutText.Text = string.Empty;
-					tlsOutText.SelectedItem = 0;
-				}
-
-				loginText.Text = a.Login;
-				passText.Text = a.Pass;
-				emailText.Text = a.Email;
-				nameText.Text = a.Name;
-				pgpAutoBox.Checked = a.IsPgpAutoDecrypt;
-				pgpAutoBox.Enabled = true;
-                enableBox.Enabled = true;
-
-                enableBox.Checked = a.Enable;
-				EnableBox_Toggled(a.Enable);
-				account = a;
-                ButtonsEnable(true);
-                await ControlPgp().ConfigureAwait(false);
-
-            } finally { runOnce.End(); }
-        }
-
-		private async void SaveItem() {
-
-			if (!runOnce.Begin())
-				return;
-
-			try {
-				bool b = string.IsNullOrEmpty(selectedName);
-				if (b) {
-					UserAccount a = NewItem();
-					if (a == default)
-						return;
-					BuildItem(a);
-					AddItem(a, b);
-					account = a;
-					await Global.Instance.Accounts.Save().ConfigureAwait(false);
-				} else {
-					UserAccount a = (from i in Global.Instance.Accounts.Items
-									 where i.Email.Equals(selectedName)
-									 select i).FirstOrDefault();
-					if (a == default) {
-						b = true;
-						a = NewItem();
-						if (a == default)
-							return;
-					}
-					BuildItem(a);
-					AddItem(a, b);
-					account = a;
-					await Global.Instance.Accounts.Save().ConfigureAwait(false);
-				}
-			} finally { runOnce.End(); }
-		}
-		private UserAccount NewItem() {
-
-			string email = emailText.Text.ToString();
-			if (string.IsNullOrEmpty(email))
-				return default;
-			
-			return new UserAccount();
-		}
-		private void BuildItem(UserAccount a)
-		{
-			string s = nameText.Text.ToString();
-			if (string.IsNullOrEmpty(s)) {
-				int idx = s.IndexOf('@');
-				if (idx > 0)
-					s = s.Substring(0, idx);
-				a.Name = s;
-			}
-			else {
-				a.Name = s;
-			}
-
-			a.Login = loginText.Text.ToString();
-			a.Pass = passText.Text.ToString();
-			a.EmailAddress = emailText.Text.ToString();
-			a.Enable = enableBox.Checked;
-            a.IsPgpAutoDecrypt = pgpAutoBox.Checked;
-
-            a.SmtpAddr = hostOutText.Text.ToString();
-			if (int.TryParse(portOutText.Text.ToString(), out int oport))
-				a.SmtpPort = oport;
-			a.SmtpSecure = SecureOptionsSelect(tlsOutText.SelectedItem);
-
-			if (inMailType == InMailType.IMAP) {
-				a.ImapAddr = hostInText.Text.ToString();
-				if (int.TryParse(portInText.Text.ToString(), out int iport))
-					a.ImapPort = iport;
-				a.ImapSecure = SecureOptionsSelect(tlsInText.SelectedItem);
-			}
-			else if (inMailType == InMailType.POP3) {
-				a.Pop3Addr = hostInText.Text.ToString();
-				if (int.TryParse(portInText.Text.ToString(), out int iport))
-					a.Pop3Port = iport;
-				a.Pop3Secure = SecureOptionsSelect(tlsInText.SelectedItem);
-			}
-		}
-
-		private void AddItem(UserAccount a, bool b) {
-			if (!b) return;
-			try {
-				data.Add(a.Name);
-				Application.MainLoop.Invoke(() => {
-					listView.SetSource(data);
-					listView.SetNeedsDisplay();
-                    frameList.Title = string.Empty.GetListTitle(data.Count);
-				});
-                Global.Instance.Accounts.Add(a);
-            } catch (Exception ex) { ex.StatusBarError(); }
-		}
-
+        #region PGP control
 		private async Task<bool> ControlPgp() =>
 			await Task.Run(() => {
-                if (string.IsNullOrWhiteSpace(selectedName))
+                if (!runOnce.IsValidIds())
                     return false;
 
                 lock (__pgpLock) {
                     if (accountGpg == null)
-                        accountGpg = new(selectedName);
-                    else if (!selectedName.Equals(accountGpg.EmailAddress.Address)) {
+                        accountGpg = new(runOnce.Ids);
+                    else if (!runOnce.Ids.Equals(accountGpg.EmailAddress.Address)) {
                         DisposeControlPgpInternal();
-                        accountGpg = new(selectedName);
+                        accountGpg = new(runOnce.Ids);
                     }
                     accountGpg.Build();
                 }
@@ -1043,6 +839,7 @@ namespace HomeMailHub.Gui
             if (acc != null)
                 acc.Dispose();
         }
+        #endregion
 
         private int SecureOptionsSelect(SecureSocketOptions opt) =>
 			opt switch {

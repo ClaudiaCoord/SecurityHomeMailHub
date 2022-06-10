@@ -4,16 +4,24 @@
  * License MIT.
  */
 
-
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Net;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
 using SecyrityMail.Data;
 using SecyrityMail.GnuPG;
 using SecyrityMail.Proxy;
+using SecyrityMail.Utils;
 
 namespace SecyrityMail
 {
+    [Serializable]
+    [DesignerCategory("code")]
+    [XmlType(AnonymousType = true)]
+    [XmlRoot(Namespace = "", IsNullable = false)]
     public class Configuration : MailEvent, IMailEventProxy, IConfiguration
     {
         private bool _pgpOnce = false,
@@ -26,11 +34,13 @@ namespace SecyrityMail
         public string PgpPassword { get; set; } = string.Empty;
         public string PgpKeyHost { get; set; } = string.Empty;
 
+        [XmlIgnore]
         public bool IsIncommingPgpDecrypt { get => _incommingPgpDecrypt; set => _incommingPgpDecrypt = pgpOnce(value); }
-
-        public bool IsSharingSocket { get; set; } = false;
+        [XmlIgnore]
         public bool IsSmtpAllOutPgpSign { get => _smtpAllOutPgpSign; set => _smtpAllOutPgpSign = pgpOnce(value); }
+        [XmlIgnore]
         public bool IsSmtpAllOutPgpCrypt { get => _smtpAllOutPgpCrypt; set => _smtpAllOutPgpCrypt = pgpOnce(value); }
+
         public bool IsSmtpDeliveryLocal { get; set; } = false;
         public bool IsSmtpCheckFrom { get; set; } = true;
         public bool IsSmtpEnable { get; set; } = false;
@@ -48,6 +58,7 @@ namespace SecyrityMail
         public double Pop3ClientIdle { get; set; } = 20.0;
 
         public int  ClientTimeout { get; set; } = 4 * 60 * 1000;
+        public bool IsSharingSocket { get; set; } = false;
         public bool IsSaveAttachments { get; set; } = false;
         public bool IsAlwaysNewMessageId { get; set; } = false;
         public bool IsImapClientMessagePurge { get; set; } = false;
@@ -71,6 +82,10 @@ namespace SecyrityMail
         public bool   IsAccessIpCheckDns { get; set; } = false;
         public bool   IsDnsblIpCheck { get; set; } = false;
         public string DnsblHost { get; set; } = string.Empty;
+
+        public bool IsSpamCheckAkismet { get; set; } = false;
+        public bool IsAkismetLearn { get; set; } = false;
+        public string SpamCheckAkismetKey { get; set; } = string.Empty;
 
         public List<string> ForbidenRouteList { get; set; } = new();
         public List<string> ForbidenEntryList { get; set; } = new();
@@ -102,14 +117,23 @@ namespace SecyrityMail
             get => Global.Instance.Vpn.IsEnableLogVpn;
             set { Global.Instance.Vpn.IsEnableLogVpn = value; OnPropertyChanged(); }
         }
+        [XmlIgnore]
         public IPEndPoint VpnEndpoint => Global.Instance.VpnAccounts.IpEndpoint;
+        [XmlIgnore]
         public bool IsVpnSelected => Global.Instance.VpnAccounts.IsAccountSelected;
+        [XmlIgnore]
         public bool IsVpnReady => Global.Instance.Vpn.IsVpnReady;
+        [XmlIgnore]
         public bool IsVpnBegin => Global.Instance.Vpn.IsVpnBegin;
+        [XmlIgnore]
         public bool IsVpnTunnelRunning => Global.Instance.Vpn.IsTunnelRunning;
+        [XmlIgnore]
         public bool IsProxyCheckRun => Global.Instance.Proxy.IsProxyCheck;
+        [XmlIgnore]
         public bool IsSshSelected => Global.Instance.SshProxy.IsAccountSelected;
+        [XmlIgnore]
         public bool IsSshRunning => Global.Instance.SshProxy.IsAccountRunning;
+        [XmlIgnore]
         public bool IsCheckMailRun => Global.Instance.Tasks.IsCheckMailRun;
 
         private bool pgpOnce(bool b)
@@ -123,10 +147,17 @@ namespace SecyrityMail
             return _pgpOnceCheck;
         }
 
-        public void Copy(IConfiguration cfg)
+        #region Copy
+        public void Copy(IConfiguration cfg, bool isfull = true)
         {
             if (cfg == null)
                 throw new ArgumentNullException(nameof(IConfiguration));
+
+            if (isfull) {
+                IsIncommingPgpDecrypt = cfg.IsIncommingPgpDecrypt;
+                IsSmtpAllOutPgpCrypt = cfg.IsSmtpAllOutPgpCrypt;
+                IsSmtpAllOutPgpSign = cfg.IsSmtpAllOutPgpSign;
+            }
 
             CheckMailPeriod = cfg.CheckMailPeriod;
             ClientTimeout = cfg.ClientTimeout;
@@ -134,7 +165,6 @@ namespace SecyrityMail
             IsCacheMessagesLog = cfg.IsCacheMessagesLog;
             IsEnableLogVpn = cfg.IsEnableLogVpn;
             IsImapClientMessagePurge = cfg.IsImapClientMessagePurge;
-            IsIncommingPgpDecrypt = cfg.IsIncommingPgpDecrypt;
             IsModifyMessageDeliveredLocal = cfg.IsModifyMessageDeliveredLocal;
             IsNewMessageSendImmediately = cfg.IsNewMessageSendImmediately;
             IsPop3DeleteAllMessages = cfg.IsPop3DeleteAllMessages;
@@ -143,8 +173,6 @@ namespace SecyrityMail
             IsPop3Enable = cfg.IsPop3Enable;
             IsReceiveOnSendOnly = cfg.IsReceiveOnSendOnly;
             IsSaveAttachments = cfg.IsSaveAttachments;
-            IsSmtpAllOutPgpCrypt = cfg.IsSmtpAllOutPgpCrypt;
-            IsSmtpAllOutPgpSign = cfg.IsSmtpAllOutPgpSign;
             IsSmtpCheckFrom = cfg.IsSmtpCheckFrom;
             IsSmtpClientFakeIp = cfg.IsSmtpClientFakeIp;
             IsSmtpDeliveryLocal = cfg.IsSmtpDeliveryLocal;
@@ -159,6 +187,9 @@ namespace SecyrityMail
             IsAccessIpWhiteList = cfg.IsAccessIpWhiteList;
             IsAccessIpCheckDns = cfg.IsAccessIpCheckDns;
             IsDnsblIpCheck = cfg.IsDnsblIpCheck;
+            IsAkismetLearn = cfg.IsAkismetLearn;
+            IsSpamCheckAkismet = cfg.IsSpamCheckAkismet;
+            SpamCheckAkismetKey = cfg.SpamCheckAkismetKey;
             DnsblHost = cfg.DnsblHost;
             PgpKeyHost = cfg.PgpKeyHost;
             PgpPassword = cfg.PgpPassword;
@@ -182,5 +213,35 @@ namespace SecyrityMail
             if ((cfg.ForbidenEntryList != default) && (cfg.ForbidenEntryList.Count > 0))
                 ForbidenEntryList.AddRange(cfg.ForbidenEntryList);
         }
+        #endregion
+
+        #region Load
+        public async Task<bool> Load() =>
+            await Load(Path.Combine(Global.GetRootDirectory(), $"{nameof(Configuration)}.conf")).ConfigureAwait(false);
+        public async Task<bool> Load(string path) =>
+            await Task.Run(() => {
+                try {
+                    if (!File.Exists(path))
+                        return false;
+                    Configuration conf = path.DeserializeFromFile<Configuration>();
+                    Copy(conf, false);
+                    return true;
+                } catch (Exception ex) { Global.Instance.Log.Add(nameof(Load), ex); }
+                return false;
+            });
+        #endregion
+
+        #region Save
+        public async Task<bool> Save() =>
+            await Save(Path.Combine(Global.GetRootDirectory(), $"{nameof(Configuration)}.conf")).ConfigureAwait(false);
+        public async Task<bool> Save(string path) =>
+            await Task.Run(() => {
+                try {
+                    path.SerializeToFile<Configuration>(this);
+                    return true;
+                } catch (Exception ex) { Global.Instance.Log.Add(nameof(Save), ex); }
+                return false;
+            });
+        #endregion
     }
 }

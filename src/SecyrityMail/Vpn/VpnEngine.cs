@@ -12,7 +12,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using SecyrityMail.Data;
-using SecyrityMail.IPFilters;
+using SecyrityMail.MailFilters;
 using SecyrityMail.Utils;
 using VPN.WireGuard;
 
