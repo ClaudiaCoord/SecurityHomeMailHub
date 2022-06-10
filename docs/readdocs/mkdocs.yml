@@ -13,6 +13,3 @@ theme: bootstrap386
 
 copyright: Copyright &copy; 2022 CC
 
-markdown_extensions:
-  - pymdownx.highlight
-  - pymdownx.superfences
