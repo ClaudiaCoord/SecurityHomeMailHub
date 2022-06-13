@@ -7,7 +7,7 @@
   "download-photos": "copy",
   "cleanup": true,
   "theme": "cards",
-  "css": "./docs/assets/css/gallery.css",
+  "css": "./docs/assets/css/style.css",
   "footer": "MIT License",
   "usage-stats": false
 }
