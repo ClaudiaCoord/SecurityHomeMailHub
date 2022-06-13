@@ -1,2 +1,5 @@
 theme: jekyll-theme-hacker
 imagesurl: "/assets/images/"
+show_downloads: [false]
+title: [Security Home Mail fetch Hub]
+
