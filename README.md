@@ -18,7 +18,7 @@ Secure, anonymous, domestic home mail hub `MTA` / `MUA`
 
  Supports anonymous mode consisting of a set of measures to determine the difficulty sender / recipient when sending and receiving mail from external servers.
 
-![Home security mail fetch hub 0](docs/img/banner.png)  
+![Home security mail fetch hub 0](docs/assets/images/banner.png)  
  
 ### Built-in encryption is:
  - `VPN` client Wireguard,
@@ -68,9 +68,9 @@ Allows you to use local accounts not tied to a specific domain, the exchange of 
 
 ### Interfaces screens:
 
-![Home security mail fetch hub](https://claudiacoord.github.io/SecurityHomeMailHub/img/ss2.png) 
+![Home security mail fetch hub](docs/assets/images/hsmh1-Full-View.png) 
 
-[More screenshot ..](docs/img) - [Wiki gallery](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki)  
+[More screenshot ..](docs/assets/images) - [Wiki gallery](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki)  
 
 ### Settings:
 

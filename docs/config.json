@@ -1,13 +1,13 @@
 {
-  "input": "./docs/img",
-  "output": "./docs/build_output",
+  "input": "./docs/assets/images",
+  "output": "./docs/assets/build_output",
   "title": "Home security mail hub Gallery",
   "sort-albums-by": "title",
   "sort-media-by": "filename",
   "download-photos": "copy",
   "cleanup": true,
   "theme": "cards",
-  "css": "./docs/gallery.css",
+  "css": "./docs/assets/css/gallery.css",
   "footer": "MIT License",
   "usage-stats": false
 }

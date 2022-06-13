@@ -23,5 +23,5 @@ jobs:
         with:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             BRANCH: main
-            FOLDER: docs/build_output
+            FOLDER: ./docs/assets/build_output
             CLEAN: true
