@@ -6,6 +6,10 @@ build:
     python: "3.9"
     
 formats:
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8b5409aba839dfb1707e9d96cca8b9901308af6
   - pdf
 
 mkdocs:
