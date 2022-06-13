@@ -74,13 +74,13 @@ Allows you to use local accounts not tied to a specific domain, the exchange of 
 
 ### Settings:
 
-- [Settings mail services](/wiki/Settings-mail-services)  
-- [Settings mail clients](/wiki/Settings-mail-clients)  
-- [Settings mail POP3](/wiki/Settings-POP3)  
-- [Settings mail SMTP](/wiki/Settings-SMTP)  
-- [Settings mailbox accounts](/wiki/Settings-mail-accounts)  
-- [Settings VPN accounts](/wiki/Settings-VPN-accounts)  
-- [Settings SSH proxy accounts](/wiki/Settings-SSH-proxy-accounts)  
-- [Settings PGP encrypting/decrypting](/wiki/Settings-PGP-encrypting-decrypting)  
+- [Settings mail services](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki/Settings-mail-services)  
+- [Settings mail clients](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki/Settings-mail-clients)  
+- [Settings mail POP3](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki/Settings-POP3)  
+- [Settings mail SMTP](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki/Settings-SMTP)  
+- [Settings mailbox accounts](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki/Settings-mail-accounts)  
+- [Settings VPN accounts](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki/Settings-VPN-accounts)  
+- [Settings SSH proxy accounts](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki/Settings-SSH-proxy-accounts)  
+- [Settings PGP encrypting/decrypting](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki/Settings-PGP-encrypting-decrypting)  
 
 Home security mail fetch hub
