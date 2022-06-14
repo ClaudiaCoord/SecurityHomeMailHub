@@ -1,6 +1,6 @@
 theme: jekyll-theme-hacker
 imagesurl: "/assets/images/"
-thumbsurl: "/assets/images/"
+templateimg: "/assets/images/hsmh"
 show_downloads: false
 title: "Security Home Mail fetch Hub"
 
