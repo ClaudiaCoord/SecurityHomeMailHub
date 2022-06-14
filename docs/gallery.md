@@ -1,7 +1,6 @@
 ---
 layout: post
-title: ""
-date: 2022-06-14
+title: "Home Mail Hub screenshots"
 ---
 <style type="text/css">
 .image-gallery {
@@ -21,8 +20,8 @@ date: 2022-06-14
 
 [![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg) [![Download x64](https://img.shields.io/badge/Download-x64-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8191/SecurityHomeMailHub-x64-1.0.8191.msi) [![Download x86](https://img.shields.io/badge/Download-x86-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8191/SecurityHomeMailHub-x86-1.0.8191.msi)
 
-## ScreenShots:
+## Home Mail Hub screenshots:
 
 {% include gallery.html folder="assets/images" %}
 
-[Home](/)  
+[Home](index.md)  
