@@ -23,4 +23,4 @@ To date, these of a mobile device of any e-mail application known brands as Goog
  All of the above and some additional security features implemented in HomeMailHub.  
  The app is absolutely free, contains no advertising or other "tabs", distributed as OpenSource with available source code.
 
-[ScreenShots Gallery](/gallery)  
+[ScreenShots Gallery](gallery.md)  
