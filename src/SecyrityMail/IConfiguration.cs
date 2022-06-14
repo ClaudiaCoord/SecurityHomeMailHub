@@ -60,6 +60,7 @@ namespace SecyrityMail
         string ServicesInterfaceIp { get; set; }
         List<string> ForbidenRouteList { get; set; }
         List<string> ForbidenEntryList { get; set; }
+        List<string> FilterFromList { get; set; }
 
         string PgpPassword { get; set; }
         string PgpKeyHost { get; set; }

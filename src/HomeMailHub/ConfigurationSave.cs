@@ -77,6 +77,10 @@ namespace HomeMailHub
                 if ((cfg.ForbidenEntryList != default) && (cfg.ForbidenEntryList.Count > 0))
                     Properties.Settings.Default.ForbidenEntryList.AddRange(cfg.ForbidenEntryList.ToArray());
 
+                Properties.Settings.Default.FilterFromList = new();
+                if ((cfg.FilterFromList != default) && (cfg.FilterFromList.Count > 0))
+                    Properties.Settings.Default.FilterFromList.AddRange(cfg.FilterFromList.ToArray());
+
                 Properties.Settings.Default.Save();
                 await Global.Instance.AccountsSave().ConfigureAwait(false);
                 return true;

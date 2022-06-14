@@ -167,7 +167,7 @@ namespace SecyrityMail
         #endregion
 
         #region IP filters
-        public ForbidenIp ForbidenAccessIp { get; } = new();
+        public AccessIpFilter ForbidenAccessIp { get; } = new();
         #endregion
 
         #region Proxy

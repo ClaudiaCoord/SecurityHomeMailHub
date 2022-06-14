@@ -601,6 +601,9 @@
   <data name="MENU_MSGSREADALL" xml:space="preserve">
     <value>_Пометить все сообщения прочитанными</value>
   </data>
+  <data name="MENU_MSGSSELECTALL" xml:space="preserve">
+    <value>_Выбрать все сообщения</value>
+  </data>
   <data name="MENU_OPENMSGFROM" xml:space="preserve">
     <value>Открыть _сообщение в ..</value>
   </data>
@@ -774,6 +777,12 @@
   </data>
   <data name="TAG_BANNEDIPLIST" xml:space="preserve">
     <value>Правила доступа для IP, NET или кодов стран</value>
+  </data>
+  <data name="TAG_BLOCK_EMAIL_DOMAIN" xml:space="preserve">
+    <value>Заблокированные почтовые адреса и домены</value>
+  </data>
+  <data name="TAG_BLOCK_EMAIL_DOMAIN_LABEL" xml:space="preserve">
+    <value>Адрес или Домен:</value>
   </data>
   <data name="TAG_BODY" xml:space="preserve">
     <value>Сообщение</value>

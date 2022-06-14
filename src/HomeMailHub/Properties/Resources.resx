@@ -601,6 +601,9 @@
   <data name="MENU_MSGSREADALL" xml:space="preserve">
     <value>_Mark all messages as read</value>
   </data>
+  <data name="MENU_MSGSSELECTALL" xml:space="preserve">
+    <value>_Select all messages</value>
+  </data>
   <data name="MENU_OPENMSGFROM" xml:space="preserve">
     <value>_Open message in ..</value>
   </data>
@@ -774,6 +777,12 @@
   </data>
   <data name="TAG_BANNEDIPLIST" xml:space="preserve">
     <value>Access rules for IP, NET or country codes</value>
+  </data>
+  <data name="TAG_BLOCK_EMAIL_DOMAIN" xml:space="preserve">
+    <value>Blocked email addresses and domains</value>
+  </data>
+  <data name="TAG_BLOCK_EMAIL_DOMAIN_LABEL" xml:space="preserve">
+    <value>Address or Domain:</value>
   </data>
   <data name="TAG_BODY" xml:space="preserve">
     <value>Body</value>

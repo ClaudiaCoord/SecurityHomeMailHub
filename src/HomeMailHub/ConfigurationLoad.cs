@@ -63,6 +63,7 @@ namespace HomeMailHub
         public string CheckProxyEndPointUrl { get; set; }
         public List<string> ForbidenRouteList { get; set; } = default;
         public List<string> ForbidenEntryList { get; set; } = default;
+        public List<string> FilterFromList { get; set; } = default;
 
         public bool IsSpamCheckAkismet { get; set; }
         public bool IsAkismetLearn { get; set; }
@@ -167,10 +168,10 @@ namespace HomeMailHub
                 ForbidenRouteList = new(ss);
             }
 
-            if ((Properties.Settings.Default.ForbidenEntryList != default) && (Properties.Settings.Default.ForbidenEntryList.Count > 0)) {
-                string[] ss = new string[Properties.Settings.Default.ForbidenEntryList.Count];
-                Properties.Settings.Default.ForbidenEntryList.CopyTo(ss, 0);
-                ForbidenEntryList = new(ss);
+            if ((Properties.Settings.Default.FilterFromList != default) && (Properties.Settings.Default.FilterFromList.Count > 0)) {
+                string[] ss = new string[Properties.Settings.Default.FilterFromList.Count];
+                Properties.Settings.Default.FilterFromList.CopyTo(ss, 0);
+                FilterFromList = new(ss);
             }
         }
 

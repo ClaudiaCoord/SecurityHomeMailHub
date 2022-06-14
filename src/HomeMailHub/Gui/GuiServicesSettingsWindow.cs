@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HomeMailHub.Associate;
 using HomeMailHub.Gui.Dialogs;
+using HomeMailHub.Gui.ListSources;
 using NStack;
 using SecyrityMail;
 using Terminal.Gui;
@@ -119,8 +120,8 @@ namespace HomeMailHub.Gui
         private FrameView frameSMTP { get; set; } = default;
         private FrameView frameSMTPLeft { get; set; } = default;
         private FrameView frameSMTPRight { get; set; } = default;
-        private FrameView frameDNSBLRight { get; set; } = default;
-        private FrameView frameAkismetRight { get; set; } = default;
+        private FrameView frameDNSBLLeft { get; set; } = default;
+        private FrameView frameAkismetLeft { get; set; } = default;
         private FrameView frameSecure { get; set; } = default;
         private FrameView frameSecureLeft { get; set; } = default;
         private FrameView frameSecureRight { get; set; } = default;
@@ -141,6 +142,7 @@ namespace HomeMailHub.Gui
 
         private List<string> adapters = new();
         private GuiLinearLayot linearLayot { get; } = new();
+        private GuiFrameList frameFromList { get; set; } = default;
 
         public Toplevel GetTop => GuiToplevel;
 
@@ -229,10 +231,17 @@ namespace HomeMailHub.Gui
             {
                 X = labelOffset,
                 Y = 1,
-                Width = 37,
+                Width = 24,
                 Height = 5,
                 TabIndex = 3,
                 ColorScheme = GuiApp.ColorField
+            });
+            framePOP3Left.Add(buttonPop3Action = new Button(Global.Instance.IsPop3Run ? RES.BTN_STOP : RES.BTN_START)
+            {
+                X = Pos.Right(hostPop3Box) + 3,
+                Y = 1,
+                AutoSize = true,
+                ColorScheme = Global.Instance.IsPop3Run ? GuiApp.ColorGreen : GuiApp.ColorRed
             });
             framePOP3Left.Add(portPop3Label = new Label(RES.TAG_PORT)
             {
@@ -277,6 +286,7 @@ namespace HomeMailHub.Gui
             portPop3Text.TextChanged += PortPop3Text_TextChanged;
             idlePop3Text.TextChanged += IdlePop3Text_TextChanged;
             enablePop3Box.Toggled += EnablePop3Box_Toggled;
+            buttonPop3Action.Clicked += ButtonPop3Action_Clicked;
             framePOP3.Add(framePOP3Left);
             #endregion
 
@@ -312,14 +322,6 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsPop3Log
             });
-            framePOP3.Add(buttonPop3Action = new Button(Global.Instance.IsPop3Run ? RES.BTN_STOP : RES.BTN_START)
-            {
-                X = 43,
-                Y = 7,
-                AutoSize = true,
-                ColorScheme = Global.Instance.IsPop3Run ? GuiApp.ColorGreen : GuiApp.ColorRed
-            });
-            buttonPop3Action.Clicked += ButtonPop3Action_Clicked;
             enablePop3Log.Toggled += EnablePop3Log_Toggled;
             enablePop3PgpDecrypt.Toggled += EnablePop3PgpDecrypt_Toggled;
             enablePop3DeleteAllMessages.Toggled += EnablePop3DeleteAllMessages_Toggled;
@@ -376,10 +378,17 @@ namespace HomeMailHub.Gui
             {
                 X = labelOffset,
                 Y = 1,
-                Width = 37,
+                Width = 24,
                 Height = 5,
                 TabIndex = 3,
                 ColorScheme = GuiApp.ColorField
+            });
+            frameSMTPLeft.Add(buttonSmtpAction = new Button(Global.Instance.IsSmtpRun ? RES.BTN_STOP : RES.BTN_START)
+            {
+                X = Pos.Right(hostSmtpBox) + 3,
+                Y = 1,
+                AutoSize = true,
+                ColorScheme = Global.Instance.IsSmtpRun ? GuiApp.ColorGreen : GuiApp.ColorRed
             });
             frameSMTPLeft.Add(portSmtpLabel = new Label(RES.TAG_PORT)
             {
@@ -423,6 +432,7 @@ namespace HomeMailHub.Gui
             hostSmtpBox.SelectedItemChanged += HostBox_SelectedItemChanged;
             portSmtpText.TextChanged += PortSmtpText_TextChanged;
             idleSmtpText.TextChanged += IdleSmtpText_TextChanged;
+            buttonSmtpAction.Clicked += ButtonSmtpAction_Clicked;
             enableSmtpBox.Toggled += EnableSmtpBox_Toggled;
             frameSMTP.Add(frameSMTPLeft);
             #endregion
@@ -483,21 +493,21 @@ namespace HomeMailHub.Gui
             frameSMTP.Add(frameSMTPRight);
             #endregion
 
-            #region DNSBL Right
-            frameDNSBLRight = new FrameView("DNSBL")
+            #region DNSBL Left
+            frameDNSBLLeft = new FrameView("DNSBL")
             {
-                X = Pos.Right(frameSMTPLeft) + 1,
-                Y = Pos.Bottom(frameSMTPRight),
-                Width = 62,
+                X = 1,
+                Y = Pos.Bottom(frameSMTPLeft),
+                Width = 52,
                 Height = 7
             };
-            frameDNSBLRight.Add(dnsblSmtpLabel = new Label(RES.TAG_SERVER)
+            frameDNSBLLeft.Add(dnsblSmtpLabel = new Label(RES.TAG_SERVER)
             {
                 X = 1,
                 Y = 1,
                 AutoSize = true
             });
-            frameDNSBLRight.Add(dnsblSmtpBox = new ComboBox()
+            frameDNSBLLeft.Add(dnsblSmtpBox = new ComboBox()
             {
                 X = labelOffset,
                 Y = 1,
@@ -505,7 +515,7 @@ namespace HomeMailHub.Gui
                 Height = 4,
                 ColorScheme = GuiApp.ColorField
             });
-            frameDNSBLRight.Add(enableDnsbl = new CheckBox(RES.CHKBOX_SMTPDNSBL)
+            frameDNSBLLeft.Add(enableDnsbl = new CheckBox(RES.CHKBOX_SMTPDNSBL)
             {
                 X = 1,
                 Y = 3,
@@ -515,24 +525,24 @@ namespace HomeMailHub.Gui
             });
             enableDnsbl.Toggled += (b) => Global.Instance.Config.IsDnsblIpCheck = b;
             dnsblSmtpBox.SelectedItemChanged += DnsblSmtpBox_SelectedItemChanged;
-            frameSMTP.Add(frameDNSBLRight);
+            frameSMTP.Add(frameDNSBLLeft);
             #endregion
 
-            #region Akismet filter Right
-            frameAkismetRight = new FrameView(RES.TAG_AKISMET)
+            #region Akismet filter Left
+            frameAkismetLeft = new FrameView(RES.TAG_AKISMET)
             {
                 X = 1,
-                Y = Pos.Bottom(frameSMTPLeft),
+                Y = Pos.Bottom(frameDNSBLLeft),
                 Width = 52,
                 Height = 8
             };
-            frameAkismetRight.Add(spamAkismetLabel = new Label(RES.TAG_APIKEY)
+            frameAkismetLeft.Add(spamAkismetLabel = new Label(RES.TAG_APIKEY)
             {
                 X = 1,
                 Y = 1,
                 AutoSize = true
             });
-            frameAkismetRight.Add(spamAkismetText = new TextField(Global.Instance.Config.SpamCheckAkismetKey)
+            frameAkismetLeft.Add(spamAkismetText = new TextField(Global.Instance.Config.SpamCheckAkismetKey)
             {
                 X = labelOffset + 2,
                 Y = 1,
@@ -540,7 +550,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 ColorScheme = GuiApp.ColorField
             });
-            frameAkismetRight.Add(enableAkismet = new CheckBox(RES.CHKBOX_AKISMET_ENABLE)
+            frameAkismetLeft.Add(enableAkismet = new CheckBox(RES.CHKBOX_AKISMET_ENABLE)
             {
                 X = 1,
                 Y = 3,
@@ -548,7 +558,7 @@ namespace HomeMailHub.Gui
                 Height = 1,
                 Checked = Global.Instance.Config.IsSpamCheckAkismet
             });
-            frameAkismetRight.Add(enableAkismetLearn = new CheckBox(RES.CHKBOX_AKISMET_LEARN)
+            frameAkismetLeft.Add(enableAkismetLearn = new CheckBox(RES.CHKBOX_AKISMET_LEARN)
             {
                 X = 1,
                 Y = 4,
@@ -559,15 +569,19 @@ namespace HomeMailHub.Gui
             enableAkismet.Toggled += (b) => Global.Instance.Config.IsSpamCheckAkismet = b;
             enableAkismetLearn.Toggled += (b) => Global.Instance.Config.IsAkismetLearn = b;
             spamAkismetText.TextChanged += (s) => Global.Instance.Config.SpamCheckAkismetKey = s.ToString();
-            frameSMTP.Add(frameAkismetRight);
-            frameSMTP.Add(buttonSmtpAction = new Button(Global.Instance.IsSmtpRun ? RES.BTN_STOP : RES.BTN_START)
-            {
-                X = Pos.Left(frameSMTPRight) - 9,
-                Y = Pos.Bottom(frameAkismetRight),
-                AutoSize = true,
-                ColorScheme = Global.Instance.IsSmtpRun ? GuiApp.ColorGreen : GuiApp.ColorRed
-            });
-            buttonSmtpAction.Clicked += ButtonSmtpAction_Clicked;
+            frameSMTP.Add(frameAkismetLeft);
+            #endregion
+
+            #region From Filter
+            frameFromList = new GuiFrameList(62, Dim.Fill(), RES.TAG_BLOCK_EMAIL_DOMAIN, RES.TAG_BLOCK_EMAIL_DOMAIN_LABEL,
+                (a, b) => {
+                    if (b) Global.Instance.Config.FilterFromList.Add(a);
+                    else Global.Instance.Config.FilterFromList.Remove(a);
+                }) {
+                X = Pos.Right(frameSMTPLeft) + 1,
+                Y = Pos.Bottom(frameSMTPRight)
+            };
+            frameSMTP.Add(frameFromList);
             #endregion
 
             #region SMTP Help
@@ -1370,6 +1384,8 @@ namespace HomeMailHub.Gui
                         helpSecureText.Text = RES.GuiServicesSettingsWindowSecureHelp;
                         helpClientsText.Text = RES.GuiServicesSettingsWindowClientsHelp;
                     });
+                    _ = await frameFromList.Load(() => Global.Instance.Config.FilterFromList).ConfigureAwait(false);
+
                 } catch (Exception ex) { ex.StatusBarError(); }
                 try {
                     MenuItem[] mitems = await nameof(GuiServicesSettingsWindow).LoadMenuUrls().ConfigureAwait(false);

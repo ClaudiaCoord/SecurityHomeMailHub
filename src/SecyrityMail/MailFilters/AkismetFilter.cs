@@ -106,13 +106,14 @@ namespace SecyrityMail.MailFilters
         public async Task LearnHam(AkismetData message) =>
             await Submit(message, _uris[(int)UriTypes.LearnHam]).ConfigureAwait(false);
 
-        public async Task<SpamType> CheckSpam(SpamFilterData sfd) {
+        public async Task<SpamStatusType> CheckSpam(SpamFilterData sfd) {
             AkismetData message = new ();
             if (!message.Copy(sfd))
-                return SpamType.UnCheck;
+                return SpamStatusType.UnCheck;
 
-            bool b = await Submit(message, _uris[(int)UriTypes.CommentCheck]).ConfigureAwait(false) == "true";
-            return b ? SpamType.Spam : SpamType.Ham;
+            string response = await Submit(message, _uris[(int)UriTypes.CommentCheck]).ConfigureAwait(false);
+            bool b = "true".Equals(response, StringComparison.InvariantCultureIgnoreCase);
+            return b ? SpamStatusType.Spam : SpamStatusType.Ham;
         }
 
         private async Task<string> Submit(AkismetData message, Uri uri)

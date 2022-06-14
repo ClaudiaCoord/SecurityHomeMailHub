@@ -383,7 +383,7 @@ namespace HomeMailHub.Gui
              select i).FirstOrDefault();
 
         protected override SshAccount VirtualNewItem() {
-            string host = loginText.Text.ToString();
+            string host = hostText.Text.ToString();
             if (string.IsNullOrEmpty(host))
                 return default;
             int idx = host.IndexOf(':');
@@ -394,19 +394,19 @@ namespace HomeMailHub.Gui
             return a;
         }
 
-        protected override void VirtualBuildItem(SshAccount acc) =>
-            Application.MainLoop.Invoke(() => {
-                acc.Enable = enableBox.Checked;
-                acc.Expired = expireDate.Date;
+        protected override void VirtualBuildItem(SshAccount acc) {
+            acc.Enable = enableBox.Checked;
+            acc.Expired = expireDate.Date;
 
-                acc.Login = loginText.Text.ToString();
-                acc.Pass = passText.Text.ToString();
-                acc.Host = hostText.Text.ToString();
-                acc.Name = nameText.Text.ToString();
-                acc.Type = ProxyTypeSelect(proxyType.SelectedItem);
-                if (int.TryParse(portText.Text.ToString(), out int port))
-                    acc.Port = port;
-            });
+            acc.Login = loginText.Text.ToString();
+            acc.Pass = passText.Text.ToString();
+            acc.Host = hostText.Text.ToString();
+            acc.Name = nameText.Text.ToString();
+            acc.Type = ProxyTypeSelect(proxyType.SelectedItem);
+            if (int.TryParse(portText.Text.ToString(), out int port))
+                acc.Port = port;
+            runOnce.ChangeId(acc.Name);
+        }
 
         protected override void VirtualSelectItem(SshAccount acc) {
 

@@ -192,28 +192,15 @@ namespace HomeMailHub.Gui.ListSources
 
         #region Add item
         protected virtual void VirtualAddItem(T1 acc) { }
-        protected void AddItem(T1 a, bool b) {
+        protected void AddItem(T1 acc, bool b) {
             try {
-                bool isenable = false,
-                     isexpired = false;
-                string name = string.Empty;
+                string name;
+                bool isvalid,
+                     isenable,
+                     isexpired;
 
-                if (a is VpnAccount vpn) {
-                    name = vpn.Name;
-                    isenable = vpn.Enable;
-                    isexpired = vpn.IsExpired;
-                }
-                else if (a is VpnAccount ssh) {
-                    name = ssh.Name;
-                    isenable = ssh.Enable;
-                    isexpired = ssh.IsExpired;
-                }
-                else if (a is UserAccount usr) {
-                    name = usr.Email;
-                    isenable = usr.Enable;
-                    isexpired = false;
-                }
-                else return;
+                (name, isenable, isexpired, isvalid) = GetItemValues(acc);
+                if (!isvalid) return;
 
                 if (b) {
                     if (runOnce.IsRange(data.Count)) {
@@ -222,13 +209,24 @@ namespace HomeMailHub.Gui.ListSources
                     }
                     return;
                 }
-                VirtualAddItem(a);
+                VirtualAddItem(acc);
+
                 data.Add(new(name, isenable, isexpired));
                 runOnce.ChangeId(data.Count - 1, name);
                 data[runOnce.Id].Set(isenable, isexpired);
                 SetList();
                 Application.MainLoop.Invoke(() => listView.SelectedItem = runOnce.Id);
             } catch (Exception ex) { ex.StatusBarError(); }
+        }
+
+        private (string, bool, bool, bool) GetItemValues(T1 acc) {
+            if (acc is VpnAccount vpn)
+                return (vpn.Name, vpn.Enable, vpn.IsExpired, true);
+            else if (acc is SshAccount ssh)
+                return (ssh.Name, ssh.Enable, ssh.IsExpired, true);
+            else if (acc is UserAccount usr)
+                return (usr.Email, usr.Enable, false, true);
+            return (string.Empty, false, false, false);
         }
         #endregion
 
@@ -267,6 +265,7 @@ namespace HomeMailHub.Gui.ListSources
                     T1 a = default;
                     bool b = runOnce.IsValidIds();
                     if (!b) {
+                        runOnce.ResetId();
                         a = VirtualNewItem();
                         if (a == default)
                             return false;
@@ -274,6 +273,7 @@ namespace HomeMailHub.Gui.ListSources
                         a = VirtualGetItem(runOnce.Ids);
                         if (a == default) {
                             b = false;
+                            runOnce.ResetId();
                             a = VirtualNewItem();
                             if (a == default)
                                 return false;
@@ -282,7 +282,8 @@ namespace HomeMailHub.Gui.ListSources
                     if (a != default) {
                         VirtualBuildItem(a);
                         AddItem(a, b);
-                        runOnce.ChangeId(VirtualGetSelectedName(a));
+                        if (!runOnce.IsValidIds())
+                            runOnce.ChangeId(VirtualGetSelectedName(a));
                         _ = await VirtualSaveAll().ConfigureAwait(false);
                     }
                     return true;

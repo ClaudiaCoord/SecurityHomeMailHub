@@ -89,6 +89,7 @@ namespace SecyrityMail
 
         public List<string> ForbidenRouteList { get; set; } = new();
         public List<string> ForbidenEntryList { get; set; } = new();
+        public List<string> FilterFromList { get; set; } = new();
 
         public bool IsCacheMessagesLog {
             get => Global.Instance.MessagesManager.IsCacheMessagesLog;
@@ -212,6 +213,10 @@ namespace SecyrityMail
             ForbidenEntryList.Clear();
             if ((cfg.ForbidenEntryList != default) && (cfg.ForbidenEntryList.Count > 0))
                 ForbidenEntryList.AddRange(cfg.ForbidenEntryList);
+
+            FilterFromList.Clear();
+            if ((cfg.FilterFromList != default) && (cfg.FilterFromList.Count > 0))
+                FilterFromList.AddRange(cfg.FilterFromList);
         }
         #endregion
 

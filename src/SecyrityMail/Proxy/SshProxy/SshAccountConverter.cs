@@ -95,12 +95,12 @@ namespace SecyrityMail.Proxy.SshProxy
                     }
                 } catch (Exception ex) { Global.Instance.Log.Add(nameof(SshAccountConverter), ex); }
             }
-            if (!string.IsNullOrEmpty(Account.Host) && !string.IsNullOrEmpty(Account.Name))
-                Account.Name = $"{Account.Name} - {Account.Host}";
-            else if (string.IsNullOrEmpty(Account.Name) && !string.IsNullOrEmpty(Account.Host))
-                Account.Name = $"{DateTime.Now:MM-dd}: {Account.Host}";
-            else
-                Account.Name = $"{DateTime.Now:MM-dd-HH-mm-ss}";
+            if (Account.IsEmptyName) {
+                if (!string.IsNullOrWhiteSpace(Account.Host))
+                    Account.Name = Account.Host;
+                else
+                    Account.Name = $"{DateTime.Now:MM-dd-HH-mm-ss}";
+            }
             if (!Account.IsEmptyNoCheckTypeAndPort)
                 Account.Type = ProxyType.SshSock5;
             if (Account.Port <= 0)

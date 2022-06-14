@@ -13,7 +13,7 @@ using SecyrityMail.Utils;
 
 namespace SecyrityMail.MailFilters
 {
-    public enum SpamType : int
+    public enum SpamStatusType : int
     {
         None = 0,
         Error,
@@ -22,24 +22,34 @@ namespace SecyrityMail.MailFilters
         UnCheck
     }
 
+    public enum SpamCheckType : int
+    {
+        None = 0,
+        From,
+        Subj,
+        Body,
+        All
+    }
+
     public class SpamFilter
     {
         private List<Lazy<ISpamFilter>> filters { get; } = new();
 
         public SpamFilter() {
+            filters.Add(new Lazy<ISpamFilter>(() => FromFilter.Create()));
             filters.Add(new Lazy<ISpamFilter>(() => AkismetFilter.Create()));
         }
 
         public async Task LearnSpam(SpamFilterData sfd) =>
-            await Learn(SpamType.Spam, sfd).ConfigureAwait(false);
+            await Learn(SpamStatusType.Spam, sfd).ConfigureAwait(false);
 
         public async Task LearnHam(SpamFilterData sfd) =>
-            await Learn(SpamType.Ham, sfd).ConfigureAwait(false);
+            await Learn(SpamStatusType.Ham, sfd).ConfigureAwait(false);
 
-        public async Task<SpamType> Check(MimeMessage mmsg, EndPoint ip) =>
+        public async Task<SpamStatusType> Check(MimeMessage mmsg, EndPoint ip) =>
             await Task.Run(async () => {
                 try {
-                    SpamType type = SpamType.Error;
+                    SpamStatusType type = SpamStatusType.Error;
                     if (mmsg == null)
                         return type;
 
@@ -47,26 +57,26 @@ namespace SecyrityMail.MailFilters
                     if (sfd.IsEmpty)
                         return type;
 
-                    type = SpamType.Ham;
+                    type = SpamStatusType.Ham;
                     foreach (Lazy<ISpamFilter> filter in filters)
-                        if (filter.Value.IsEnable && (type = await filter.Value.CheckSpam(sfd)) == SpamType.Spam) {
+                        if (filter.Value.IsEnable && (type = await filter.Value.CheckSpam(sfd)) == SpamStatusType.Spam) {
                             Global.Instance.Log.Add(filter.Value.GetType().Name, $"message from {sfd.Name} marked as SPAM!");
                             break;
                         }
                     return type;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(SpamFilter), ex); }
-                return SpamType.Error;
+                return SpamStatusType.Error;
             });
 
-        private async Task Learn(SpamType type, SpamFilterData sfd) =>
+        private async Task Learn(SpamStatusType type, SpamFilterData sfd) =>
             await Task.Run(async () => {
                 try {
                     foreach (Lazy<ISpamFilter> filter in filters)
                         if (filter.Value.IsAutoLearn) {
                             switch (type) {
-                                case SpamType.Spam: await filter.Value.LearnSpam(sfd).ConfigureAwait(false); break;
-                                case SpamType.Ham: await filter.Value.LearnHam(sfd).ConfigureAwait(false); break;
+                                case SpamStatusType.Spam: await filter.Value.LearnSpam(sfd).ConfigureAwait(false); break;
+                                case SpamStatusType.Ham: await filter.Value.LearnHam(sfd).ConfigureAwait(false); break;
                             }
                         }
                 } catch (Exception ex) { Global.Instance.Log.Add(nameof(SpamFilter), ex); }

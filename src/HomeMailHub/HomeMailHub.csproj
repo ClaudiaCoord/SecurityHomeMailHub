@@ -119,7 +119,7 @@
     <Compile Include="ConfigurationLoad.cs" />
     <Compile Include="ConfigurationSave.cs" />
     <Compile Include="Gui\GuiBusyBar.cs" />
-    <Compile Include="Gui\GuiFrameList.cs" />
+    <Compile Include="Gui\ListSources\GuiFrameList.cs" />
     <Compile Include="Gui\GuiLinearLayot.cs" />
     <Compile Include="Gui\GuiMessageForwardsDialog.cs" />
     <Compile Include="Gui\GuiProgressBar.cs" />

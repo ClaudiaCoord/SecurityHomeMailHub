@@ -11,7 +11,7 @@ using SecyrityMail;
 using Terminal.Gui;
 using RES = HomeMailHub.Properties.Resources;
 
-namespace HomeMailHub.Gui
+namespace HomeMailHub.Gui.ListSources
 {
     public class GuiFrameList : FrameView, IDisposable
     {
@@ -28,6 +28,7 @@ namespace HomeMailHub.Gui
 
         private List<string> Items { get; } = new();
         public Func<List<string>> GetList = () => default;
+        public Action<string, bool> SetList = (a, b) => {};
         public int Count => Items.Count;
         public bool IsEmpty => Items.Count == 0;
         public string this[int i] { get => Items[i]; set => Items[i] = value; }
@@ -43,12 +44,14 @@ namespace HomeMailHub.Gui
             }
         }
 
-        public GuiFrameList(string title, string edit) : base(title) {
+        public GuiFrameList(int width, Dim height, string title, string edit, Action<string,bool> act) : base(title) {
+
+            SetList = act;
 
             #region linearLayot
             linearLayot.Add("en", new List<GuiLinearData> {
+                new GuiLinearData(1,  1, true),
                 new GuiLinearData(2,  1, true),
-                new GuiLinearData(6,  1, true),
                 new GuiLinearData(21, 3, true),
                 new GuiLinearData(30, 3, true),
                 new GuiLinearData(38, 3, true),
@@ -59,8 +62,8 @@ namespace HomeMailHub.Gui
                 new GuiLinearData(47, 3, true)
             });
             linearLayot.Add("ru", new List<GuiLinearData> {
+                new GuiLinearData(1,  1, true),
                 new GuiLinearData(2,  1, true),
-                new GuiLinearData(6,  1, true),
                 new GuiLinearData(8,  3, true),
                 new GuiLinearData(24, 3, true),
                 new GuiLinearData(37, 3, true),
@@ -72,6 +75,8 @@ namespace HomeMailHub.Gui
             });
 
             int idx = 0;
+            this.Width = width;
+            this.Height = height;
             Pos bottom;
             List<GuiLinearData> layout = linearLayot.GetDefault();
             #endregion
@@ -79,7 +84,7 @@ namespace HomeMailHub.Gui
             #region elements
             Add(listView = new ListView(Global.Instance.Config.ForbidenRouteList)
             {
-                X = 1,
+                X = 0,
                 Y = 1,
                 Width = Dim.Fill() - 2,
                 Height = Dim.Fill() - 4,
@@ -96,9 +101,9 @@ namespace HomeMailHub.Gui
             });
             Add(editText = new TextField(string.Empty)
             {
-                X = layout[idx].X,
+                X = Pos.Right(editLabel) + layout[idx].X,
                 Y = bottom + layout[idx++].Y,
-                Width = 51,
+                Width = width - editLabel.Width - layout[idx].X,
                 Height = 1,
                 ColorScheme = GuiApp.ColorField
             });
@@ -124,11 +129,13 @@ namespace HomeMailHub.Gui
             listView.SelectedItemChanged += ListView_SelectedItemChanged;
             editText.KeyUp += EditText_KeyUp;
 
-            buttonAdd.Clicked += () => { };
-            buttonSort.Clicked += () => { };
-            buttonDelete.Clicked += () => { };
+            buttonAdd.Clicked += () => { AddList(true); };
+            buttonDelete.Clicked += () => { AddList(false); };
+            buttonSort.Clicked += () => {
+                Items.Sort();
+                Application.MainLoop.Invoke(() => listView.SetNeedsDisplay());
+            };
             #endregion
-
         }
 
         public new void Dispose() {
@@ -138,14 +145,15 @@ namespace HomeMailHub.Gui
         }
 
         public async Task<bool> Load(Func<List<string>> fun) =>
-            await Task.Run(() => {
+            await Task.Run(async () => {
                 try {
+                    __last_id = -1;
                     var data = fun.Invoke();
                     Items.Clear();
                     Items.AddRange(data);
                     Application.MainLoop.Invoke(() => editText.Text = string.Empty);
-                    __last_id = -1;
-                } catch {}
+                    await listView.SetSourceAsync(Items).ConfigureAwait(false);
+                } catch { }
                 return false;
             });
 
@@ -171,22 +179,50 @@ namespace HomeMailHub.Gui
         private async void AddList()  {
 
             string s = editText.Text.ToString();
-            if (string.IsNullOrWhiteSpace(s) || (Items.Count == 0))
+            if (string.IsNullOrWhiteSpace(s))
+                return;
+
+            bool b = (Items.Count > 0) && Items.Contains(s);
+            if (b) Items.Remove(s);
+            else Items.Add(s);
+            await UpdateList(!b).ConfigureAwait(false);
+            SetList.Invoke(s, !b);
+        }
+
+        private async void AddList(bool isadd = true) {
+
+            string s = editText.Text.ToString();
+            if (string.IsNullOrWhiteSpace(s) || ((Items.Count == 0) && !isadd))
                 return;
 
             bool b = Items.Contains(s);
-            if (b)
-                Items.Remove(s);
-            else {
-                Items.Add(s);
-                editText.Text = string.Empty;
-            }
-            __last_id = -1;
-            await listView.SetSourceAsync(Items).ContinueWith((a) => {
-                if (!b && (Items.Count > 0))
-                listView.SelectedItem = Items.Count - 1;
+            if ((!isadd && !b) || (isadd && b)) return;
+            else if (isadd) Items.Add(s);
+            else Items.Remove(s);
 
-            }).ConfigureAwait(false);
+            await UpdateList(isadd).ConfigureAwait(false);
+            SetList.Invoke(s, isadd);
+        }
+
+        private async Task UpdateList(bool isadd) {
+            await listView.SetSourceAsync(Items).ContinueWith((a) => {
+                Application.MainLoop.Invoke(() => {
+                    if (Items.Count > 0) {
+                        if (!isadd) {
+                            __last_id = -1;
+                            editText.Text = string.Empty;
+                        } else {
+                            __last_id = Items.Count - 1;
+                            listView.SelectedItem = __last_id;
+                            editText.Text = Items[__last_id];
+                        }
+                    } else {
+                        __last_id = -1;
+                        editText.Text = string.Empty;
+                    }
+                    listView.SetNeedsDisplay();
+                });
+            });
         }
         #endregion
     }

@@ -611,12 +611,12 @@ namespace HomeMailHub.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection SignaturesText {
+        public global::System.Collections.Specialized.StringCollection SignaturesList {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["SignaturesText"]));
+                return ((global::System.Collections.Specialized.StringCollection)(this["SignaturesList"]));
             }
             set {
-                this["SignaturesText"] = value;
+                this["SignaturesList"] = value;
             }
         }
         
@@ -701,6 +701,17 @@ namespace HomeMailHub.Properties {
             }
             set {
                 this["IsAkismetLearn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection FilterFromList {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["FilterFromList"]));
+            }
+            set {
+                this["FilterFromList"] = value;
             }
         }
     }

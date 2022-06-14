@@ -145,7 +145,7 @@ namespace SecyrityMail.Servers
                     _ = await CheckDelivery(mmsg).ConfigureAwait(false);
 
                     try {
-                        SpamType spamtype = SpamType.None;
+                        SpamStatusType spamtype = SpamStatusType.None;
 
                         foreach (var t in MailOutList) {
                             MailMessage msg = default;
@@ -154,12 +154,12 @@ namespace SecyrityMail.Servers
 
                             if (t.Item1 || (t.Item2 == Global.DirectoryPlace.Error) || (t.Item2 == Global.DirectoryPlace.Spam)) {
 
-                                if (spamtype == SpamType.None)
+                                if (spamtype == SpamStatusType.None)
                                     spamtype = await Global.Instance.SpamFilters.Check(mmsg, ip).ConfigureAwait(false);
 
                                 Global.DirectoryPlace place = spamtype switch {
-                                    SpamType.Error => Global.DirectoryPlace.Error,
-                                    SpamType.Spam => Global.DirectoryPlace.Spam,
+                                    SpamStatusType.Error => Global.DirectoryPlace.Error,
+                                    SpamStatusType.Spam => Global.DirectoryPlace.Spam,
                                     _ => t.Item2
                                 };
                                 msg = await LocalDelivery(place, t.Item4, t.Item3.Item2, mmsg, t.Item5)

@@ -4,7 +4,6 @@
  * License MIT.
  */
 
-
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -66,6 +65,9 @@ namespace SecyrityMail.Proxy.SshProxy
         [XmlIgnore]
         public bool IsEmptyNoCheckTypeAndPort => 
             string.IsNullOrWhiteSpace(Host) || string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Pass);
+
+        [XmlIgnore]
+        public bool IsEmptyName => string.IsNullOrWhiteSpace(_Name);
 
         [XmlIgnore]
         public bool IsExpired =>

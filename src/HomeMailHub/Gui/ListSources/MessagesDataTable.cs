@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using SecyrityMail;
 using SecyrityMail.Messages;
 using Terminal.Gui;
-using static HomeMailHub.Gui.GuiMessagesListWindow;
 using GuiAttribute = Terminal.Gui.Attribute;
 using RES = HomeMailHub.Properties.Resources;
 

@@ -1576,6 +1576,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _Select all messages.
+        /// </summary>
+        internal static string MENU_MSGSSELECTALL {
+            get {
+                return ResourceManager.GetString("MENU_MSGSSELECTALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на _Open message in ...
         /// </summary>
         internal static string MENU_OPENMSGFROM {
@@ -2094,6 +2103,24 @@ namespace HomeMailHub.Properties {
         internal static string TAG_BANNEDIPLIST {
             get {
                 return ResourceManager.GetString("TAG_BANNEDIPLIST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Blocked email addresses and domains.
+        /// </summary>
+        internal static string TAG_BLOCK_EMAIL_DOMAIN {
+            get {
+                return ResourceManager.GetString("TAG_BLOCK_EMAIL_DOMAIN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Address or Domain:.
+        /// </summary>
+        internal static string TAG_BLOCK_EMAIL_DOMAIN_LABEL {
+            get {
+                return ResourceManager.GetString("TAG_BLOCK_EMAIL_DOMAIN_LABEL", resourceCulture);
             }
         }
         

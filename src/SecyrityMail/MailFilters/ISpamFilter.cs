@@ -13,7 +13,7 @@ namespace SecyrityMail.MailFilters
         bool IsEnable { get; }
         bool IsAutoLearn { get; }
 
-        Task<SpamType> CheckSpam(SpamFilterData sfd);
+        Task<SpamStatusType> CheckSpam(SpamFilterData sfd);
         Task LearnSpam(SpamFilterData sfd);
         Task LearnHam(SpamFilterData sfd);
     }

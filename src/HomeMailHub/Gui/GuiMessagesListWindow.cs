@@ -423,6 +423,15 @@ namespace HomeMailHub.Gui
             messagesMenu = new MenuItem[]
             {
                 multiSelectMenu,
+                new MenuItem (
+                    RES.MENU_MSGSSELECTALL, "", async () => {
+                        if (!IsMultiSelect) IsMultiSelect = true;
+                        await Task.Delay(150).ConfigureAwait(false);
+                        Application.MainLoop?.Invoke(() => {
+                            tableView.SelectAll();
+                            tableView.SetNeedsDisplay();
+                        });
+                    }),
                 null,
                 new MenuBarItem (RES.MENU_SUB_MOVEFOLDER, new MenuItem [] {
                     new MenuItem (

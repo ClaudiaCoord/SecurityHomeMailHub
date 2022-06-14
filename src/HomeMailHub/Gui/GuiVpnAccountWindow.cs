@@ -460,23 +460,22 @@ namespace HomeMailHub.Gui
             return a;
         }
 
-        protected override void VirtualBuildItem(VpnAccount acc) =>
-            Application.MainLoop.Invoke(() => {
-                acc.Enable = enableBox.Checked;
-                acc.Expired = expireDate.Date;
+        protected override void VirtualBuildItem(VpnAccount acc) {
+            acc.Enable = enableBox.Checked;
+            acc.Expired = expireDate.Date;
 
-                acc.Interface.PrivateKey = privkeyText.Text.ToString();
-                acc.Interface.Address = addrText.Text.ToString();
-                acc.Interface.DNS = dnsText.Text.ToString();
-                acc.Interface.MTU = mtuText.Text.ToString();
+            acc.Interface.PrivateKey = privkeyText.Text.ToString();
+            acc.Interface.Address = addrText.Text.ToString();
+            acc.Interface.DNS = dnsText.Text.ToString();
+            acc.Interface.MTU = mtuText.Text.ToString();
 
-                acc.Peer.PresharedKey = prekeyText.Text.ToString();
-                acc.Peer.PublicKey = pubkeyText.Text.ToString();
-                acc.Peer.Endpoint = hostText.Text.ToString();
-                acc.Peer.AllowedIPs = ipsText.Text.ToString();
-                if (short.TryParse(aliveText.Text.ToString(), out short keepalive))
-                    acc.Peer.PersistentKeepalive = keepalive;
-            });
+            acc.Peer.PresharedKey = prekeyText.Text.ToString();
+            acc.Peer.PublicKey = pubkeyText.Text.ToString();
+            acc.Peer.Endpoint = hostText.Text.ToString();
+            acc.Peer.AllowedIPs = ipsText.Text.ToString();
+            if (short.TryParse(aliveText.Text.ToString(), out short keepalive))
+                acc.Peer.PersistentKeepalive = keepalive;
+        }
 
         protected override void VirtualSelectItem(VpnAccount acc) {
 

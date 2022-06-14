@@ -40,9 +40,9 @@ README.*.*
 
 /docs/*.txt
 /docs/*.ico
-/src/Terminal.Gui.1.5
-/src/Security home Mail Hub x86-cache
-/src/Security home Mail Hub x64-cache
+/src/*.aip
+/src/HomeMailHub-x64-cache
+/src/HomeMailHub-x86-cache
 /docs/icons8-mail-ios-32.png
 /docs/icons8-mail-ios-70.png
 /docs/icons8-mail-ios-96.png

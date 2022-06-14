@@ -677,43 +677,41 @@ namespace HomeMailHub.Gui
             return new UserAccount();
         }
 
-        protected override void VirtualBuildItem(UserAccount acc) =>
-            Application.MainLoop.Invoke(() => {
+        protected override void VirtualBuildItem(UserAccount acc) {
+            string s = nameText.Text.ToString();
+            if (string.IsNullOrEmpty(s)) {
+                int idx = s.IndexOf('@');
+                if (idx > 0)
+                    s = s.Substring(0, idx);
+                acc.Name = s;
+            } else {
+                acc.Name = s;
+            }
 
-                string s = nameText.Text.ToString();
-                if (string.IsNullOrEmpty(s)) {
-                    int idx = s.IndexOf('@');
-                    if (idx > 0)
-                        s = s.Substring(0, idx);
-                    acc.Name = s;
-                } else {
-                    acc.Name = s;
-                }
+            acc.Login = loginText.Text.ToString();
+            acc.Pass = passText.Text.ToString();
+            acc.EmailAddress = emailText.Text.ToString();
+            acc.Enable = enableBox.Checked;
+            acc.IsPgpAutoDecrypt = pgpAutoBox.Checked;
 
-                acc.Login = loginText.Text.ToString();
-                acc.Pass = passText.Text.ToString();
-                acc.EmailAddress = emailText.Text.ToString();
-                acc.Enable = enableBox.Checked;
-                acc.IsPgpAutoDecrypt = pgpAutoBox.Checked;
+            acc.SmtpAddr = hostOutText.Text.ToString();
+            if (int.TryParse(portOutText.Text.ToString(), out int oport))
+                acc.SmtpPort = oport;
+            acc.SmtpSecure = SecureOptionsSelect(tlsOutText.SelectedItem);
 
-                acc.SmtpAddr = hostOutText.Text.ToString();
-                if (int.TryParse(portOutText.Text.ToString(), out int oport))
-                    acc.SmtpPort = oport;
-                acc.SmtpSecure = SecureOptionsSelect(tlsOutText.SelectedItem);
-
-                if (inMailType == InMailType.IMAP) {
-                    acc.ImapAddr = hostInText.Text.ToString();
-                    if (int.TryParse(portInText.Text.ToString(), out int iport))
-                        acc.ImapPort = iport;
-                    acc.ImapSecure = SecureOptionsSelect(tlsInText.SelectedItem);
-                }
-                else if (inMailType == InMailType.POP3) {
-                    acc.Pop3Addr = hostInText.Text.ToString();
-                    if (int.TryParse(portInText.Text.ToString(), out int iport))
-                        acc.Pop3Port = iport;
-                    acc.Pop3Secure = SecureOptionsSelect(tlsInText.SelectedItem);
-                }
-            });
+            if (inMailType == InMailType.IMAP) {
+                acc.ImapAddr = hostInText.Text.ToString();
+                if (int.TryParse(portInText.Text.ToString(), out int iport))
+                    acc.ImapPort = iport;
+                acc.ImapSecure = SecureOptionsSelect(tlsInText.SelectedItem);
+            }
+            else if (inMailType == InMailType.POP3) {
+                acc.Pop3Addr = hostInText.Text.ToString();
+                if (int.TryParse(portInText.Text.ToString(), out int iport))
+                    acc.Pop3Port = iport;
+                acc.Pop3Secure = SecureOptionsSelect(tlsInText.SelectedItem);
+            }
+        }
 
         protected override async void VirtualSelectItem(UserAccount acc) {
 

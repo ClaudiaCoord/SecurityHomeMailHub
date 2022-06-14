@@ -15,7 +15,7 @@ using SecyrityMail.Utils;
 
 namespace SecyrityMail.MailFilters
 {
-    public class ForbidenIp : IAutoInit
+    public class AccessIpFilter : IAutoInit
     {
         private DnsblFilter dnsbl = new();
         private RunOnce runOnce = new();
@@ -155,7 +155,7 @@ namespace SecyrityMail.MailFilters
                     } catch (Exception ex) { Global.Instance.Log.Add(nameof(SetSourceList), ex); }
                 }
             }
-            catch (Exception ex) { Global.Instance.Log.Add(nameof(ForbidenIp), ex); }
+            catch (Exception ex) { Global.Instance.Log.Add(nameof(AccessIpFilter), ex); }
             finally { runOnce.End(); }
         }
 
