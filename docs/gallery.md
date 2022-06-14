@@ -1,6 +1,5 @@
 ---
 layout: post
-title: "Home Mail Hub screenshots"
 ---
 <style type="text/css">
 .image-gallery {

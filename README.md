@@ -70,7 +70,7 @@ Allows you to use local accounts not tied to a specific domain, the exchange of 
 
 ![Home security mail fetch hub](docs/assets/images/hsmh1-Full-View.png) 
 
-[More screenshot ..](docs/assets/images) - [Wiki gallery](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki)  
+[More screenshot ..](https://claudiacoord.github.io/SecurityHomeMailHub/gallery.html) - [Wiki gallery](https://github.com/ClaudiaCoord/SecurityHomeMailHub/wiki)  
 
 ### Settings:
 
