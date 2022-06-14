@@ -14,7 +14,7 @@
 
   .box {
       flex-basis: 25%;
-      width: 100%;
+      width: 150px;
       padding: 10px;
       margin: 2px;
   }
