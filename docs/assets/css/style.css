@@ -3,7 +3,6 @@
 ---
 
 @import "{{ site.theme }}";
-
 .image-gallery {
     width: 100%;
     display: grid;
