@@ -326,7 +326,7 @@ namespace HomeMailHub.Gui
                     new MenuBarItem ($"VPN {RES.TAG_SERVICE}", new MenuItem [] {
                         new MenuItem (RES.BTN_START, "",
 							async () => await Global.Instance.Vpn.Start().ConfigureAwait(false),
-							() => Global.Instance.Config.IsVpnEnable && !Global.Instance.Config.IsVpnTunnelRunning, null, Key.F2),
+							() => Global.Instance.Config.IsVpnManualEnable && !Global.Instance.Config.IsVpnTunnelRunning, null, Key.F2),
                         new MenuItem (RES.BTN_STOP, "",
 							() => Global.Instance.Vpn.Stop(),
 							() => Global.Instance.Config.IsVpnTunnelRunning, null, Key.AltMask | Key.F2)
@@ -344,13 +344,18 @@ namespace HomeMailHub.Gui
                     proxyTypeMenu,
                     RES.MENU_VPNRANDOM.CreateCheckedMenuItem((b) => {
                         if (b) { Global.Instance.Config.IsVpnRandom = !Global.Instance.Config.IsVpnRandom;
-                                 ToStatusBar(RES.MENU_VPNRANDOM, Global.Instance.Config.IsVpnRandom); }
+                                 ToStatusBar(RES.MENU_VPNRANDOM.ClearText(), Global.Instance.Config.IsVpnRandom); }
                         return Global.Instance.Config.IsVpnRandom;
                     }),
                     RES.MENU_VPNALWAYS.CreateCheckedMenuItem((b) => {
                         if (b) { Global.Instance.Config.IsVpnAlways = !Global.Instance.Config.IsVpnAlways;
-                                 ToStatusBar(RES.MENU_VPNALWAYS, Global.Instance.Config.IsVpnAlways); }
+                                 ToStatusBar(RES.MENU_VPNALWAYS.ClearText(), Global.Instance.Config.IsVpnAlways); }
                         return Global.Instance.Config.IsVpnAlways;
+                    }),
+                    RES.MENU_EXCLUDENET.CreateCheckedMenuItem((b) => {
+                        if (b) { Global.Instance.Config.IsVPNLocalRoute = !Global.Instance.Config.IsVPNLocalRoute;
+                                 ToStatusBar(RES.MENU_EXCLUDENET.ClearText(), Global.Instance.Config.IsVPNLocalRoute); }
+                        return Global.Instance.Config.IsVPNLocalRoute;
                     }),
                     RES.MENU_PROXYREPACK.CreateCheckedMenuItem((b) => {
 						if (b) { Global.Instance.Config.IsProxyListRepack = !Global.Instance.Config.IsProxyListRepack;

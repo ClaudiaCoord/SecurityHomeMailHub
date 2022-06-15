@@ -11,9 +11,11 @@ using System.IO;
 
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Routing;
 using SecyrityMail.Data;
 using SecyrityMail.MailFilters;
 using SecyrityMail.Utils;
+using SecyrityMail.Vpn.RouteTable;
 using VPN.WireGuard;
 
 namespace SecyrityMail.Vpn
@@ -26,6 +28,7 @@ namespace SecyrityMail.Vpn
 
         private string GetTag(string s) => $"{VpnTag} {s}";
 
+        private NetRouteTable routeTable = new();
         private EventHandler<EventActionArgs> eventMain;
         private CancellationTokenSafe cancellation = new();
         private Thread threadTunnel = null;
@@ -132,10 +135,10 @@ namespace SecyrityMail.Vpn
                          flog = default(FileInfo);
                 Vpnlogger log = default(Vpnlogger);
                 TokenSafe token = cancellation.TokenSafe;
+                VpnAccount account = VpnAccounts.AccountSelected;
                 uint cursor = Vpnlogger.CursorAll;
                 try {
                     {
-                        VpnAccount account = VpnAccounts.AccountSelected;
                         if ((account == default) || account.IsEmpty)
                             throw new Exception("VPN account not selected");
 
@@ -146,6 +149,8 @@ namespace SecyrityMail.Vpn
                         fcnf = new FileInfo(path);
                         if ((fcnf == default) || !fcnf.Exists)
                             throw new FileNotFoundException(path);
+
+                        account.CurrentServiceName = Path.GetFileNameWithoutExtension(fcnf.FullName);
 
                         flog = new FileInfo(Global.GetRootFile(Global.DirectoryPlace.Vpn, "log.bin"));
                         if (flog == default)
@@ -159,6 +164,9 @@ namespace SecyrityMail.Vpn
                     log = new(flog.FullName);
                     VpnService.Add(fcnf.FullName, true);
                     VpnDriver.VpnAdapter adapter = null;
+
+                    if (Global.Instance.Config.IsVPNLocalRoute)
+                        routeTable.CreateRoute(account);
 
                     while (IsTunnelRunning) {
 
@@ -200,11 +208,14 @@ namespace SecyrityMail.Vpn
                             Global.Instance.Log.Add(TunnelTag, ex);
                         }
                     }
+                    if (Global.Instance.Config.IsVPNLocalRoute)
+                        routeTable.DeleteRoute(account);
                     Global.Instance.Log.Add(LogTag, "end tunnel logging");
                 }
                 catch (OperationCanceledException) { Global.Instance.Log.Add(TunnelTag, "cancell tunnel logging, close"); }
                 catch (Exception ex) { Global.Instance.Log.Add(TunnelTag, ex); }
                 finally {
+
                     if (fcnf != default) {
                         fcnf.Refresh();
                         try { VpnService.Remove(fcnf.FullName, true); } catch { }

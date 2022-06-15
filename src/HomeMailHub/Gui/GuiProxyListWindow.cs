@@ -279,6 +279,12 @@ namespace HomeMailHub.Gui
 						_ = await FromDownload(ProxyType.Http).ConfigureAwait(false), null, null, Key.AltMask | Key.H),
 					new MenuItem (RES.GUIPROXY_MENU3, "", async () =>
 						_ = await FromDownload(ProxyType.Sock5).ConfigureAwait(false), null, null, Key.AltMask | Key.S),
+                    null,
+                    new MenuItem (RES.BTN_CHECKALL, "", () => {
+						if ((proxyType == ProxyType.All) || (proxyType == ProxyType.None))
+							ProxySelectType_SelectedItemChanged(new SelectedItemChangedArgs(0, -1));
+						buttonCheckAll.OnClicked();
+						}, null, null, Key.AltMask | Key.CursorRight),
 					null,
 					new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.CursorLeft)
 				}),

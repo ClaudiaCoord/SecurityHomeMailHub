@@ -529,6 +529,9 @@
   <data name="MENU_DELETEMENU" xml:space="preserve">
     <value>_Delete</value>
   </data>
+  <data name="MENU_EXCLUDENET" xml:space="preserve">
+    <value>Exclude _local network from VPN routing</value>
+  </data>
   <data name="MENU_EXPORT_FORMAT" xml:space="preserve">
     <value>Export selected messages in</value>
   </data>
@@ -594,6 +597,9 @@
   </data>
   <data name="MENU_MESSAGES" xml:space="preserve">
     <value>_Messages</value>
+  </data>
+  <data name="MENU_MOVE_TO" xml:space="preserve">
+    <value>_Move selected messages to mailbox</value>
   </data>
   <data name="MENU_MSGFORWARDS" xml:space="preserve">
     <value>_Forwards</value>

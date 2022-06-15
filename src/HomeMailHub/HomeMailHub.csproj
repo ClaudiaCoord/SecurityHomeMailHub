@@ -185,6 +185,16 @@
     </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
+    <ContentWithTargetPath Include="Install\vpn\RouteAdd.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\VPN\RouteAdd.cmd</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Install\vpn\RouteDelete.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>mail\VPN\RouteDelete.cmd</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+  <ItemGroup>
     <ContentWithTargetPath Include="Install\GeoLite2-Country.mmdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>GeoLite2-Country.mmdb</TargetPath>

@@ -349,7 +349,7 @@ namespace HomeMailHub.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.0.0.0/0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.0.0.0/0, ::/0, 8000::/0")]
         public string VpnAllowedIPDefault {
             get {
                 return ((string)(this["VpnAllowedIPDefault"]));
@@ -712,6 +712,18 @@ namespace HomeMailHub.Properties {
             }
             set {
                 this["FilterFromList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsVPNLocalRoute {
+            get {
+                return ((bool)(this["IsVPNLocalRoute"]));
+            }
+            set {
+                this["IsVPNLocalRoute"] = value;
             }
         }
     }

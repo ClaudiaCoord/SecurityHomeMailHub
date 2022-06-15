@@ -45,27 +45,35 @@ namespace SecyrityMail.Vpn
     public class VpnPeer
     {
         [XmlIgnore]
-        const string AllowedIPsAll = "0.0.0.0/0, ::/0";
+        public const string AllowedIPsDefaultBlock = "0.0.0.0/0, ::/0, 8000::/0";
         [XmlIgnore]
-        public const string AllowedIPsDefault = "0.0.0.0/0";
+        public const string AllowedIPsDefaultNoBlock = "0.0.0.0/1, 128.0.0.0/1, ::/1, 8000::/1";
 
         [XmlElement("PublicKey")]
         public string PublicKey { get; set; } = string.Empty;
         [XmlElement("PresharedKey")]
         public string PresharedKey { get; set; } = string.Empty;
         [XmlElement("AllowedIPs")]
-        public string AllowedIPs { get; set; } = AllowedIPsDefault;
+        public string AllowedIPs { get; set; } = AllowedIPsDefaultBlock;
         [XmlElement("Endpoint")]
         public string Endpoint { get; set; } = string.Empty;
         [XmlElement("PersistentKeepalive")]
         public short PersistentKeepalive { get; set; } = 0;
 
-        public void SetDefault() =>
-            AllowedIPs = string.IsNullOrWhiteSpace(Global.Instance.Config.VpnAllowedIPDefault) ?
-                AllowedIPsDefault : Global.Instance.Config.VpnAllowedIPDefault;
+        private string SelectAllowed() =>
+            Global.Instance.Config.IsVPNLocalRoute ? AllowedIPsDefaultNoBlock :
+                (string.IsNullOrWhiteSpace(Global.Instance.Config.VpnAllowedIPDefault) ?
+                    AllowedIPsDefaultBlock : Global.Instance.Config.VpnAllowedIPDefault);
 
-        public void SetAllowedAll() =>
-            AllowedIPs = AllowedIPsAll;
+        public VpnPeer Get() {
+            return new VpnPeer() {
+                PublicKey = PublicKey,
+                PresharedKey = PresharedKey,
+                AllowedIPs = SelectAllowed(),
+                Endpoint = Endpoint,
+                PersistentKeepalive = PersistentKeepalive
+            };
+        }
     }
     [Serializable]
     [DesignerCategory("code")]
@@ -74,6 +82,9 @@ namespace SecyrityMail.Vpn
     public class VpnAccount
     {
         private string _Name = string.Empty;
+
+        [XmlIgnore]
+        public string CurrentServiceName { get; set; } = string.Empty;
 
         [XmlElement("Interface")]
         public VpnInterface Interface { get; set; } = new();
@@ -148,14 +159,17 @@ namespace SecyrityMail.Vpn
                         sb.Append($"{nameof(VpnInterface.DNS)} = {Interface.DNS}\n");
                     if (!string.IsNullOrWhiteSpace(Interface.MTU))
                         sb.Append($"{nameof(VpnInterface.MTU)} = {Interface.MTU}\n");
+                    if (Global.Instance.Config.IsVPNLocalRoute)
+                        sb.Append("Table = off\n");
 
+                    VpnPeer peer = Peer.Get();
                     sb.Append($"[{nameof(VpnAccount.Peer)}]\n");
-                    sb.Append($"{nameof(VpnPeer.PublicKey)} = {Peer.PublicKey}\n");
-                    if (!string.IsNullOrWhiteSpace(Peer.PresharedKey))
-                        sb.Append($"{nameof(VpnPeer.PresharedKey)} = {Peer.PresharedKey}\n");
-                    sb.Append($"{nameof(VpnPeer.Endpoint)} = {Peer.Endpoint}\n");
-                    sb.Append($"{nameof(VpnPeer.AllowedIPs)} = {Peer.AllowedIPs}\n");
-                    sb.Append($"{nameof(VpnPeer.PersistentKeepalive)} = {Peer.PersistentKeepalive}");
+                    sb.Append($"{nameof(VpnPeer.PublicKey)} = {peer.PublicKey}\n");
+                    if (!string.IsNullOrWhiteSpace(peer.PresharedKey))
+                        sb.Append($"{nameof(VpnPeer.PresharedKey)} = {peer.PresharedKey}\n");
+                    sb.Append($"{nameof(VpnPeer.Endpoint)} = {peer.Endpoint}\n");
+                    sb.Append($"{nameof(VpnPeer.AllowedIPs)} = {peer.AllowedIPs}\n");
+                    sb.Append($"{nameof(VpnPeer.PersistentKeepalive)} = {peer.PersistentKeepalive}");
                     File.WriteAllBytes(path, enc.GetBytes(sb.ToString()));
                     return path;
                 }

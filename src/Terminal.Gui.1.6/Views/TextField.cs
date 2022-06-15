@@ -1,4 +1,11 @@
-﻿using System;
+﻿//
+// TextField.cs: single-line text editor with Emacs keybindings
+//
+// Authors:
+//   Miguel de Icaza (miguel@gnome.org)
+//
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,31 +15,73 @@ using Terminal.Gui.Resources;
 using Rune = System.Rune;
 
 namespace Terminal.Gui {
+	/// <summary>
+	///   Single-line text entry <see cref="View"/>
+	/// </summary>
+	/// <remarks>
+	///   The <see cref="TextField"/> <see cref="View"/> provides editing functionality and mouse support.
+	/// </remarks>
 	public class TextField : View {
 		List<Rune> text;
 		int first, point;
-		int selectedStart = -1;        
+		int selectedStart = -1; // -1 represents there is no text selection.
 		ustring selectedText;
 		HistoryText historyText = new HistoryText ();
 		CultureInfo currentCulture;
 
+		/// <summary>
+		/// Tracks whether the text field should be considered "used", that is, that the user has moved in the entry, so new input should be appended at the cursor position, rather than clearing the entry
+		/// </summary>
 		public bool Used { get; set; }
 
+		/// <summary>
+		/// If set to true its not allow any changes in the text.
+		/// </summary>
 		public bool ReadOnly { get; set; } = false;
 
+		/// <summary>
+		/// Changing event, raised before the <see cref="Text"/> changes and can be canceled or changing the new text.
+		/// </summary>
 		public event Action<TextChangingEventArgs> TextChanging;
 
+		/// <summary>
+		///   Changed event, raised when the text has changed.
+		/// </summary>
+		/// <remarks>
+		///   This event is raised when the <see cref="Text"/> changes. 
+		/// </remarks>
+		/// <remarks>
+		///   The passed <see cref="EventArgs"/> is a <see cref="ustring"/> containing the old value. 
+		/// </remarks>
 		public event Action<ustring> TextChanged;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TextField"/> class using <see cref="LayoutStyle.Computed"/> positioning.
+		/// </summary>
+		/// <param name="text">Initial text contents.</param>
 		public TextField (string text) : this (ustring.Make (text)) { }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TextField"/> class using <see cref="LayoutStyle.Computed"/> positioning.
+		/// </summary>
 		public TextField () : this (string.Empty) { }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TextField"/> class using <see cref="LayoutStyle.Computed"/> positioning.
+		/// </summary>
+		/// <param name="text">Initial text contents.</param>
 		public TextField (ustring text) : base (text)
 		{
 			Initialize (text, text.RuneCount + 1);
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TextField"/> class using <see cref="LayoutStyle.Absolute"/> positioning.
+		/// </summary>
+		/// <param name="x">The x coordinate.</param>
+		/// <param name="y">The y coordinate.</param>
+		/// <param name="w">The width.</param>
+		/// <param name="text">Initial text contents.</param>
 		public TextField (int x, int y, int w, ustring text) : base (new Rect (x, y, w, 1))
 		{
 			Initialize (text, w);
@@ -57,6 +106,7 @@ namespace Terminal.Gui {
 
 			Initialized += TextField_Initialized;
 
+			// Things this view knows how to do
 			AddCommand (Command.DeleteCharRight, () => { DeleteCharRight (); return true; });
 			AddCommand (Command.DeleteCharLeft, () => { DeleteCharLeft (); return true; });
 			AddCommand (Command.LeftHomeExtend, () => { MoveHomeExtend (); return true; });
@@ -87,6 +137,7 @@ namespace Terminal.Gui {
 			AddCommand (Command.DeleteAll, () => { DeleteAll (); return true; });
 			AddCommand (Command.Accept, () => { ShowContextMenu (); return true; });
 
+			// Default keybindings for this view
 			AddKeyBinding (Key.DeleteChar, Command.DeleteCharRight);
 			AddKeyBinding (Key.D | Key.CtrlMask, Command.DeleteCharRight);
 
@@ -193,15 +244,24 @@ namespace Terminal.Gui {
 			Autocomplete.PopupInsideContainer = false;
 		}
 
+		///<inheritdoc/>
 		public override bool OnLeave (View view)
 		{
 			if (Application.mouseGrabView != null && Application.mouseGrabView == this)
 				Application.UngrabMouse ();
+			//if (SelectedLength != 0 && !(Application.mouseGrabView is MenuBar))
+			//	ClearAllSelection ();
+
 			return base.OnLeave (view);
 		}
 
+		/// <summary>
+		/// Provides autocomplete context menu based on suggestions at the current cursor
+		/// position. Populate <see cref="Autocomplete.AllSuggestions"/> to enable this feature.
+		/// </summary>
 		public IAutocomplete Autocomplete { get; protected set; } = new TextFieldAutocomplete ();
 
+		///<inheritdoc/>
 		public override Rect Frame {
 			get => base.Frame;
 			set {
@@ -210,6 +270,11 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		///   Sets or gets the text held by the view.
+		/// </summary>
+		/// <remarks>
+		/// </remarks>
 		public new ustring Text {
 			get {
 				return ustring.Make (text);
@@ -237,7 +302,11 @@ namespace Terminal.Gui {
 						, HistoryText.LineStatus.Replaced);
 				}
 
+#				if TERM_EVENT_NEWVALUE
 				TextChanged?.Invoke (newText.NewText);
+#				else
+				TextChanged?.Invoke (oldText);
+#				endif
 
 				if (point > text.Count) {
 					point = Math.Max (TextModel.DisplaySize (text, 0).size - 1, 0);
@@ -248,8 +317,17 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		///   Sets the secret property.
+		/// </summary>
+		/// <remarks>
+		///   This makes the text entry suitable for entering passwords.
+		/// </remarks>
 		public bool Secret { get; set; }
 
+		/// <summary>
+		///    Sets or gets the current cursor position.
+		/// </summary>
 		public virtual int CursorPosition {
 			get { return point; }
 			set {
@@ -264,14 +342,31 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Gets the left offset position.
+		/// </summary>
 		public int ScrollOffset => first;
 
+		/// <summary>
+		/// Indicates whatever the text was changed or not.
+		/// <see langword="true"/> if the text was changed <see langword="false"/> otherwise.
+		/// </summary>
 		public bool IsDirty => historyText.IsDirty (Text);
 
+		/// <summary>
+		/// Indicates whatever the text has history changes or not.
+		/// <see langword="true"/> if the text has history changes <see langword="false"/> otherwise.
+		/// </summary>
 		public bool HasHistoryChanges => historyText.HasHistoryChanges;
 
+		/// <summary>
+		/// Get the <see cref="ContextMenu"/> for this view.
+		/// </summary>
 		public ContextMenu ContextMenu { get; private set; }
 
+		/// <summary>
+		///   Sets the cursor position.
+		/// </summary>
 		public override void PositionCursor ()
 		{
 			var col = 0;
@@ -315,6 +410,7 @@ namespace Terminal.Gui {
 			}
 		}
 
+		///<inheritdoc/>
 		public override void Redraw (Rect bounds)
 		{
 			var selColor = new Attribute (ColorScheme.Focus.Background, ColorScheme.Focus.Foreground);
@@ -363,6 +459,7 @@ namespace Terminal.Gui {
 			if (SelectedLength > 0)
 				return;
 
+			// draw autocomplete
 			Autocomplete.GenerateSuggestions ();
 
 			var renderAt = new Point (
@@ -413,6 +510,7 @@ namespace Terminal.Gui {
 			SetText (newText.ToList ());
 		}
 
+		///<inheritdoc/>
 		public override bool CanFocus {
 			get => base.CanFocus;
 			set { base.CanFocus = value; }
@@ -426,10 +524,32 @@ namespace Terminal.Gui {
 
 		int oldCursorPos;
 
+		/// <summary>
+		/// Processes key presses for the <see cref="TextField"/>.
+		/// </summary>
+		/// <param name="kb"></param>
+		/// <returns></returns>
+		/// <remarks>
+		/// The <see cref="TextField"/> control responds to the following keys:
+		/// <list type="table">
+		///    <listheader>
+		///        <term>Keys</term>
+		///        <description>Function</description>
+		///    </listheader>
+		///    <item>
+		///        <term><see cref="Key.Delete"/>, <see cref="Key.Backspace"/></term>
+		///        <description>Deletes the character before cursor.</description>
+		///    </item>
+		/// </list>
+		/// </remarks>
 		public override bool ProcessKey (KeyEvent kb)
 		{
+			// remember current cursor position
+			// because the new calculated cursor position is needed to be set BEFORE the change event is triggest
+			// Needed for the Elmish Wrapper issue https://github.com/DieselMeister/Terminal.Gui.Elmish/issues/2
 			oldCursorPos = point;
 
+			// Give autocomplete first opportunity to respond to key presses
 			if (SelectedLength == 0 && Autocomplete.ProcessKey (kb)) {
 				return true;
 			}
@@ -439,6 +559,7 @@ namespace Terminal.Gui {
 			if (result != null)
 				return (bool)result;
 
+			// Ignore other control characters.
 			if (kb.Key < Key.Space || kb.Key > Key.CharMask)
 				return false;
 
@@ -486,6 +607,9 @@ namespace Terminal.Gui {
 			SetNeedsDisplay ();
 		}
 
+		/// <summary>
+		/// Deletes word backwards.
+		/// </summary>
 		public virtual void KillWordBackwards ()
 		{
 			ClearAllSelection ();
@@ -497,6 +621,9 @@ namespace Terminal.Gui {
 			Adjust ();
 		}
 
+		/// <summary>
+		/// Deletes word forwards.
+		/// </summary>
 		public virtual void KillWordForwards ()
 		{
 			ClearAllSelection ();
@@ -532,6 +659,20 @@ namespace Terminal.Gui {
 
 			historyText.Redo ();
 
+			//if (Clipboard.Contents == null)
+			//	return true;
+			//var clip = TextModel.ToRunes (Clipboard.Contents);
+			//if (clip == null)
+			//	return true;
+
+			//if (point == text.Count) {
+			//	point = text.Count;
+			//	SetText(text.Concat(clip).ToList());
+			//} else {
+			//	point += clip.Count;
+			//	SetText(text.GetRange(0, oldCursorPos).Concat(clip).Concat(text.GetRange(oldCursorPos, text.Count - oldCursorPos)));
+			//}
+			//Adjust ();
 		}
 
 		void UndoChanges ()
@@ -657,6 +798,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Deletes the left character.
+		/// </summary>
 		public virtual void DeleteCharLeft (bool useOldCursorPos = true)
 		{
 			if (ReadOnly)
@@ -685,6 +829,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Deletes the right character.
+		/// </summary>
 		public virtual void DeleteCharRight ()
 		{
 			if (ReadOnly)
@@ -798,6 +945,9 @@ namespace Terminal.Gui {
 			ContextMenu.Show ();
 		}
 
+		/// <summary>
+		/// Selects all text.
+		/// </summary>
 		public void SelectAll ()
 		{
 			if (text.Count == 0) {
@@ -809,6 +959,9 @@ namespace Terminal.Gui {
 			SetNeedsDisplay ();
 		}
 
+		/// <summary>
+		/// Deletes all text.
+		/// </summary>
 		public void DeleteAll ()
 		{
 			if (text.Count == 0) {
@@ -821,6 +974,9 @@ namespace Terminal.Gui {
 			SetNeedsDisplay ();
 		}
 
+		/// <summary>
+		/// Start position of the selected text.
+		/// </summary>
 		public int SelectedStart {
 			get => selectedStart;
 			set {
@@ -835,8 +991,14 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Length of the selected text.
+		/// </summary>
 		public int SelectedLength { get => length; }
 
+		/// <summary>
+		/// The selected text.
+		/// </summary>
 		public ustring SelectedText {
 			get => Secret ? null : selectedText;
 			private set => selectedText = value;
@@ -846,6 +1008,7 @@ namespace Terminal.Gui {
 		bool isButtonPressed;
 		bool isButtonReleased = true;
 
+		///<inheritdoc/>
 		public override bool MouseEvent (MouseEvent ev)
 		{
 			if (!ev.Flags.HasFlag (MouseFlags.Button1Pressed) && !ev.Flags.HasFlag (MouseFlags.ReportMousePosition) &&
@@ -862,6 +1025,7 @@ namespace Terminal.Gui {
 				SetFocus ();
 			}
 
+			// Give autocomplete first opportunity to respond to mouse clicks
 			if (SelectedLength == 0 && Autocomplete.MouseEvent (ev, true)) {
 				return true;
 			}
@@ -926,6 +1090,7 @@ namespace Terminal.Gui {
 
 		int PositionCursor (MouseEvent ev)
 		{
+			// We could also set the cursor position.
 			int x;
 			var pX = TextModel.GetColFromX (text, first, ev.X);
 			if (text.Count == 0) {
@@ -975,6 +1140,9 @@ namespace Terminal.Gui {
 			Adjust ();
 		}
 
+		/// <summary>
+		/// Clear the selected text.
+		/// </summary>
 		public void ClearAllSelection ()
 		{
 			if (selectedStart == -1 && length == 0 && selectedText == "")
@@ -997,6 +1165,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Copy the selected text to the clipboard.
+		/// </summary>
 		public virtual void Copy ()
 		{
 			if (Secret || length == 0)
@@ -1005,6 +1176,9 @@ namespace Terminal.Gui {
 			Clipboard.Contents = SelectedText;
 		}
 
+		/// <summary>
+		/// Cut the selected text to the clipboard.
+		/// </summary>
 		public virtual void Cut ()
 		{
 			if (ReadOnly || Secret || length == 0)
@@ -1031,6 +1205,9 @@ namespace Terminal.Gui {
 			return newText.ToRuneList ();
 		}
 
+		/// <summary>
+		/// Paste the selected text from the clipboard.
+		/// </summary>
 		public virtual void Paste ()
 		{
 			if (ReadOnly || Clipboard.Contents == null) {
@@ -1053,6 +1230,11 @@ namespace Terminal.Gui {
 			Adjust ();
 		}
 
+		/// <summary>
+		/// Virtual method that invoke the <see cref="TextChanging"/> event if it's defined.
+		/// </summary>
+		/// <param name="newText">The new text to be replaced.</param>
+		/// <returns>Returns the <see cref="TextChangingEventArgs"/></returns>
 		public virtual TextChangingEventArgs OnTextChanging (ustring newText)
 		{
 			var ev = new TextChangingEventArgs (newText);
@@ -1062,6 +1244,9 @@ namespace Terminal.Gui {
 
 		CursorVisibility desiredCursorVisibility = CursorVisibility.Default;
 
+		/// <summary>
+		/// Get / Set the wished cursor when the field is focused
+		/// </summary>
 		public CursorVisibility DesiredCursorVisibility {
 			get => desiredCursorVisibility;
 			set {
@@ -1073,6 +1258,7 @@ namespace Terminal.Gui {
 			}
 		}
 
+		///<inheritdoc/>
 		public override bool OnEnter (View view)
 		{
 			Application.Driver.SetCursorVisibility (DesiredCursorVisibility);
@@ -1080,6 +1266,12 @@ namespace Terminal.Gui {
 			return base.OnEnter (view);
 		}
 
+		/// <summary>
+		/// Inserts the given <paramref name="toAdd"/> text at the current cursor position
+		/// exactly as if the user had just typed it
+		/// </summary>
+		/// <param name="toAdd">Text to add</param>
+		/// <param name="useOldCursorPos">If uses the <see cref="oldCursorPos"/>.</param>
 		public void InsertText (string toAdd, bool useOldCursorPos = true)
 		{
 			foreach (var ch in toAdd) {
@@ -1097,29 +1289,52 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Allows clearing the <see cref="HistoryText.HistoryTextItem"/> items updating the original text.
+		/// </summary>
 		public void ClearHistoryChanges ()
 		{
 			historyText.Clear (Text);
 		}
 	}
 
+	/// <summary>
+	/// An <see cref="EventArgs"/> which allows passing a cancelable new text value event.
+	/// </summary>
 	public class TextChangingEventArgs : EventArgs {
+		/// <summary>
+		/// The new text to be replaced.
+		/// </summary>
 		public ustring NewText { get; set; }
+		/// <summary>
+		/// Flag which allows to cancel the new text value.
+		/// </summary>
 		public bool Cancel { get; set; }
 
+		/// <summary>
+		/// Initializes a new instance of <see cref="TextChangingEventArgs"/>
+		/// </summary>
+		/// <param name="newText">The new <see cref="TextField.Text"/> to be replaced.</param>
 		public TextChangingEventArgs (ustring newText)
 		{
 			NewText = newText;
 		}
 	}
 
+	/// <summary>
+	/// Renders an overlay on another view at a given point that allows selecting
+	/// from a range of 'autocomplete' options.
+	/// An implementation on a TextField.
+	/// </summary>
 	public class TextFieldAutocomplete : Autocomplete {
 
+		/// <inheritdoc/>
 		protected override void DeleteTextBackwards ()
 		{
 			((TextField)HostControl).DeleteCharLeft (false);
 		}
 
+		/// <inheritdoc/>
 		protected override string GetCurrentWord ()
 		{
 			var host = (TextField)HostControl;
@@ -1128,6 +1343,7 @@ namespace Terminal.Gui {
 			return IdxToWord (currentLine, cursorPosition);
 		}
 
+		/// <inheritdoc/>
 		protected override void InsertText (string accepted)
 		{
 			((TextField)HostControl).InsertText (accepted, false);

@@ -51,3 +51,4 @@ README.*.*
 /src/SecurityMailTunnel/*.licenseheader
 /src/VpnWireGuard/*.licenseheader
 /src/lib/GnuPG-2.3.4
+/src/Terminal.Gui.1.6.OLD

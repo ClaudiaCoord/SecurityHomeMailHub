@@ -49,44 +49,54 @@
 
     <Platforms>AnyCPU;x86;x64</Platforms>
 
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|x64'">
     <DebugType>none</DebugType>
     <PlatformTarget>x64</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|x86'">
     <DebugType>none</DebugType>
     <PlatformTarget>x86</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|x64'">
     <DebugType>none</DebugType>
     <PlatformTarget>x64</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|x86'">
     <DebugType>none</DebugType>
     <PlatformTarget>x86</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|AnyCPU'">
     <DebugType>none</DebugType>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
     <DebugType>none</DebugType>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|x86'">
     <DebugType>none</DebugType>
     <PlatformTarget>x86</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|x86'">
     <DebugType>none</DebugType>
     <PlatformTarget>x86</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|x64'">
     <DebugType>none</DebugType>
     <PlatformTarget>x64</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|x64'">
     <DebugType>none</DebugType>
     <PlatformTarget>x64</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TERM_NO_RUNE_DEFAULT;TERM_EVENT_NEWVALUE</DefineConstants>
   </PropertyGroup>
 </Project>

@@ -37,10 +37,12 @@ namespace SecyrityMail
         bool IsSmtpLog { get; set; }
         bool IsSmtpSecure { get; set; }
         bool IsSmtpEnable { get; set; }
+        bool IsVPNLocalRoute { get; set; }
         bool IsVpnTunnelRunning { get; }
         bool IsVpnBegin { get; }
-        bool IsVpnAlways { get; set; }
+        bool IsVpnManualEnable { get; }
         bool IsVpnEnable { get; set; }
+        bool IsVpnAlways { get; set; }
         bool IsVpnRandom { get; set; }
         bool IsVpnReady { get; }
         bool IsVpnSelected { get; }

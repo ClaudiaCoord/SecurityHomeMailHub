@@ -732,7 +732,7 @@ namespace Terminal.Gui {
 		public override int Top => top;
 		public override bool HeightAsBuffer { get; set; }
 		public override IClipboard Clipboard => clipboard;
-		internal override int [,,] Contents => contents;
+		public override int [,,] Contents => contents;
 
 		public WindowsConsole WinConsole { get; private set; }
 
@@ -910,7 +910,8 @@ namespace Terminal.Gui {
 		{
 			MouseFlags mouseFlag = MouseFlags.AllEvents;
 
-			//System.Diagnostics.Debug.WriteLine ($"ButtonState: {mouseEvent.ButtonState};EventFlags: {mouseEvent.EventFlags}");
+			//System.Diagnostics.Debug.WriteLine (
+			//	$"X:{mouseEvent.MousePosition.X};Y:{mouseEvent.MousePosition.Y};ButtonState:{mouseEvent.ButtonState};EventFlags:{mouseEvent.EventFlags}");
 
 			if (isButtonDoubleClicked || isOneFingerDoubleClicked) {
 				Application.MainLoop.AddIdle (() => {
@@ -996,7 +997,7 @@ namespace Terminal.Gui {
 
 			//}
 			if ((mouseEvent.ButtonState != 0 && mouseEvent.EventFlags == 0 && lastMouseButtonPressed == null && !isButtonDoubleClicked) ||
-				 (lastMouseButtonPressed == null && mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseMoved &&
+				 (lastMouseButtonPressed == null && mouseEvent.EventFlags.HasFlag (WindowsConsole.EventFlags.MouseMoved) &&
 				 mouseEvent.ButtonState != 0 && !isButtonReleased && !isButtonDoubleClicked)) {
 				switch (mouseEvent.ButtonState) {
 				case WindowsConsole.ButtonState.Button1Pressed:
@@ -1014,21 +1015,16 @@ namespace Terminal.Gui {
 
 				if (mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseMoved) {
 					mouseFlag |= MouseFlags.ReportMousePosition;
-					point = new Point ();
 					isButtonReleased = false;
 					processButtonClick = false;
-				} else {
-					point = new Point () {
-						X = mouseEvent.MousePosition.X,
-						Y = mouseEvent.MousePosition.Y
-					};
 				}
+				point = p;
 				lastMouseButtonPressed = mouseEvent.ButtonState;
 				isButtonPressed = true;
 
 				if ((mouseFlag & MouseFlags.ReportMousePosition) == 0) {
 					Application.MainLoop.AddIdle (() => {
-						Task.Run (async () => await ProcessContinuousButtonPressedAsync (mouseEvent, mouseFlag));
+						Task.Run (async () => await ProcessContinuousButtonPressedAsync (mouseFlag));
 						return false;
 					});
 				}
@@ -1175,18 +1171,17 @@ namespace Terminal.Gui {
 			//buttonPressedCount = 0;
 		}
 
-		async Task ProcessContinuousButtonPressedAsync (WindowsConsole.MouseEventRecord mouseEvent, MouseFlags mouseFlag)
+		async Task ProcessContinuousButtonPressedAsync (MouseFlags mouseFlag)
 		{
-			await Task.Delay (200);
 			while (isButtonPressed) {
 				await Task.Delay (100);
 				var me = new MouseEvent () {
-					X = mouseEvent.MousePosition.X,
-					Y = mouseEvent.MousePosition.Y,
+					X = point.X,
+					Y = point.Y,
 					Flags = mouseFlag
 				};
 
-				var view = Application.wantContinuousButtonPressedView;
+				var view = Application.WantContinuousButtonPressedView;
 				if (view == null) {
 					break;
 				}
@@ -1441,6 +1436,8 @@ namespace Terminal.Gui {
 				Right = (short)Cols
 			};
 			WinConsole.ForceRefreshCursorVisibility ();
+			Console.Out.Write ("\x1b[3J");
+			Console.Out.Flush ();
 		}
 
 		public override void UpdateOffScreen ()
@@ -1575,6 +1572,12 @@ namespace Terminal.Gui {
 		{
 			if (damageRegion.Left == -1)
 				return;
+
+			if (!HeightAsBuffer) {
+				var windowSize = WinConsole.GetConsoleBufferWindow (out _);
+				if (!windowSize.IsEmpty && (windowSize.Width != Cols || windowSize.Height != Rows))
+					return;
+			}
 
 			var bufferCoords = new WindowsConsole.Coord () {
 				X = (short)Clip.Width,
@@ -1840,12 +1843,12 @@ namespace Terminal.Gui {
 
 		bool IMainLoopDriver.EventsPending (bool wait)
 		{
+			waitForProbe.Set ();
+			winChange.Set ();
+
 			if (CheckTimers (wait, out var waitTimeout)) {
 				return true;
 			}
-
-			waitForProbe.Set ();
-			winChange.Set ();
 
 			try {
 				if (!tokenSource.IsCancellationRequested) {

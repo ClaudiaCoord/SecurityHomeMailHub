@@ -31,6 +31,8 @@ namespace HomeMailHub.Gui
         private MenuBar  GuiMenu { get; set; } = default;
         private MenuBarItem undeleteMenu { get; set; } = default;
         private MenuItem [] messagesMenu { get; set; } = default;
+        private MenuItem [] mailUsersMenu { get; set; } = default;
+        private MenuBarItem mailboxMenu { get; set; } = default;
         private MenuItem multiSelectMenu { get; set; } = default;
         private ContextMenu contextMenu { get; set; } = default;
         private TableView tableView { get; set; } = default;
@@ -419,6 +421,7 @@ namespace HomeMailHub.Gui
                 if (b) IsMultiSelect = !IsMultiSelect;
                 return IsMultiSelect;
             }, true);
+            mailboxMenu = new MenuBarItem(RES.MENU_MOVE_TO, new MenuItem[0]);
 
             messagesMenu = new MenuItem[]
             {
@@ -447,6 +450,7 @@ namespace HomeMailHub.Gui
                         $"_{Global.DirectoryPlace.Bounced}", "", async () => await MoveToFolder(Global.DirectoryPlace.Bounced).ConfigureAwait(false),
                         () => FolderMoveEnable(Global.DirectoryPlace.Bounced))
                 }),
+                mailboxMenu,
                 new MenuItem(RES.MENU_SUB_COMBINEMSG, "",
                     async () => await CombineMessages().ConfigureAwait(false),
                     () => MessagesCombineEnable()),
@@ -469,7 +473,6 @@ namespace HomeMailHub.Gui
                 new MenuItem (RES.MENU_MSGSREADALL, "", () => dataTable.SetReadAllMessage(), () => MessagesOptionsOneEnable())
             };
             contextMenu = new ContextMenu(0, 0, new MenuBarItem("", messagesMenu));
-
             undeleteMenu = new MenuBarItem(RES.MENU_DELETEMENU, new MenuItem[] {
                 new MenuItem (
                     RES.MENU_DELETEALL, "", () => DeleteAllDialog(),
@@ -553,7 +556,25 @@ namespace HomeMailHub.Gui
                             infoPgpText.Text = a.IsPgpAutoDecrypt ? RES.TAG_YES : RES.TAG_NO;
                         }
                     } catch (Exception ex) { ex.StatusBarError(); }
-                } catch (Exception ex) { ex.StatusBarError(); }
+
+                    try {
+                        if (Global.Instance.Accounts.Count > 0) {
+                            int i = 0, n = 0;
+                            MenuItem[] mum = new MenuItem[Global.Instance.Accounts.Count];
+                            for (; i < Global.Instance.Accounts.Count; i++) {
+
+                                UserAccount acc = Global.Instance.Accounts[i];
+                                if (selectedName.Equals(acc.Email)) continue;
+                                mum[n++] = new MenuItem(
+                                    acc.Email, "", async () => _ = await MoveToMailBox(acc.Email).ConfigureAwait(false), () => acc.Enable);
+                            }
+                            Array.Resize(ref mum, n);
+                            mailUsersMenu = mum;
+                        }
+                        Application.MainLoop.Invoke(() => mailboxMenu.Children = (mailUsersMenu == null) ? new MenuItem[0] : mailUsersMenu);
+                    } catch (Exception ex) { ex.StatusBarError(); }
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
                 finally { waitBusyBar.Stop(); }
                 return true;
             });
@@ -803,6 +824,26 @@ namespace HomeMailHub.Gui
         private bool FolderMoveEnable(Global.DirectoryPlace place) =>
             !dataTable.IsEmpty && (dataTable.FolderType != place) &&
             ((IsMultiSelect && (tableView.MultiSelectedRegions.Count > 0)) || (!IsMultiSelect && runOnce.IsValidId()));
+        #endregion
+
+        #region Move to MailBox
+        private async Task<bool> MoveToMailBox(string email) =>
+            await Task.Run(async () => {
+                try {
+                    waitBusyBar.Start();
+
+                    SelectorType st = MessagesSelector();
+                    if (st == SelectorType.None)
+                        return false;
+
+                    _ = await dataTable.MoveToMailBox(email).ConfigureAwait(false);
+                    dataTable.ShowFolder();
+                    SetTitle();
+                }
+                catch (Exception ex) { ex.StatusBarError(); }
+                finally { waitBusyBar.Stop(); }
+                return true;
+            });
         #endregion
 
         #region Export messages

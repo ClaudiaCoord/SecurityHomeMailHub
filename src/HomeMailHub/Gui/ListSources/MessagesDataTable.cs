@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using SecyrityMail;
+using SecyrityMail.Data;
 using SecyrityMail.Messages;
 using Terminal.Gui;
 using GuiAttribute = Terminal.Gui.Attribute;
@@ -97,6 +98,8 @@ namespace HomeMailHub.Gui.ListSources
 
         public async new void Dispose() {
 
+            if (messages != default)
+                messages.EventCb -= Messages_EventCb;
             await cacheOpener.Close().ConfigureAwait(false);
             base.Dispose();
         }
@@ -104,10 +107,12 @@ namespace HomeMailHub.Gui.ListSources
         #region Load
         public async Task<bool> LoadMessages() =>
             await Task.Run(async () => {
-                if (messages == default)
+                if (messages == default) {
                     messages = await cacheOpener.Open(userId)
                                                 .ConfigureAwait(false);
-                else
+                    if (messages != default)
+                        messages.EventCb += Messages_EventCb;
+                } else
                     messages = await cacheOpener.ReOpen(userId)
                                                 .ConfigureAwait(false);
                 if (messages == default)
@@ -147,6 +152,24 @@ namespace HomeMailHub.Gui.ListSources
                 }
             } catch (Exception ex) { ex.StatusBarError(); }
         }
+        #endregion
+
+        #region Message move to MailBox
+        public async Task<bool> MoveToMailBox(string email) =>
+            await Task.Run(async () => {
+                try {
+                    if (IsEmpty || Multiselected.IsEmpty) return false;
+                    for (int i = 0; i < Multiselected.Count; i++) {
+                        try {
+                            int idx = GetId(Multiselected[i]);
+                            if (idx <= 0) continue;
+                            _ = await messages.MoveToMailBox(idx, email).ConfigureAwait(false);
+                        } catch { }
+                    }
+                    if (Multiselected.Count > 0) return true;
+                } catch (Exception ex) { ex.StatusBarError(); }
+                return false;
+            });
         #endregion
 
         #region Export messages
@@ -441,6 +464,13 @@ namespace HomeMailHub.Gui.ListSources
             }
             if (isrefresh)
                 TableRefresh();
+        }
+        #endregion
+
+        #region Messages Event
+        private void Messages_EventCb(object sender, EventActionArgs e) {
+            if (e.Id != MailEventId.PropertyChanged) return;
+            if ("Add".Equals(e.Text)) ShowFolder();
         }
         #endregion
 

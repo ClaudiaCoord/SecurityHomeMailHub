@@ -127,7 +127,7 @@
     <value>_Проверить</value>
   </data>
   <data name="BTN_CHECKALL" xml:space="preserve">
-    <value>П_роверить Все</value>
+    <value>_Проверить Все</value>
   </data>
   <data name="BTN_CHECKSTOP" xml:space="preserve">
     <value>_Остановить проверку</value>
@@ -374,7 +374,7 @@
     <value>В список прокси серверов добавлено {0} новых</value>
   </data>
   <data name="GUIPROXY_MENU1" xml:space="preserve">
-    <value>_Скачать список прокси серверов всех типов</value>
+    <value>Скачать список _прокси серверов всех типов</value>
   </data>
   <data name="GUIPROXY_MENU2" xml:space="preserve">
     <value>Скачать список _HTTP,HTTPS прокси серверов</value>
@@ -529,6 +529,9 @@
   <data name="MENU_DELETEMENU" xml:space="preserve">
     <value>_Удаление</value>
   </data>
+  <data name="MENU_EXCLUDENET" xml:space="preserve">
+    <value>Исключить _локальную сеть из VPN роутинга</value>
+  </data>
   <data name="MENU_EXPORT_FORMAT" xml:space="preserve">
     <value>_Экспортировать выбранные сообщения в формате</value>
   </data>
@@ -594,6 +597,9 @@
   </data>
   <data name="MENU_MESSAGES" xml:space="preserve">
     <value>_Сообщения</value>
+  </data>
+  <data name="MENU_MOVE_TO" xml:space="preserve">
+    <value>Пренести _выделенные сообщения в почтовый ящик</value>
   </data>
   <data name="MENU_MSGFORWARDS" xml:space="preserve">
     <value>_Переслать</value>
@@ -701,7 +707,7 @@
     <value>_Удалить выбранные сообщения</value>
   </data>
   <data name="MENU_SUB_MOVEFOLDER" xml:space="preserve">
-    <value>_Переместить выбранные сообщения в папку</value>
+    <value>_Пренести выбранные сообщения в папку</value>
   </data>
   <data name="MENU_SUB_MULTISELECT" xml:space="preserve">
     <value>_Выбор нескольких сообщений</value>

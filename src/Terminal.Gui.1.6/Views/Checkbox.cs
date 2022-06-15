@@ -10,9 +10,9 @@ namespace Terminal.Gui {
 
 		public event Action<bool> Toggled;
 
-		public virtual void OnToggled (bool currentChecked)
+		public virtual void OnToggled (bool previousChecked)
 		{
-			Toggled?.Invoke (currentChecked);
+			Toggled?.Invoke (previousChecked);
 		}
 
 		public CheckBox () : this (string.Empty) { }
@@ -86,10 +86,7 @@ namespace Terminal.Gui {
 			}
 		}
 
-		public override void PositionCursor ()
-		{
-			Move (0, 0);
-		}
+		public override void PositionCursor () => Move(0, 0);
 
 		public override bool ProcessKey (KeyEvent kb)
 		{
@@ -114,7 +111,11 @@ namespace Terminal.Gui {
 				SetFocus ();
 			}
 			Checked = !Checked;
+#			if TERM_EVENT_NEWVALUE
 			OnToggled (Checked);
+#			else
+			OnToggled (!Checked);
+#			endif
 			SetNeedsDisplay ();
 			return true;
 		}
@@ -125,16 +126,20 @@ namespace Terminal.Gui {
 				return false;
 
 			SetFocus ();
-			Checked = !Checked;
-			OnToggled (Checked);
+            Checked = !Checked;
+#			if TERM_EVENT_NEWVALUE
+            OnToggled(Checked);
+#			else
+			OnToggled (!Checked);
+#			endif
 			SetNeedsDisplay ();
-
 			return true;
 		}
 
 		public override bool OnEnter (View view)
 		{
 			Application.Driver.SetCursorVisibility (CursorVisibility.Invisible);
+
 			return base.OnEnter (view);
 		}
 	}

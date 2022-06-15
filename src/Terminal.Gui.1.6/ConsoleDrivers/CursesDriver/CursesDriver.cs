@@ -30,7 +30,7 @@ namespace Terminal.Gui {
 		IClipboard clipboard;
 		int [,,] contents;
 
-		internal override int [,,] Contents => contents;
+		public override int [,,] Contents => contents;
 
 		// Current row, and current col, tracked by Move/AddRune only
 		int ccol, crow;
@@ -119,8 +119,15 @@ namespace Terminal.Gui {
 			Curses.raw ();
 			Curses.noecho ();
 			Curses.refresh ();
+			ProcessWinChange ();
+		}
+
+		private void ProcessWinChange ()
+		{
 			if (Curses.CheckWinChange ()) {
 				Clip = new Rect (0, 0, Cols, Rows);
+				Console.Out.Write ("\x1b[3J");
+				Console.Out.Flush ();
 				UpdateOffScreen ();
 				TerminalResized?.Invoke ();
 			}
@@ -382,18 +389,16 @@ namespace Terminal.Gui {
 
 				if (cev.ButtonState == Curses.Event.ReportMousePosition) {
 					mouseFlag = MapCursesButton ((Curses.Event)lastMouseButtonPressed) | MouseFlags.ReportMousePosition;
-					point = new Point ();
 					cancelButtonClicked = true;
-				} else {
-					point = new Point () {
-						X = cev.X,
-						Y = cev.Y
-					};
 				}
+				point = new Point () {
+					X = cev.X,
+					Y = cev.Y
+				};
 
 				if ((mouseFlag & MouseFlags.ReportMousePosition) == 0) {
 					Application.MainLoop.AddIdle (() => {
-						Task.Run (async () => await ProcessContinuousButtonPressedAsync (cev, mouseFlag));
+						Task.Run (async () => await ProcessContinuousButtonPressedAsync (mouseFlag));
 						return false;
 					});
 				}
@@ -480,18 +485,17 @@ namespace Terminal.Gui {
 			return mf;
 		}
 
-		async Task ProcessContinuousButtonPressedAsync (Curses.MouseEvent cev, MouseFlags mouseFlag)
+		async Task ProcessContinuousButtonPressedAsync (MouseFlags mouseFlag)
 		{
-			await Task.Delay (200);
-			while (isButtonPressed && lastMouseButtonPressed != null) {
+			while (isButtonPressed) {
 				await Task.Delay (100);
 				var me = new MouseEvent () {
-					X = cev.X,
-					Y = cev.Y,
+					X = point.X,
+					Y = point.Y,
 					Flags = mouseFlag
 				};
 
-				var view = Application.wantContinuousButtonPressedView;
+				var view = Application.WantContinuousButtonPressedView;
 				if (view == null)
 					break;
 				if (isButtonPressed && lastMouseButtonPressed != null && (mouseFlag & MouseFlags.ReportMousePosition) == 0) {
@@ -628,10 +632,7 @@ namespace Terminal.Gui {
 
 			if (code == Curses.KEY_CODE_YES) {
 				if (wch == Curses.KeyResize) {
-					if (Curses.CheckWinChange ()) {
-						TerminalResized?.Invoke ();
-						return;
-					}
+					ProcessWinChange ();
 				}
 				if (wch == Curses.KeyMouse) {
 					Curses.getmouse (out Curses.MouseEvent ev);
@@ -805,11 +806,7 @@ namespace Terminal.Gui {
 			});
 
 			mLoop.WinChanged += () => {
-				if (Curses.CheckWinChange ()) {
-					Clip = new Rect (0, 0, Cols, Rows);
-					UpdateOffScreen ();
-					TerminalResized?.Invoke ();
-				}
+				ProcessWinChange ();
 			};
 		}
 

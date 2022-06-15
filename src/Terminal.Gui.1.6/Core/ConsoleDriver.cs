@@ -665,8 +665,10 @@ namespace Terminal.Gui {
 		/// </summary>
 		public abstract bool HeightAsBuffer { get; set; }
 
-		// The format is rows, columns and 3 values on the last column: Rune, Attribute and Dirty Flag
-		internal abstract int [,,] Contents { get; }
+		/// <summary>
+		/// The format is rows, columns and 3 values on the last column: Rune, Attribute and Dirty Flag
+		/// </summary>
+		public virtual int [,,] Contents { get; }
 
 		/// <summary>
 		/// Initializes the driver
@@ -1188,6 +1190,27 @@ namespace Terminal.Gui {
 		/// </summary>
 		public Rune BottomTee = '\u2534';
 
+#if NETSTANDARD2_0_OR_GREATER || NET5_0_OR_GREATER || NET6_0_OR_GREATER
+		/// <summary>
+		/// Checkmark.
+		/// </summary>
+		public Rune Checked = '\u221a';
+
+		/// <summary>
+		/// Un-checked checkmark.
+		/// </summary>
+		public Rune UnChecked = '\u2574';
+
+		/// <summary>
+		/// Selected mark.
+		/// </summary>
+		public Rune Selected = '\u25cf';
+
+		/// <summary>
+		/// Un-selected selected mark.
+		/// </summary>
+		public Rune UnSelected = '\u25cc';
+#else
 		/// <summary>
 		/// Checkmark.
 		/// </summary>
@@ -1207,11 +1230,11 @@ namespace Terminal.Gui {
 		/// Un-selected selected mark.
 		/// </summary>
 		public Rune UnSelected = ' ';
-
-        /// <summary>
-        /// Right Arrow.
-        /// </summary>
-        public Rune RightArrow = '\u25ba';
+#endif
+		/// <summary>
+		/// Right Arrow.
+		/// </summary>
+		public Rune RightArrow = '\u25ba';
 
 		/// <summary>
 		/// Left Arrow.

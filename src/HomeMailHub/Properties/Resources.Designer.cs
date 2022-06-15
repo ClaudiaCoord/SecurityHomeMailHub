@@ -1360,6 +1360,15 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Exclude _local network from VPN routing.
+        /// </summary>
+        internal static string MENU_EXCLUDENET {
+            get {
+                return ResourceManager.GetString("MENU_EXCLUDENET", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Export selected messages in.
         /// </summary>
         internal static string MENU_EXPORT_FORMAT {
@@ -1554,6 +1563,15 @@ namespace HomeMailHub.Properties {
         internal static string MENU_MESSAGES {
             get {
                 return ResourceManager.GetString("MENU_MESSAGES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Move selected messages to mailbox.
+        /// </summary>
+        internal static string MENU_MOVE_TO {
+            get {
+                return ResourceManager.GetString("MENU_MOVE_TO", resourceCulture);
             }
         }
         

@@ -46,6 +46,7 @@ namespace HomeMailHub
                 Properties.Settings.Default.IsVpnAlways = cfg.IsVpnAlways;
                 Properties.Settings.Default.IsVpnEnable = cfg.IsVpnEnable;
                 Properties.Settings.Default.IsVpnRandom = cfg.IsVpnRandom;
+                Properties.Settings.Default.IsVPNLocalRoute = cfg.IsVPNLocalRoute;
                 Properties.Settings.Default.IsProxyListRepack = cfg.IsProxyListRepack;
                 Properties.Settings.Default.IsSharingSocket = cfg.IsSharingSocket;
                 Properties.Settings.Default.IsAccessIpWhiteList = cfg.IsAccessIpWhiteList;

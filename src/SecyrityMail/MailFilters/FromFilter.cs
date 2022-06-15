@@ -23,8 +23,8 @@ namespace SecyrityMail.MailFilters
         public FromFilter() { }
         public FromFilter(List<string> list) => Set(list);
 
-        HashSet<string> _emails = new HashSet<string>();
-        List<string> _domain = new List<string>();
+        HashSet<string> _emails = new ();
+        HashSet<string> _domain = new ();
 
         public bool IsEnable => (_emails.Count > 0) || (_domain.Count > 0);
         public bool IsAutoLearn => false;
@@ -56,7 +56,7 @@ namespace SecyrityMail.MailFilters
                     }
 #                   if DEBUG
                     if (b)
-                        Global.Instance.Log.Add(GetTag(nameof(CheckSpam)), $"Check message is spam: {sfd.Address}");
+                        Global.Instance.Log.Add(GetTag(nameof(CheckSpam)), $"Checked message is spam: {sfd.Address}");
 #                   endif
                     return b ? SpamStatusType.Spam : SpamStatusType.Ham;
                 }

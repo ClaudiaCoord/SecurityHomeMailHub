@@ -68,13 +68,13 @@ namespace SecyrityMail.Messages
         public string RootDirectory { get; set; } = string.Empty;
         [XmlElement("items")]
         public List<MailMessage> Items { get; set; } = new();
-        public void OnChange() { isModify = true; OnPropertyChanged(nameof(MailMessages)); }
+        public void OnChange() { isModify = true; OnPropertyChanged(nameof(OnChange)); }
         public void Clear() {
             lock(__lock)
                 Items.Clear();
             TotalSize = 0U;
             isModify = true;
-            OnPropertyChanged(nameof(MailMessages));
+            OnPropertyChanged(nameof(Clear));
         }
         public void Delete(MailMessage msg) {
             lock (__lock) {
@@ -83,14 +83,21 @@ namespace SecyrityMail.Messages
             }
             isModify = true;
             TotalSize -= (long)msg.Size;
-            OnPropertyChanged(nameof(MailMessages));
+            OnPropertyChanged(nameof(Delete));
+        }
+        public void Remove(MailMessage msg) {
+            lock (__lock)
+                Items.Remove(msg);
+            isModify = true;
+            TotalSize -= (long)msg.Size;
+            OnPropertyChanged(nameof(Remove));
         }
         public void Add(MailMessage msg) {
             lock (__lock)
                 Items.Add(msg);
             isModify = true;
             TotalSize += (long)msg.Size;
-            OnPropertyChanged(nameof(MailMessages));
+            OnPropertyChanged(nameof(Add));
         }
         public MailMessage Get(int i) {
             lock (__lock)
@@ -150,6 +157,28 @@ namespace SecyrityMail.Messages
             if (id > 0) {
                 MailMessage msg = Find(id);
                 return MoveToFolder(place, msg);
+            }
+            return false;
+        }
+        public async Task<bool> MoveToMailBox(int id, string email) {
+            if (id > 0) {
+                CacheOpenerData cache = new(typeof(MailMessages));
+                try {
+                    MailMessage msg = Find(id);
+                    if (msg == default) return false;
+                    msg = msg.MoveToMailBox(email);
+                    if (msg == default) return false;
+
+                    MailMessages msgs = await Global.Instance.MessagesManager.Open(cache, email)
+                                                                             .ConfigureAwait(false);
+                    if (msgs == default) return false;
+                    msgs.Add(msg);
+
+                    Remove(msg);
+                    return true;
+                }
+                catch { }
+                finally { Global.Instance.MessagesManager.Close(cache, email); }
             }
             return false;
         }

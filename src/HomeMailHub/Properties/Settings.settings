@@ -84,7 +84,7 @@
       <Value Profile="(Default)">1.1.1.1, 1.0.0.1, 8.8.8.8, 8.8.4.4</Value>
     </Setting>
     <Setting Name="VpnAllowedIPDefault" Type="System.String" Scope="User">
-      <Value Profile="(Default)">0.0.0.0/0</Value>
+      <Value Profile="(Default)">0.0.0.0/0, ::/0, 8000::/0</Value>
     </Setting>
     <Setting Name="IsCacheMessagesLog" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -175,6 +175,9 @@
     </Setting>
     <Setting Name="FilterFromList" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="IsVPNLocalRoute" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

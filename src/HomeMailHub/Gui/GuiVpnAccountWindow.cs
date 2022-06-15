@@ -426,7 +426,7 @@ namespace HomeMailHub.Gui
             mtuText.Text = string.Empty;
 
             dnsText.Text = VpnInterface.DnsDefault;
-            ipsText.Text = VpnPeer.AllowedIPsDefault;
+            ipsText.Text = VpnPeer.AllowedIPsDefaultBlock;
 
             enableBox.Checked = true;
             expireDate.Date = DateTime.Now.AddDays(7.0);

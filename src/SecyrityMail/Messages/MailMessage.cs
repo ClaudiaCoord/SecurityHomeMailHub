@@ -447,6 +447,37 @@ namespace SecyrityMail.Messages
         }
         #endregion
 
+        #region Move to MailBox
+        public MailMessage MoveToMailBox(string email) {
+            try {
+                if (string.IsNullOrWhiteSpace(FilePath) || string.IsNullOrWhiteSpace(email))
+                    return default;
+
+                FileInfo f = new FileInfo(FilePath);
+                if ((f == default) || !f.Exists)
+                    return default;
+
+                (Global.DirectoryPlace place, string rootdir, DateTimeOffset dt) = Global.GetFolderInfo(FilePath);
+                if (place == Global.DirectoryPlace.None)
+                    return default;
+
+                string path = Global.GetUserDirectory(email, place, dt);
+                if (string.IsNullOrWhiteSpace(path))
+                    return default;
+
+                DirectoryInfo dir = Directory.CreateDirectory(path);
+                f.MoveTo(Path.Combine(dir.FullName, Path.GetFileName(FilePath)));
+                f.Refresh();
+                if (f.Exists) {
+                    Folder = place;
+                    FilePath = f.FullName;
+                    return this;
+                }
+            } catch (Exception ex) { Global.Instance.Log.Add(nameof(MoveToMailBox), ex); }
+            return default;
+        }
+        #endregion
+
         #region MimeMessage to text
         public async Task<Tuple<MimeMessage, string>> MimeMessageToText() =>
             await Task.Run(async () => {

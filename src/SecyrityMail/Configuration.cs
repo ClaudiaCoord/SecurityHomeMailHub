@@ -41,6 +41,7 @@ namespace SecyrityMail
         [XmlIgnore]
         public bool IsSmtpAllOutPgpCrypt { get => _smtpAllOutPgpCrypt; set => _smtpAllOutPgpCrypt = pgpOnce(value); }
 
+        public bool IsVPNLocalRoute { get; set; } = true;
         public bool IsSmtpDeliveryLocal { get; set; } = false;
         public bool IsSmtpCheckFrom { get; set; } = true;
         public bool IsSmtpEnable { get; set; } = false;
@@ -121,6 +122,8 @@ namespace SecyrityMail
         [XmlIgnore]
         public IPEndPoint VpnEndpoint => Global.Instance.VpnAccounts.IpEndpoint;
         [XmlIgnore]
+        public bool IsVpnManualEnable => Global.Instance.VpnAccounts.IsAccountSelected;
+        [XmlIgnore]
         public bool IsVpnSelected => Global.Instance.VpnAccounts.IsAccountSelected;
         [XmlIgnore]
         public bool IsVpnReady => Global.Instance.Vpn.IsVpnReady;
@@ -180,6 +183,7 @@ namespace SecyrityMail
             IsSmtpLog = cfg.IsSmtpLog;
             IsSmtpSecure = cfg.IsSmtpSecure;
             IsSmtpEnable = cfg.IsSmtpEnable;
+            IsVPNLocalRoute = cfg.IsVPNLocalRoute;
             IsVpnAlways = cfg.IsVpnAlways;
             IsVpnEnable = cfg.IsVpnEnable;
             IsVpnRandom = cfg.IsVpnRandom;

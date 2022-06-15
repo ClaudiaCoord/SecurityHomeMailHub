@@ -1,3 +1,27 @@
+//
+// TextView.cs: multi-line text editing
+//
+// Authors:
+//   Miguel de Icaza (miguel@gnome.org)
+//
+// 
+// TODO:
+// In ReadOnly mode backspace/space behave like pageup/pagedown
+// Attributed text on spans
+// Replace insertion with Insert method
+// String accumulation (Control-k, control-k is not preserving the last new line, see StringToRunes
+// Alt-D, Alt-Backspace
+// API to set the cursor position
+// API to scroll to a particular place
+// keybindings to go to top/bottom
+// public API to insert, remove ranges
+// Add word forward/word backwards commands
+// Save buffer API
+// Mouse
+//
+// Desirable:
+//   Move all the text manipulation into the TextModel
+
 
 using System;
 using System.Collections.Generic;
@@ -35,6 +59,8 @@ namespace Terminal.Gui {
 			return true;
 		}
 
+		// Turns the ustring into runes, this does not split the 
+		// contents on a newline if it is present.
 		internal static List<Rune> ToRunes (ustring str)
 		{
 			List<Rune> runes = new List<Rune> ();
@@ -44,11 +70,14 @@ namespace Terminal.Gui {
 			return runes;
 		}
 
+		// Splits a string into a List that contains a List<Rune> for each line
 		public static List<List<Rune>> StringToRunes (ustring content)
 		{
 			var lines = new List<List<Rune>> ();
 			int start = 0, i = 0;
 			var hasCR = false;
+			// ASCII code 13 = Carriage Return.
+			// ASCII code 10 = Line Feed.
 			for (; i < content.Length; i++) {
 				if (content [i] == 13) {
 					hasCR = true;
@@ -130,8 +159,16 @@ namespace Terminal.Gui {
 
 		public string FilePath { get; set; }
 
+		/// <summary>
+		/// The number of text lines in the model
+		/// </summary>
 		public int Count => lines.Count;
 
+		/// <summary>
+		/// Returns the specified line as a List of Rune
+		/// </summary>
+		/// <returns>The line.</returns>
+		/// <param name="line">Line number to retrieve.</param>
 		public List<Rune> GetLine (int line)
 		{
 			if (lines.Count > 0) {
@@ -146,11 +183,20 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Adds a line to the model at the specified position.
+		/// </summary>
+		/// <param name="pos">Line number where the line will be inserted.</param>
+		/// <param name="runes">The line of text, as a List of Rune.</param>
 		public void AddLine (int pos, List<Rune> runes)
 		{
 			lines.Insert (pos, runes);
 		}
 
+		/// <summary>
+		/// Removes the line at the specified position
+		/// </summary>
+		/// <param name="pos">Position.</param>
 		public void RemoveLine (int pos)
 		{
 			if (lines.Count > 0) {
@@ -170,6 +216,12 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Returns the maximum line length of the visible lines.
+		/// </summary>
+		/// <param name="first">The first line.</param>
+		/// <param name="last">The last line.</param>
+		/// <param name="tabWidth">The tab width.</param>
 		public int GetMaxVisibleLine (int first, int last, int tabWidth)
 		{
 			int maxLength = 0;
@@ -216,6 +268,7 @@ namespace Terminal.Gui {
 			return t.Count - start;
 		}
 
+		// Returns the size and length in a range of the string.
 		internal static (int size, int length) DisplaySize (List<Rune> t, int start = -1, int end = -1,
 			bool checkNextRune = true, int tabWidth = 0)
 		{
@@ -256,6 +309,7 @@ namespace Terminal.Gui {
 			return (size, len);
 		}
 
+		// Returns the left column in a range of the string.
 		internal static int CalculateLeftColumn (List<Rune> t, int start, int end, int width, int tabWidth = 0)
 		{
 			if (t == null || t.Count == 0) {
@@ -472,6 +526,10 @@ namespace Terminal.Gui {
 			return false;
 		}
 
+		/// <summary>
+		/// Redefine column and line tracking.
+		/// </summary>
+		/// <param name="point">Contains the column and line.</param>
 		internal void ResetContinuousFind (Point point)
 		{
 			toFind.startPointToFind = toFind.currentPointToFind = point;
@@ -947,6 +1005,122 @@ namespace Terminal.Gui {
 		}
 	}
 
+	/// <summary>
+	///   Multi-line text editing <see cref="View"/>
+	/// </summary>
+	/// <remarks>
+	///   <para>
+	///     <see cref="TextView"/> provides a multi-line text editor. Users interact
+	///     with it with the standard Emacs commands for movement or the arrow
+	///     keys. 
+	///   </para> 
+	///   <list type="table"> 
+	///     <listheader>
+	///       <term>Shortcut</term>
+	///       <description>Action performed</description>
+	///     </listheader>
+	///     <item>
+	///        <term>Left cursor, Control-b</term>
+	///        <description>
+	///          Moves the editing point left.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Right cursor, Control-f</term>
+	///        <description>
+	///          Moves the editing point right.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Alt-b</term>
+	///        <description>
+	///          Moves one word back.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Alt-f</term>
+	///        <description>
+	///          Moves one word forward.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Up cursor, Control-p</term>
+	///        <description>
+	///          Moves the editing point one line up.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Down cursor, Control-n</term>
+	///        <description>
+	///          Moves the editing point one line down
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Home key, Control-a</term>
+	///        <description>
+	///          Moves the cursor to the beginning of the line.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>End key, Control-e</term>
+	///        <description>
+	///          Moves the cursor to the end of the line.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Control-Home</term>
+	///        <description>
+	///          Scrolls to the first line and moves the cursor there.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Control-End</term>
+	///        <description>
+	///          Scrolls to the last line and moves the cursor there.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Delete, Control-d</term>
+	///        <description>
+	///          Deletes the character in front of the cursor.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Backspace</term>
+	///        <description>
+	///          Deletes the character behind the cursor.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Control-k</term>
+	///        <description>
+	///          Deletes the text until the end of the line and replaces the kill buffer
+	///          with the deleted text.   You can paste this text in a different place by
+	///          using Control-y.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Control-y</term>
+	///        <description>
+	///           Pastes the content of the kill ring into the current position.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Alt-d</term>
+	///        <description>
+	///           Deletes the word above the cursor and adds it to the kill ring.  You 
+	///           can paste the contents of the kill ring with Control-y.
+	///        </description>
+	///     </item>
+	///     <item>
+	///        <term>Control-q</term>
+	///        <description>
+	///          Quotes the next input character, to prevent the normal processing of
+	///          key handling to take place.
+	///        </description>
+	///     </item>
+	///   </list>
+	/// </remarks>
 	public class TextView : View {
 		TextModel model = new TextModel ();
 		int topRow;
@@ -966,9 +1140,20 @@ namespace Terminal.Gui {
 		HistoryText historyText = new HistoryText ();
 		CultureInfo currentCulture;
 
-		public event Action TextChanged;
+		/// <summary>
+		/// Selected is ON/OFF
+		/// </summary>
 		public bool IsSelecting => selecting;
 
+		/// <summary>
+		/// Raised when the <see cref="Text"/> of the <see cref="TextView"/> changes.
+		/// </summary>
+		public event Action TextChanged;
+
+		/// <summary>
+		/// Provides autocomplete context menu based on suggestions at the current cursor
+		/// position.  Populate <see cref="Autocomplete.AllSuggestions"/> to enable this feature
+		/// </summary>
 		public IAutocomplete Autocomplete { get; protected set; } = new TextViewAutocomplete ();
 
 #if false
@@ -981,11 +1166,20 @@ namespace Terminal.Gui {
 		/// </remarks>
 		public Action Changed;
 #endif
+		/// <summary>
+		///   Initializes a <see cref="TextView"/> on the specified area, with absolute position and size.
+		/// </summary>
+		/// <remarks>
+		/// </remarks>
 		public TextView (Rect frame) : base (frame)
 		{
 			Initialize ();
 		}
 
+		/// <summary>
+		///   Initializes a <see cref="TextView"/> on the specified area, 
+		///   with dimensions controlled with the X, Y, Width and Height properties.
+		/// </summary>
 		public TextView () : base ()
 		{
 			Initialize ();
@@ -1001,6 +1195,7 @@ namespace Terminal.Gui {
 
 			Initialized += TextView_Initialized;
 
+			// Things this view knows how to do
 			AddCommand (Command.PageDown, () => { ProcessPageDown (); return true; });
 			AddCommand (Command.PageDownExtend, () => { ProcessPageDownExtend (); return true; });
 			AddCommand (Command.PageUp, () => { ProcessPageUp (); return true; });
@@ -1053,6 +1248,7 @@ namespace Terminal.Gui {
 				return true;
 			});
 
+			// Default keybindings for this view
 			AddKeyBinding (Key.PageDown, Command.PageDown);
 			AddKeyBinding (Key.V | Key.CtrlMask, Command.PageDown);
 
@@ -1099,13 +1295,13 @@ namespace Terminal.Gui {
 
 			AddKeyBinding (Key.End | Key.ShiftMask, Command.EndOfLineExtend);
 
-			AddKeyBinding (Key.K | Key.CtrlMask, Command.CutToEndLine);  
-			AddKeyBinding (Key.DeleteChar | Key.CtrlMask | Key.ShiftMask, Command.CutToEndLine);  
+			AddKeyBinding (Key.K | Key.CtrlMask, Command.CutToEndLine); // kill-to-end
+			AddKeyBinding (Key.DeleteChar | Key.CtrlMask | Key.ShiftMask, Command.CutToEndLine); // kill-to-end
 
-			AddKeyBinding (Key.K | Key.AltMask, Command.CutToStartLine);  
-			AddKeyBinding (Key.Backspace | Key.CtrlMask | Key.ShiftMask, Command.CutToStartLine);  
+			AddKeyBinding (Key.K | Key.AltMask, Command.CutToStartLine); // kill-to-start
+			AddKeyBinding (Key.Backspace | Key.CtrlMask | Key.ShiftMask, Command.CutToStartLine); // kill-to-start
 
-			AddKeyBinding (Key.Y | Key.CtrlMask, Command.Paste);   
+			AddKeyBinding (Key.Y | Key.CtrlMask, Command.Paste); // Control-y, yank
 			AddKeyBinding (Key.Space | Key.CtrlMask, Command.ToggleExtend);
 
 			AddKeyBinding (((int)'C' + Key.AltMask), Command.Copy);
@@ -1124,8 +1320,8 @@ namespace Terminal.Gui {
 			AddKeyBinding ((Key)((int)'F' + Key.AltMask), Command.WordRight);
 
 			AddKeyBinding (Key.CursorRight | Key.CtrlMask | Key.ShiftMask, Command.WordRightExtend);
-			AddKeyBinding (Key.DeleteChar | Key.CtrlMask, Command.KillWordForwards);  
-			AddKeyBinding (Key.Backspace | Key.CtrlMask, Command.KillWordBackwards);  
+			AddKeyBinding (Key.DeleteChar | Key.CtrlMask, Command.KillWordForwards); // kill-word-forwards
+			AddKeyBinding (Key.Backspace | Key.CtrlMask, Command.KillWordBackwards); // kill-word-backwards
 
 			AddKeyBinding (Key.Enter, Command.NewLine);
 			AddKeyBinding (Key.End | Key.CtrlMask, Command.BottomEnd);
@@ -1232,6 +1428,10 @@ namespace Terminal.Gui {
 			ReplaceKeyBinding (obj, Application.AlternateForwardKey);
 		}
 
+		/// <summary>
+		/// Tracks whether the text view should be considered "used", that is, that the user has moved in the entry,
+		/// so new input should be appended at the cursor position, rather than clearing the entry
+		/// </summary>
 		public bool Used { get; set; }
 
 		void ResetPosition ()
@@ -1242,6 +1442,11 @@ namespace Terminal.Gui {
 			ResetCursorVisibility ();
 		}
 
+		/// <summary>
+		///   Sets or gets the text in the <see cref="TextView"/>.
+		/// </summary>
+		/// <remarks>
+		/// </remarks>
 		public override ustring Text {
 			get {
 				if (wordWrap) {
@@ -1265,6 +1470,7 @@ namespace Terminal.Gui {
 			}
 		}
 
+		///<inheritdoc/>
 		public override Rect Frame {
 			get => base.Frame;
 			set {
@@ -1291,14 +1497,29 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the top row.
+		/// </summary>
 		public int TopRow { get => topRow; set => topRow = Math.Max (Math.Min (value, Lines - 1), 0); }
 
+		/// <summary>
+		/// Gets or sets the left column.
+		/// </summary>
 		public int LeftColumn { get => leftColumn; set => leftColumn = Math.Max (Math.Min (value, Maxlength - 1), 0); }
 
+		/// <summary>
+		/// Gets the maximum visible length line.
+		/// </summary>
 		public int Maxlength => model.GetMaxVisibleLine (topRow, topRow + Frame.Height, TabWidth);
 
+		/// <summary>
+		/// Gets the  number of lines.
+		/// </summary>
 		public int Lines => model.Count;
 
+		/// <summary>
+		///    Sets or gets the current cursor position.
+		/// </summary>
 		public Point CursorPosition {
 			get => new Point (currentColumn, currentRow);
 			set {
@@ -1311,6 +1532,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Start column position of the selected text.
+		/// </summary>
 		public int SelectionStartColumn {
 			get => selectionStartColumn;
 			set {
@@ -1322,6 +1546,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Start row position of the selected text.
+		/// </summary>
 		public int SelectionStartRow {
 			get => selectionStartRow;
 			set {
@@ -1333,6 +1560,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// The selected text.
+		/// </summary>
 		public ustring SelectedText {
 			get {
 				if (!selecting || (model.Count == 1 && model.GetLine (0).Count == 0)) {
@@ -1348,12 +1578,21 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Length of the selected text.
+		/// </summary>
 		public int SelectedLength => GetSelectedLength ();
 
+		/// <summary>
+		/// Get or sets the selecting.
+		/// </summary>
 		public bool Selecting {
 			get => selecting;
 			set => selecting = value;
 		}
+		/// <summary>
+		/// Allows word wrap the to fit the available container width.
+		/// </summary>
 		public bool WordWrap {
 			get => wordWrap;
 			set {
@@ -1375,6 +1614,10 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// The bottom offset needed to use a horizontal scrollbar or for another reason.
+		/// This is only needed with the keyboard navigation.
+		/// </summary>
 		public int BottomOffset {
 			get => bottomOffset;
 			set {
@@ -1386,6 +1629,10 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// The right offset needed to use a vertical scrollbar or for another reason.
+		/// This is only needed with the keyboard navigation.
+		/// </summary>
 		public int RightOffset {
 			get => rightOffset;
 			set {
@@ -1397,6 +1644,10 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether pressing ENTER in a <see cref="TextView"/>
+		/// creates a new line of text in the view or activates the default button for the toplevel.
+		/// </summary>
 		public bool AllowsReturn {
 			get => allowsReturn;
 			set {
@@ -1412,6 +1663,12 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets whether the <see cref="TextView"/> inserts a tab character into the text or ignores 
+		/// tab input. If set to `false` and the user presses the tab key (or shift-tab) the focus will move to the
+		/// next view (or previous with shift-tab). The default is `true`; if the user presses the tab key, a tab 
+		/// character will be inserted into the text.
+		/// </summary>
 		public bool AllowsTab {
 			get => allowsTab;
 			set {
@@ -1429,6 +1686,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating the number of whitespace when pressing the TAB key.
+		/// </summary>
 		public int TabWidth {
 			get => tabWidth;
 			set {
@@ -1442,6 +1702,9 @@ namespace Terminal.Gui {
 
 		Dim savedHeight = null;
 
+		/// <summary>
+		/// Gets or sets a value indicating whether this <see cref="TextView"/> is a multiline text view.
+		/// </summary>
 		public bool Multiline {
 			get => multiline;
 			set {
@@ -1481,12 +1744,27 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Indicates whatever the text was changed or not.
+		/// <see langword="true"/> if the text was changed <see langword="false"/> otherwise.
+		/// </summary>
 		public bool IsDirty => historyText.IsDirty (Text);
 
+		/// <summary>
+		/// Indicates whatever the text has history changes or not.
+		/// <see langword="true"/> if the text has history changes <see langword="false"/> otherwise.
+		/// </summary>
 		public bool HasHistoryChanges => historyText.HasHistoryChanges;
 
+		/// <summary>
+		/// Get the <see cref="ContextMenu"/> for this view.
+		/// </summary>
 		public ContextMenu ContextMenu { get; private set; }
 
+		/// <summary>
+		/// Add MenuItem array to ContextMenu
+		/// </summary>
+		/// <param name="items">MenuItem array</param>
 		public void AddContextMenu (MenuItem [] items)
 		{
 			int idx = ContextMenu.MenuItems.Children.Length;
@@ -1522,6 +1800,11 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Loads the contents of the file into the  <see cref="TextView"/>.
+		/// </summary>
+		/// <returns><c>true</c>, if file was loaded, <c>false</c> otherwise.</returns>
+		/// <param name="path">Path to the file to load.</param>
 		public bool LoadFile (string path)
 		{
 			var res = model.LoadFile (path);
@@ -1530,6 +1813,11 @@ namespace Terminal.Gui {
 			return res;
 		}
 
+		/// <summary>
+		/// Loads the contents of the stream into the  <see cref="TextView"/>.
+		/// </summary>
+		/// <returns><c>true</c>, if stream was loaded, <c>false</c> otherwise.</returns>
+		/// <param name="stream">Stream to load the contents from.</param>
 		public void LoadStream (Stream stream)
 		{
 			model.LoadStream (stream);
@@ -1537,6 +1825,10 @@ namespace Terminal.Gui {
 			SetNeedsDisplay ();
 		}
 
+		/// <summary>
+		/// Closes the contents of the stream into the  <see cref="TextView"/>.
+		/// </summary>
+		/// <returns><c>true</c>, if stream was closed, <c>false</c> otherwise.</returns>
 		public bool CloseFile ()
 		{
 			var res = model.CloseFile ();
@@ -1545,10 +1837,20 @@ namespace Terminal.Gui {
 			return res;
 		}
 
+		/// <summary>
+		///    Gets the current cursor row.
+		/// </summary>
 		public int CurrentRow => currentRow;
 
+		/// <summary>
+		/// Gets the cursor column.
+		/// </summary>
+		/// <value>The cursor column.</value>
 		public int CurrentColumn => currentColumn;
 
+		/// <summary>
+		///   Positions the cursor on the current row and column
+		/// </summary>
 		public override void PositionCursor ()
 		{
 			if (!CanFocus || !Enabled) {
@@ -1597,21 +1899,45 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Sets the driver to the default color for the control where no text is being rendered.  Defaults to <see cref="ColorScheme.Normal"/>.
+		/// </summary>
 		protected virtual void ColorNormal ()
 		{
 			Driver.SetAttribute (GetNormalColor ());
 		}
 
+		/// <summary>
+		/// Sets the <see cref="View.Driver"/> to an appropriate color for rendering the given <paramref name="idx"/> of the
+		/// current <paramref name="line"/>.  Override to provide custom coloring by calling <see cref="ConsoleDriver.SetAttribute(Attribute)"/>
+		/// Defaults to <see cref="ColorScheme.Normal"/>.
+		/// </summary>
+		/// <param name="line"></param>
+		/// <param name="idx"></param>
 		protected virtual void ColorNormal (List<Rune> line, int idx)
 		{
 			Driver.SetAttribute (GetNormalColor ());
 		}
 
+		/// <summary>
+		/// Sets the <see cref="View.Driver"/> to an appropriate color for rendering the given <paramref name="idx"/> of the
+		/// current <paramref name="line"/>.  Override to provide custom coloring by calling <see cref="ConsoleDriver.SetAttribute(Attribute)"/>
+		/// Defaults to <see cref="ColorScheme.Focus"/>.
+		/// </summary>
+		/// <param name="line"></param>
+		/// <param name="idx"></param>
 		protected virtual void ColorSelection (List<Rune> line, int idx)
 		{
 			Driver.SetAttribute (ColorScheme.Focus);
 		}
 
+		/// <summary>
+		/// Sets the <see cref="View.Driver"/> to an appropriate color for rendering the given <paramref name="idx"/> of the
+		/// current <paramref name="line"/>.  Override to provide custom coloring by calling <see cref="ConsoleDriver.SetAttribute(Attribute)"/>
+		/// Defaults to <see cref="ColorScheme.HotFocus"/>.
+		/// </summary>
+		/// <param name="line"></param>
+		/// <param name="idx"></param>
 		protected virtual void ColorUsed (List<Rune> line, int idx)
 		{
 			Driver.SetAttribute (ColorScheme.HotFocus);
@@ -1619,6 +1945,10 @@ namespace Terminal.Gui {
 
 		bool isReadOnly = false;
 
+		/// <summary>
+		/// Gets or sets whether the  <see cref="TextView"/> is in read-only mode or not
+		/// </summary>
+		/// <value>Boolean value(Default false)</value>
 		public bool ReadOnly {
 			get => isReadOnly;
 			set {
@@ -1629,6 +1959,9 @@ namespace Terminal.Gui {
 
 		CursorVisibility desiredCursorVisibility = CursorVisibility.Default;
 
+		/// <summary>
+		/// Get / Set the wished cursor when the field is focused
+		/// </summary>
 		public CursorVisibility DesiredCursorVisibility {
 			get => desiredCursorVisibility;
 			set {
@@ -1641,13 +1974,16 @@ namespace Terminal.Gui {
 			}
 		}
 
+		///<inheritdoc/>
 		public override bool OnEnter (View view)
 		{
+			//TODO: Improve it by handling read only mode of the text field
 			Application.Driver.SetCursorVisibility (DesiredCursorVisibility);
 
 			return base.OnEnter (view);
 		}
 
+		// Returns an encoded region start..end (top 32 bits are the row, low32 the column)
 		void GetEncodedRegionBounds (out long start, out long end)
 		{
 			long selection = ((long)(uint)selectionStartRow << 32) | (uint)selectionStartColumn;
@@ -1669,6 +2005,10 @@ namespace Terminal.Gui {
 			return q >= start && q <= end - 1;
 		}
 
+		//
+		// Returns a ustring with the text in the selected 
+		// region.
+		//
 		ustring GetRegion ()
 		{
 			long start, end;
@@ -1695,6 +2035,9 @@ namespace Terminal.Gui {
 			return res;
 		}
 
+		//
+		// Clears the contents of the selected region
+		//
 		void ClearRegion ()
 		{
 			long start, end;
@@ -1748,6 +2091,9 @@ namespace Terminal.Gui {
 			SetNeedsDisplay ();
 		}
 
+		/// <summary>
+		/// Select all text.
+		/// </summary>
 		public void SelectAll ()
 		{
 			if (model.Count == 0) {
@@ -1762,6 +2108,16 @@ namespace Terminal.Gui {
 			SetNeedsDisplay ();
 		}
 
+		/// <summary>
+		/// Find the next text based on the match case with the option to replace it.
+		/// </summary>
+		/// <param name="textToFind">The text to find.</param>
+		/// <param name="gaveFullTurn"><c>true</c>If all the text was forward searched.<c>false</c>otherwise.</param>
+		/// <param name="matchCase">The match case setting.</param>
+		/// <param name="matchWholeWord">The match whole word setting.</param>
+		/// <param name="textToReplace">The text to replace.</param>
+		/// <param name="replace"><c>true</c>If is replacing.<c>false</c>otherwise.</param>
+		/// <returns><c>true</c>If the text was found.<c>false</c>otherwise.</returns>
 		public bool FindNextText (ustring textToFind, out bool gaveFullTurn, bool matchCase = false,
 			bool matchWholeWord = false, ustring textToReplace = null, bool replace = false)
 		{
@@ -1777,6 +2133,16 @@ namespace Terminal.Gui {
 			return SetFoundText (textToFind, foundPos, textToReplace, replace);
 		}
 
+		/// <summary>
+		/// Find the previous text based on the match case with the option to replace it.
+		/// </summary>
+		/// <param name="textToFind">The text to find.</param>
+		/// <param name="gaveFullTurn"><c>true</c>If all the text was backward searched.<c>false</c>otherwise.</param>
+		/// <param name="matchCase">The match case setting.</param>
+		/// <param name="matchWholeWord">The match whole word setting.</param>
+		/// <param name="textToReplace">The text to replace.</param>
+		/// <param name="replace"><c>true</c>If the text was found.<c>false</c>otherwise.</param>
+		/// <returns><c>true</c>If the text was found.<c>false</c>otherwise.</returns>
 		public bool FindPreviousText (ustring textToFind, out bool gaveFullTurn, bool matchCase = false,
 			bool matchWholeWord = false, ustring textToReplace = null, bool replace = false)
 		{
@@ -1792,11 +2158,22 @@ namespace Terminal.Gui {
 			return SetFoundText (textToFind, foundPos, textToReplace, replace);
 		}
 
+		/// <summary>
+		/// Reset the flag to stop continuous find.
+		/// </summary>
 		public void FindTextChanged ()
 		{
 			continuousFind = false;
 		}
 
+		/// <summary>
+		/// Replaces all the text based on the match case.
+		/// </summary>
+		/// <param name="textToFind">The text to find.</param>
+		/// <param name="matchCase">The match case setting.</param>
+		/// <param name="matchWholeWord">The match whole word setting.</param>
+		/// <param name="textToReplace">The text to replace.</param>
+		/// <returns><c>true</c>If the text was found.<c>false</c>otherwise.</returns>
 		public bool ReplaceAllText (ustring textToFind, bool matchCase = false, bool matchWholeWord = false,
 			ustring textToReplace = null)
 		{
@@ -1853,6 +2230,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Restore from original model.
+		/// </summary>
 		void SetWrapModel ()
 		{
 			if (wordWrap) {
@@ -1864,6 +2244,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Update the original model.
+		/// </summary>
 		void UpdateWrapModel ()
 		{
 			if (wordWrap) {
@@ -1879,6 +2262,7 @@ namespace Terminal.Gui {
 			}
 		}
 
+		///<inheritdoc/>
 		public override void Redraw (Rect bounds)
 		{
 			ColorNormal ();
@@ -1941,6 +2325,7 @@ namespace Terminal.Gui {
 			if (SelectedLength > 0)
 				return;
 
+			// draw autocomplete
 			Autocomplete.GenerateSuggestions ();
 
 			var renderAt = new Point (
@@ -1952,6 +2337,7 @@ namespace Terminal.Gui {
 			Autocomplete.RenderOverlay (renderAt);
 		}
 
+		///<inheritdoc/>
 		public override bool CanFocus {
 			get => base.CanFocus;
 			set { base.CanFocus = value; }
@@ -1970,6 +2356,11 @@ namespace Terminal.Gui {
 		}
 
 
+		/// <summary>
+		/// Inserts the given <paramref name="toAdd"/> text at the current cursor position
+		/// exactly as if the user had just typed it
+		/// </summary>
+		/// <param name="toAdd">Text to add</param>
 		public void InsertText (string toAdd)
 		{
 			foreach (var ch in toAdd) {
@@ -2032,6 +2423,12 @@ namespace Terminal.Gui {
 			return ustring.Make (encoded);
 		}
 
+		/// <summary>
+		/// Returns the characters on the current line (where the cursor is positioned).
+		/// Use <see cref="CurrentColumn"/> to determine the position of the cursor within
+		/// that line
+		/// </summary>
+		/// <returns></returns>
 		public List<Rune> GetCurrentLine () => model.GetLine (currentRow);
 
 		void InsertText (ustring text)
@@ -2050,6 +2447,7 @@ namespace Terminal.Gui {
 
 			historyText.Add (new List<List<Rune>> () { new List<Rune> (line) }, CursorPosition);
 
+			// Optimize single line
 			if (lines.Count == 1) {
 				line.InsertRange (currentColumn, lines [0]);
 				currentColumn += lines [0].Count;
@@ -2072,12 +2470,16 @@ namespace Terminal.Gui {
 			int lastp = 0;
 
 			if (model.Count > 0 && line.Count > 0 && !copyWithoutSelection) {
+				// Keep a copy of the rest of the line
 				var restCount = line.Count - currentColumn;
 				rest = line.GetRange (currentColumn, restCount);
 				line.RemoveRange (currentColumn, restCount);
 			}
 
+			// First line is inserted at the current location, the rest is appended
 			line.InsertRange (currentColumn, lines [0]);
+			//model.AddLine (currentRow, lines [0]);
+
 			var addedLines = new List<List<Rune>> () { new List<Rune> (line) };
 
 			for (int i = 1; i < lines.Count; i++) {
@@ -2096,6 +2498,7 @@ namespace Terminal.Gui {
 
 			historyText.Add (addedLines, CursorPosition, HistoryText.LineStatus.Added);
 
+			// Now adjust column and row positions
 			currentRow += lines.Count - 1;
 			currentColumn = rest != null ? lastp : lines [lines.Count - 1].Count;
 			Adjust ();
@@ -2104,10 +2507,13 @@ namespace Terminal.Gui {
 				HistoryText.LineStatus.Replaced);
 		}
 
+		// The column we are tracking, or -1 if we are not tracking any column
 		int columnTrack = -1;
 
+		// Tries to snap the cursor to the tracking column
 		void TrackColumn ()
 		{
+			// Now track the column
 			var line = GetCurrentLine ();
 			if (line.Count < columnTrack)
 				currentColumn = line.Count;
@@ -2172,6 +2578,13 @@ namespace Terminal.Gui {
 			return (w, h);
 		}
 
+		/// <summary>
+		/// Will scroll the <see cref="TextView"/> to display the specified row at the top if <paramref name="isRow"/> is true or
+		/// will scroll the <see cref="TextView"/> to display the specified column at the left if <paramref name="isRow"/> is false.
+		/// </summary>
+		/// <param name="idx">Row that should be displayed at the top or Column that should be displayed at the left,
+		///  if the value is negative it will be reset to zero</param>
+		/// <param name="isRow">If true (default) the <paramref name="idx"/> is a row, column otherwise.</param>
 		public void ScrollTo (int idx, bool isRow = true)
 		{
 			if (idx < 0) {
@@ -2190,12 +2603,14 @@ namespace Terminal.Gui {
 		bool wrapNeeded;
 		bool shiftSelecting;
 
+		///<inheritdoc/>
 		public override bool ProcessKey (KeyEvent kb)
 		{
 			if (!CanFocus) {
 				return true;
 			}
 
+			// Give autocomplete first opportunity to respond to key presses
 			if (SelectedLength == 0 && Autocomplete.ProcessKey (kb)) {
 				return true;
 			}
@@ -2206,6 +2621,7 @@ namespace Terminal.Gui {
 				return (bool)result;
 
 			ResetColumnTrack ();
+			// Ignore control characters and other special keys
 			if (kb.Key < Key.Space || kb.Key > Key.CharMask)
 				return false;
 
@@ -2412,7 +2828,9 @@ namespace Terminal.Gui {
 
 		bool ProcessMoveLeft ()
 		{
+			// if the user presses Left (without any control keys) and they are at the start of the text
 			if (currentColumn == 0 && currentRow == 0) {
+				// do not respond (this lets the key press fall through to navigation system - which usually changes focus backward)
 				return false;
 			}
 
@@ -2433,9 +2851,12 @@ namespace Terminal.Gui {
 
 		bool ProcessMoveRight ()
 		{
+			// if the user presses Right (without any control keys)
+			// determine where the last cursor position in the text is
 			var lastRow = model.Count - 1;
 			var lastCol = model.GetLine (lastRow).Count;
 
+			// if they are at the very end of all the text do not respond (this lets the key press fall through to navigation system - which usually changes focus forward)
 			if (currentColumn == lastCol && currentRow == lastRow) {
 				return false;
 			}
@@ -2534,8 +2955,8 @@ namespace Terminal.Gui {
 		{
 			ResetColumnTrack ();
 
-			if (!AllowsTab) {
-				return false;
+			if (!AllowsTab || isReadOnly) {
+				return ProcessMovePreviousView ();
 			}
 			if (currentColumn > 0) {
 				var currentLine = GetCurrentLine ();
@@ -2558,8 +2979,8 @@ namespace Terminal.Gui {
 		{
 			ResetColumnTrack ();
 
-			if (!AllowsTab) {
-				return false;
+			if (!AllowsTab || isReadOnly) {
+				return ProcessMoveNextView ();
 			}
 			InsertText (new KeyEvent ((Key)'\t', null));
 			DoNeededAction ();
@@ -2577,11 +2998,9 @@ namespace Terminal.Gui {
 		{
 			ResetColumnTrack ();
 
-			if (!AllowsReturn) {
+			if (!AllowsReturn || isReadOnly) {
 				return false;
 			}
-			if (isReadOnly)
-				return true;
 
 			var currentLine = GetCurrentLine ();
 
@@ -2745,6 +3164,7 @@ namespace Terminal.Gui {
 			if (isReadOnly)
 				return;
 			if (model.Count == 1 && GetCurrentLine ().Count == 0) {
+				// Prevents from adding line feeds if there is no more lines.
 				return;
 			}
 
@@ -2770,6 +3190,7 @@ namespace Terminal.Gui {
 						}
 					}
 					if (model.Count == 0) {
+						// Prevents from adding line feeds if there is no more lines.
 						setLastWasKill = false;
 					}
 
@@ -2811,6 +3232,7 @@ namespace Terminal.Gui {
 			if (isReadOnly)
 				return;
 			if (model.Count == 1 && GetCurrentLine ().Count == 0) {
+				// Prevents from adding line feeds if there is no more lines.
 				return;
 			}
 
@@ -2843,6 +3265,7 @@ namespace Terminal.Gui {
 					}
 				}
 				if (model.Count == 0) {
+					// Prevents from adding line feeds if there is no more lines.
 					setLastWasKill = false;
 				}
 			} else {
@@ -2882,6 +3305,9 @@ namespace Terminal.Gui {
 			DoNeededAction ();
 		}
 
+		/// <summary>
+		/// Deletes all the selected or a single character at right from the position of the cursor.
+		/// </summary>
 		public void DeleteCharRight ()
 		{
 			if (isReadOnly)
@@ -2905,6 +3331,9 @@ namespace Terminal.Gui {
 			DoNeededAction ();
 		}
 
+		/// <summary>
+		/// Deletes all the selected or a single character at left from the position of the cursor.
+		/// </summary>
 		public void DeleteCharLeft ()
 		{
 			if (isReadOnly)
@@ -3004,18 +3433,24 @@ namespace Terminal.Gui {
 
 		void ResetContinuousFindTrack ()
 		{
+			// Handle some state here - whether the last command was a kill
+			// operation and the column tracking (up/down)
 			lastWasKill = false;
 			continuousFind = false;
 		}
 
 		void ResetColumnTrack ()
 		{
+			// Handle some state here - whether the last command was a kill
+			// operation and the column tracking (up/down)
 			lastWasKill = false;
 			columnTrack = -1;
 		}
 
 		void ResetAllTrack ()
 		{
+			// Handle some state here - whether the last command was a kill
+			// operation and the column tracking (up/down)
 			lastWasKill = false;
 			columnTrack = -1;
 			continuousFind = false;
@@ -3023,6 +3458,7 @@ namespace Terminal.Gui {
 
 		bool InsertText (KeyEvent kb)
 		{
+			//So that special keys like tab can be processed
 			if (isReadOnly)
 				return true;
 
@@ -3062,6 +3498,9 @@ namespace Terminal.Gui {
 			ContextMenu.Show ();
 		}
 
+		/// <summary>
+		/// Deletes all text.
+		/// </summary>
 		public void DeleteAll ()
 		{
 			if (Lines == 0) {
@@ -3075,6 +3514,7 @@ namespace Terminal.Gui {
 			SetNeedsDisplay ();
 		}
 
+		///<inheritdoc/>
 		public override bool OnKeyUp (KeyEvent kb)
 		{
 			switch (kb.Key) {
@@ -3143,6 +3583,7 @@ namespace Terminal.Gui {
 		bool DeleteTextBackwards ()
 		{
 			if (currentColumn > 0) {
+				// Delete backwards 
 				var currentLine = GetCurrentLine ();
 
 				historyText.Add (new List<List<Rune>> () { new List<Rune> (currentLine) }, CursorPosition);
@@ -3162,6 +3603,7 @@ namespace Terminal.Gui {
 				} else
 					SetNeedsDisplay (new Rect (0, currentRow - topRow, 1, Frame.Width));
 			} else {
+				// Merges the current line with the previous one.
 				if (currentRow == 0)
 					return true;
 				var prowIdx = currentRow - 1;
@@ -3201,6 +3643,9 @@ namespace Terminal.Gui {
 
 		bool copyWithoutSelection;
 
+		/// <summary>
+		/// Copy the selected text to the clipboard contents.
+		/// </summary>
 		public void Copy ()
 		{
 			SetWrapModel ();
@@ -3216,6 +3661,9 @@ namespace Terminal.Gui {
 			DoNeededAction ();
 		}
 
+		/// <summary>
+		/// Cut the selected text to the clipboard contents.
+		/// </summary>
 		public void Cut ()
 		{
 			SetWrapModel ();
@@ -3231,6 +3679,9 @@ namespace Terminal.Gui {
 			DoNeededAction ();
 		}
 
+		/// <summary>
+		/// Paste the clipboard contents into the current selected position.
+		/// </summary>
 		public void Paste ()
 		{
 			if (isReadOnly) {
@@ -3367,6 +3818,9 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// Will scroll the <see cref="TextView"/> to the last line and position the cursor there.
+		/// </summary>
 		public void MoveEnd ()
 		{
 			currentRow = model.Count - 1;
@@ -3376,6 +3830,9 @@ namespace Terminal.Gui {
 			PositionCursor ();
 		}
 
+		/// <summary>
+		/// Will scroll the <see cref="TextView"/> to the first line and position the cursor there.
+		/// </summary>
 		public void MoveHome ()
 		{
 			currentRow = 0;
@@ -3561,6 +4018,7 @@ namespace Terminal.Gui {
 			}
 		}
 
+		///<inheritdoc/>
 		public override bool MouseEvent (MouseEvent ev)
 		{
 			if (!ev.Flags.HasFlag (MouseFlags.Button1Clicked) && !ev.Flags.HasFlag (MouseFlags.Button1Pressed)
@@ -3585,6 +4043,7 @@ namespace Terminal.Gui {
 
 			continuousFind = false;
 
+			// Give autocomplete first opportunity to respond to mouse clicks
 			if (SelectedLength == 0 && Autocomplete.MouseEvent (ev, true)) {
 				return true;
 			}
@@ -3737,6 +4196,7 @@ namespace Terminal.Gui {
 			line = r;
 		}
 
+		///<inheritdoc/>
 		public override bool OnLeave (View view)
 		{
 			if (Application.mouseGrabView != null && Application.mouseGrabView == this) {
@@ -3746,14 +4206,23 @@ namespace Terminal.Gui {
 			return base.OnLeave (view);
 		}
 
+		/// <summary>
+		/// Allows clearing the <see cref="HistoryText.HistoryTextItem"/> items updating the original text.
+		/// </summary>
 		public void ClearHistoryChanges ()
 		{
 			historyText.Clear (Text);
 		}
 	}
 
+	/// <summary>
+	/// Renders an overlay on another view at a given point that allows selecting
+	/// from a range of 'autocomplete' options.
+	/// An implementation on a TextView.
+	/// </summary>
 	public class TextViewAutocomplete : Autocomplete {
 
+		///<inheritdoc/>
 		protected override string GetCurrentWord ()
 		{
 			var host = (TextView)HostControl;
@@ -3762,11 +4231,13 @@ namespace Terminal.Gui {
 			return IdxToWord (currentLine, cursorPosition);
 		}
 
+		/// <inheritdoc/>
 		protected override void DeleteTextBackwards ()
 		{
 			((TextView)HostControl).DeleteCharLeft ();
 		}
 
+		/// <inheritdoc/>
 		protected override void InsertText (string accepted)
 		{
 			((TextView)HostControl).InsertText (accepted);

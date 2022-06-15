@@ -41,6 +41,7 @@ namespace HomeMailHub
         public bool IsVpnAlways { get; set; }
         public bool IsVpnEnable { get; set; }
         public bool IsVpnRandom { get; set; }
+        public bool IsVPNLocalRoute { get; set; }
         public bool IsProxyListRepack { get; set; }
         public bool IsSharingSocket { get; set; }
         public bool IsAccessIpWhiteList { get; set; }
@@ -71,6 +72,7 @@ namespace HomeMailHub
 
         public bool IsProxyCheckRun { get; } /* no set */
         public bool IsVpnTunnelRunning { get; } /* no set */
+        public bool IsVpnManualEnable { get; } /* no set */
         public bool IsVpnBegin { get; } /* no set */
         public bool IsVpnReady { get; } /* no set */
         public bool IsVpnSelected { get; } /* no set */
@@ -120,6 +122,7 @@ namespace HomeMailHub
             IsVpnAlways = Properties.Settings.Default.IsVpnAlways;
             IsVpnEnable = Properties.Settings.Default.IsVpnEnable;
             IsVpnRandom = Properties.Settings.Default.IsVpnRandom;
+            IsVPNLocalRoute = Properties.Settings.Default.IsVPNLocalRoute;
             IsEnableLogVpn = Properties.Settings.Default.IsEnableLogVpn;
             IsProxyListRepack = Properties.Settings.Default.IsProxyListRepack;
             IsSharingSocket = Properties.Settings.Default.IsSharingSocket;
