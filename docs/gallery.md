@@ -17,7 +17,7 @@ layout: post
 }
 </style>
 
-[![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg) [![Download x64](https://img.shields.io/badge/Download-x64-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8191/SecurityHomeMailHub-x64-1.0.8191.msi) [![Download x86](https://img.shields.io/badge/Download-x86-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8191/SecurityHomeMailHub-x86-1.0.8191.msi)
+[![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg) [![Download x64](https://img.shields.io/badge/Download-x64-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8201/SecurityHomeMailHub-x64-1.0.8201.msi) [![Download x86](https://img.shields.io/badge/Download-x86-brightgreen.svg?style=flat-square)](https://github.com/ClaudiaCoord/SecurityHomeMailHub/releases/download/1.0.8201/SecurityHomeMailHub-x86-1.0.8201.msi)
 
 ## Home Mail Hub screenshots:
 
