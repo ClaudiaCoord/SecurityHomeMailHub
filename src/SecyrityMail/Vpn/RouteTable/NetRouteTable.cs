@@ -24,29 +24,36 @@ namespace SecyrityMail.Vpn.RouteTable
             (entry == null) ? $"status = {x}" :
                 $"status = {x}: {entry.DestinationNet}/{entry.DestinationMask} to: {entry.GatewayIP} metric: {entry.Metric}";
 
-        public void CreateRoute() {
-            try {
-                Init();
-                int x = RouteActions(RouteEntry, true);
-                Global.Instance.Log.Add(nameof(CreateRoute), GetMessage(RouteEntry, x));
-            }
-            catch (Exception ex) { Global.Instance.Log.Add(nameof(CreateRoute), ex); }
-        }
-        public void DeleteRoute() {
-            try {
-                if ((RouteEntry != null) && !RouteEntry.IsEmpty) {
-                    int x = RouteActions(RouteEntry.Clone().SetMetric(), false);
-                    Global.Instance.Log.Add(nameof(DeleteRoute), GetMessage(RouteEntry, x));
+        public async Task<bool> CreateRoute() =>
+            await Task.Run(() => {
+                try {
+                    Init();
+                    int x = RouteActions(RouteEntry, true);
+                    Global.Instance.Log.Add(nameof(CreateRoute), GetMessage(RouteEntry, x));
+                    return x == 0;
                 }
-                Clear();
-            }
-            catch (Exception ex) { Global.Instance.Log.Add(nameof(DeleteRoute), ex); }
-        }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(CreateRoute), ex); }
+                return false;
+            });
+        public async Task<bool> DeleteRoute() =>
+            await Task.Run(() => {
+                try {
+                    int x = -1;
+                    if ((RouteEntry != null) && !RouteEntry.IsEmpty) {
+                        x = RouteActions(RouteEntry.Clone().SetMetric(), false);
+                        Global.Instance.Log.Add(nameof(DeleteRoute), GetMessage(RouteEntry, x));
+                    }
+                    Clear();
+                    return x == 0;
+                }
+                catch (Exception ex) { Global.Instance.Log.Add(nameof(DeleteRoute), ex); }
+                return false;
+            });
 
-        public async void CreateRoute(VpnAccount acc) =>
+        public async Task<bool> CreateRoute(VpnAccount acc) =>
             await FileInit(true, acc).ConfigureAwait(false);
 
-        public async void DeleteRoute(VpnAccount acc) =>
+        public async Task<bool> DeleteRoute(VpnAccount acc) =>
             await FileInit(false, acc).ConfigureAwait(false);
 
         #region static
@@ -69,10 +76,11 @@ namespace SecyrityMail.Vpn.RouteTable
                         Path.Combine(Global.GetRootDirectory(Global.DirectoryPlace.Vpn), file));
 
                     if ((f == null) || !f.Exists || (f.Length == 0)) {
+                        bool b;
                         Global.Instance.Log.Add(nameof(NetRouteTable), $"user route file '{file}' is empty or not exist..");
-                        if (action) CreateRoute();
-                        else DeleteRoute();
-                        return false;
+                        if (action) b = await CreateRoute().ConfigureAwait(false);
+                        else b = await DeleteRoute().ConfigureAwait(false);
+                        return b;
                     }
                     CancellationTokenSource cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(6));
                     try {
@@ -88,8 +96,6 @@ namespace SecyrityMail.Vpn.RouteTable
                     }
                     finally {
                         cancellation.Dispose();
-                        if (!action && (acc != null))
-                            acc.CurrentServiceName = string.Empty;
                     }
                     return true;
                 }

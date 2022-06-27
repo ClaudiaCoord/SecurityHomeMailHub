@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HomeMailHub.Gui.Dialogs;
 using HomeMailHub.Gui.ListSources;
@@ -166,6 +167,39 @@ namespace HomeMailHub.Gui
                         (a.MouseEvent.X < 7) ? 7 : a.MouseEvent.X,
                         (a.MouseEvent.Y >= 2) ? (a.MouseEvent.Y + 2) : a.MouseEvent.Y);
                     contextMenu.Show();
+                }
+                if ((a.MouseEvent.Flags == MouseFlags.Button1Clicked) &&
+                    (isMultiSelect || a.MouseEvent.Flags.HasFlag(MouseFlags.ButtonCtrl) || a.MouseEvent.Flags.HasFlag(MouseFlags.ButtonAlt))) {
+                    a.Handled = true;
+                    Point? cell = tableView.ScreenToCell(a.MouseEvent.X, a.MouseEvent.Y);
+                    if (cell != null) {
+                        if (tableView.MultiSelectedRegions.Count == 0) {
+                            tableView.MultiSelectedRegions.Push(
+                            new TableView.TableSelection(
+                                new Point(tableView.SelectedColumn, tableView.SelectedRow),
+                                new Rect(tableView.SelectedColumn, tableView.SelectedRow, 1, 1)
+                            ));
+                        } else if (!tableView.MultiSelectedRegions.Any(r => r.Rect.Contains(cell.Value))) {
+                            tableView.MultiSelectedRegions.Push(
+                            new TableView.TableSelection(
+                                cell.Value,
+                                new Rect(cell.Value.X, cell.Value.Y, 1, 1)
+                            ));
+                            tableView.Update();
+                        } else {
+                            var tab = (from i in tableView.MultiSelectedRegions
+                                       where i.Rect.X == cell.Value.X && i.Rect.Y == cell.Value.Y
+                                       select i).FirstOrDefault();
+                            if (tab != null) {
+                                List<TableView.TableSelection> list = tableView.MultiSelectedRegions.ToList();
+                                list.Remove(tab);
+                                tableView.MultiSelectedRegions.Clear();
+                                foreach (TableView.TableSelection s in list)
+                                    tableView.MultiSelectedRegions.Push(s);
+                                tableView.Update();
+                            }
+                        }
+                    }
                 }
             };
             dataTable = new MessagesDataTable(selectedName, tableView);

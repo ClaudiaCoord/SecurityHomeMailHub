@@ -8,10 +8,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Routing;
 using SecyrityMail.Data;
 using SecyrityMail.MailFilters;
 using SecyrityMail.Utils;
@@ -32,6 +30,7 @@ namespace SecyrityMail.Vpn
         private EventHandler<EventActionArgs> eventMain;
         private CancellationTokenSafe cancellation = new();
         private Thread threadTunnel = null;
+        private VpnAccount CurrentAccount { get; set; } = default;
 
         private bool isEnableLogVpn = true,
                      isVpnReady = false,
@@ -99,8 +98,17 @@ namespace SecyrityMail.Vpn
                 }
         }
 
-        public void Dispose()
-        {
+        public async void Dispose() {
+
+            VpnAccount acc = CurrentAccount;
+            CurrentAccount = default;
+            if (acc != null) {
+                if (Global.Instance.Config.IsVPNLocalRoute)
+                    _ = await routeTable.DeleteRoute(acc).ConfigureAwait(false);
+                else
+                    _ = await routeTable.DeleteRoute().ConfigureAwait(false);
+                acc.CurrentServiceName = string.Empty;
+            }
             if (!cancellation.IsDisposed) {
                 cancellation.Cancel();
                 cancellation.Dispose();
@@ -135,14 +143,14 @@ namespace SecyrityMail.Vpn
                          flog = default(FileInfo);
                 Vpnlogger log = default(Vpnlogger);
                 TokenSafe token = cancellation.TokenSafe;
-                VpnAccount account = VpnAccounts.AccountSelected;
+                CurrentAccount = VpnAccounts.AccountSelected;
                 uint cursor = Vpnlogger.CursorAll;
                 try {
                     {
-                        if ((account == default) || account.IsEmpty)
-                            throw new Exception("VPN account not selected");
+                        if ((CurrentAccount == default) || CurrentAccount.IsEmpty)
+                            throw new Exception("VPN CurrentAccount not selected");
 
-                        string path = await account.Export();
+                        string path = await CurrentAccount.Export();
                         if (string.IsNullOrEmpty(path))
                             throw new Exception("error get VPN configuration");
 
@@ -150,13 +158,13 @@ namespace SecyrityMail.Vpn
                         if ((fcnf == default) || !fcnf.Exists)
                             throw new FileNotFoundException(path);
 
-                        account.CurrentServiceName = Path.GetFileNameWithoutExtension(fcnf.FullName);
+                        CurrentAccount.CurrentServiceName = Path.GetFileNameWithoutExtension(fcnf.FullName);
 
                         flog = new FileInfo(Global.GetRootFile(Global.DirectoryPlace.Vpn, "log.bin"));
                         if (flog == default)
                             throw new FileLoadException(flog.FullName);
 
-                        Global.Instance.Log.Add(LogTag, $"start tunnel logging ({account.Name})");
+                        Global.Instance.Log.Add(LogTag, $"start tunnel logging ({CurrentAccount.Name})");
                     }
 
                     token.ThrowIfCancellationRequested();
@@ -166,7 +174,8 @@ namespace SecyrityMail.Vpn
                     VpnDriver.VpnAdapter adapter = null;
 
                     if (Global.Instance.Config.IsVPNLocalRoute)
-                        routeTable.CreateRoute(account);
+                        _ = await routeTable.CreateRoute(CurrentAccount)
+                                            .ConfigureAwait(false);
 
                     while (IsTunnelRunning) {
 
@@ -208,8 +217,6 @@ namespace SecyrityMail.Vpn
                             Global.Instance.Log.Add(TunnelTag, ex);
                         }
                     }
-                    if (Global.Instance.Config.IsVPNLocalRoute)
-                        routeTable.DeleteRoute(account);
                     Global.Instance.Log.Add(LogTag, "end tunnel logging");
                 }
                 catch (OperationCanceledException) { Global.Instance.Log.Add(TunnelTag, "cancell tunnel logging, close"); }
