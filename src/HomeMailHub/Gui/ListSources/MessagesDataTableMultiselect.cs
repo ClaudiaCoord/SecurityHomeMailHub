@@ -42,8 +42,7 @@ namespace HomeMailHub.Gui.ListSources
                         new TableView.TableSelection(
                             new Point(tv.SelectedColumn, tv.SelectedRow),
                             new Rect(tv.SelectedColumn, tv.SelectedRow, 1, 1)
-                    ));
-                    tv.Update();
+                        ));
                 } else {
                     var tab = (from i in tv.MultiSelectedRegions
                                where i.Rect.X == cell.Value.X && i.Rect.Y == cell.Value.Y
@@ -54,6 +53,7 @@ namespace HomeMailHub.Gui.ListSources
                         tv.MultiSelectedRegions.Clear();
                         foreach (TableView.TableSelection s in list)
                             tv.MultiSelectedRegions.Push(s);
+                        tv.SelectedRow = (list.Count > 0) ? list[0].Rect.Y : -1;
                     } else {
                         tv.MultiSelectedRegions.Push(
                             new TableView.TableSelection(
@@ -61,8 +61,8 @@ namespace HomeMailHub.Gui.ListSources
                                 new Rect(cell.Value.X, cell.Value.Y, 1, 1)
                             ));
                     }
-                    tv.Update();
                 }
+                tv.Update();
                 return true;
             }
             return false;
