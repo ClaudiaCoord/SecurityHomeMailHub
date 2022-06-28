@@ -39,9 +39,9 @@ namespace HomeMailHub.Gui.ListSources
             if (cell != null) {
                 if (tv.MultiSelectedRegions.Count == 0) {
                     tv.MultiSelectedRegions.Push(
-                    new TableView.TableSelection(
-                        new Point(tv.SelectedColumn, tv.SelectedRow),
-                        new Rect(tv.SelectedColumn, tv.SelectedRow, 1, 1)
+                        new TableView.TableSelection(
+                            new Point(tv.SelectedColumn, tv.SelectedRow),
+                            new Rect(tv.SelectedColumn, tv.SelectedRow, 1, 1)
                     ));
                     tv.Update();
                 } else {
