@@ -1,29 +1,27 @@
-To date, these of a mobile device of any e-mail application known brands as Google Mail, Yandex Mail, MailRu, Microsoft Mail, etc.  - transmit your sensitive data, including network routing table, including the IP address of your ISP, IP address VPN, and GEO coordinates on the basis of the IP address, or GPS.
+![Home security mail fetch hub](https://claudiacoord.github.io/SecurityHomeMailHub/assets/images/banner.png) 
 
-![Home security mail fetch hub 0](https://claudiacoord.github.io/SecurityHomeMailHub/assets/images/banner.png)  
+На сегодняшний день использование на мобильном устройстве любого почтового приложения <u>известных брендов</u>, таких как `Google Mail`, `Яндекс Почта`, `MailRu`, `Microsoft Mail` и т. д. - передача ваших конфиденциальных данных, включая таблицу сетевой маршрутизации, включая IP-адрес вашего провайдера, IP-адрес `VPN` и `ГЕО` координаты на основе IP-адреса или `GPS`.
 
-#### Change this situation possible.  
+#### Изменить эту ситуацию возможно.
 
- First of all, stop using the original e-mail clients from the postal service aggregators.
+Прежде всего, перестаньте использовать оригинальные почтовые клиенты от агрегаторов почтовых услуг.  
+Следующий шаг, установка посредника для доставки и получения сообщений электронной почты, который должен делать следующее:  
 
- The next step, the installation of an intermediary for the delivery and receipt of e-mail messages that should do the following:  
+#### 1. При отправке сообщения:
 
-#### 1. When sending a message:  
+- 1.1 для очистки сообщений от дополнительной информации, если таковая была добавлена ​​в заголовки сообщения клиентом,
 
-  - 1.1 to clean the messages from the additional information, if any, was added to the headers of the message by the client,  
+- 1.2 общаться с внешним почтовым сервером только через анонимные и защищенные каналы, такие как `VPN`, `Proxy`,
 
-  - 1.2 to communicate with an external mail server only through anonymous and protected channels, such as VPN, Proxy,  
+- 1.3 с точки зрения агрегаторов почтовых сервисов безопасный канал – это канал, по которому они могут беспрепятственно получать от пользовательского устройства любую конфиденциальную информацию без ведома и ведома владельца,
 
-  - 1.3 in terms of aggregators mail services, secure channel is the channel through which they can receive without hindrance from the user device, any confidential information without the knowledge and unbeknownst to the owner,  
+- 1.4 применительно к внешнему почтовому серверу не использовать свойство `Keep alive Connection`, а разрывать соединение сразу после операции, это усложняет вычисление реального IP адреса при использовании прокси-сервера и `VPN` подключения.
 
-  - 1.4 with regard to the external mail server, do not use keep alive Connection property, and break the connection immediately after the operation, it complicates the calculation of the real IP address when using a proxy server and VPN connection.  
+#### 2. При получении сообщения:
 
-#### 2. When you receive a message:  
+- 2.1 преобразовать тело сообщения в текстовый формат, а также составить и включить в обрабатываемое сообщение список внешних ссылок, которые могут иметь «`двойное использование`»,
 
- - 2.1 convert the body of the message in text format, and compiling and including in the processed message a list of external links, that may have "dual use",  
+- 2.2 удалять заголовки, вызывающие различные подтверждения и дополнительный, не контролируемый вами, генерирующий почтовый трафик.
 
- - 2.2 delete headers, causing a variety of confirmation and additional, not controlled by you to generate e-mail traffic.  
-
- All of the above and some additional security features implemented in HomeMailHub.  
-
- The app is absolutely free, contains no advertising or other "tabs", distributed as OpenSource with available source code.
+Все вышеперечисленное и некоторые дополнительные функции безопасности реализованы в <mark>HomeMailHub</mark>.  
+Приложение абсолютно бесплатное, не содержит рекламы и прочих «вкладок», распространяется как `OpenSource` с доступным исходным кодом.  
