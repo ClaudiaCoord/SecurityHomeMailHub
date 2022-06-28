@@ -179,12 +179,6 @@ namespace HomeMailHub.Gui
                                 new Point(tableView.SelectedColumn, tableView.SelectedRow),
                                 new Rect(tableView.SelectedColumn, tableView.SelectedRow, 1, 1)
                             ));
-                        } else if (!tableView.MultiSelectedRegions.Any(r => r.Rect.Contains(cell.Value))) {
-                            tableView.MultiSelectedRegions.Push(
-                            new TableView.TableSelection(
-                                cell.Value,
-                                new Rect(cell.Value.X, cell.Value.Y, 1, 1)
-                            ));
                             tableView.Update();
                         } else {
                             var tab = (from i in tableView.MultiSelectedRegions
@@ -196,8 +190,14 @@ namespace HomeMailHub.Gui
                                 tableView.MultiSelectedRegions.Clear();
                                 foreach (TableView.TableSelection s in list)
                                     tableView.MultiSelectedRegions.Push(s);
-                                tableView.Update();
+                            } else {
+                                tableView.MultiSelectedRegions.Push(
+                                    new TableView.TableSelection(
+                                        cell.Value,
+                                        new Rect(cell.Value.X, cell.Value.Y, 1, 1)
+                                    ));
                             }
+                            tableView.Update();
                         }
                     }
                 }
