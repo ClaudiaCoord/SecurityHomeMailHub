@@ -33,7 +33,7 @@ namespace HomeMailHub.Gui.ListSources
             return !IsEmpty;
         }
 
-        public void MouseMultiSelect(TableView tv, MouseEventArgs a)
+        public bool MouseMultiSelect(TableView tv, MouseEventArgs a)
         {
             Point? cell = tv.ScreenToCell(a.MouseEvent.X, a.MouseEvent.Y);
             if (cell != null) {
@@ -63,7 +63,9 @@ namespace HomeMailHub.Gui.ListSources
                     }
                     tv.Update();
                 }
+                return true;
             }
+            return false;
         }
     }
 }

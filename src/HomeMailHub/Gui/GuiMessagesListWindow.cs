@@ -169,15 +169,12 @@ namespace HomeMailHub.Gui
                     contextMenu.Show();
                 }
                 if (a.MouseEvent.Flags == MouseFlags.Button2Clicked) {
-                    a.Handled = true;
-                    if (!IsMultiSelect)
-                        IsMultiSelect = true;
-                    dataTable.Multiselected.MouseMultiSelect(tableView, a);
+                    if (!IsMultiSelect) IsMultiSelect = true;
+                    a.Handled = dataTable.Multiselected.MouseMultiSelect(tableView, a);
                 }
                 if ((a.MouseEvent.Flags == MouseFlags.Button1Clicked) &&
                     (IsMultiSelect || a.MouseEvent.Flags.HasFlag(MouseFlags.ButtonCtrl) || a.MouseEvent.Flags.HasFlag(MouseFlags.ButtonAlt))) {
-                    a.Handled = true;
-                    dataTable.Multiselected.MouseMultiSelect(tableView, a);
+                    a.Handled = dataTable.Multiselected.MouseMultiSelect(tableView, a);
                 }
             };
             dataTable = new MessagesDataTable(selectedName, tableView);
