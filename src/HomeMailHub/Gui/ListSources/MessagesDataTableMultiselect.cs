@@ -5,7 +5,9 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using Terminal.Gui;
+using static Terminal.Gui.View;
 
 namespace HomeMailHub.Gui.ListSources
 {
@@ -29,6 +31,39 @@ namespace HomeMailHub.Gui.ListSources
             if (list.Count > 0)
                 selected.AddRange(list);
             return !IsEmpty;
+        }
+
+        public void MouseMultiSelect(TableView tv, MouseEventArgs a)
+        {
+            Point? cell = tv.ScreenToCell(a.MouseEvent.X, a.MouseEvent.Y);
+            if (cell != null) {
+                if (tv.MultiSelectedRegions.Count == 0) {
+                    tv.MultiSelectedRegions.Push(
+                    new TableView.TableSelection(
+                        new Point(tv.SelectedColumn, tv.SelectedRow),
+                        new Rect(tv.SelectedColumn, tv.SelectedRow, 1, 1)
+                    ));
+                    tv.Update();
+                } else {
+                    var tab = (from i in tv.MultiSelectedRegions
+                               where i.Rect.X == cell.Value.X && i.Rect.Y == cell.Value.Y
+                               select i).FirstOrDefault();
+                    if (tab != null) {
+                        List<TableView.TableSelection> list = tv.MultiSelectedRegions.ToList();
+                        list.Remove(tab);
+                        tv.MultiSelectedRegions.Clear();
+                        foreach (TableView.TableSelection s in list)
+                            tv.MultiSelectedRegions.Push(s);
+                    } else {
+                        tv.MultiSelectedRegions.Push(
+                            new TableView.TableSelection(
+                                cell.Value,
+                                new Rect(cell.Value.X, cell.Value.Y, 1, 1)
+                            ));
+                    }
+                    tv.Update();
+                }
+            }
         }
     }
 }
