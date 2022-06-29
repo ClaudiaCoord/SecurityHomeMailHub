@@ -105,8 +105,6 @@ namespace SecyrityMail.Vpn
             if (acc != null) {
                 if (Global.Instance.Config.IsVPNLocalRoute)
                     _ = await routeTable.DeleteRoute(acc).ConfigureAwait(false);
-                else
-                    _ = await routeTable.DeleteRoute().ConfigureAwait(false);
                 acc.CurrentServiceName = string.Empty;
             }
             if (!cancellation.IsDisposed) {

@@ -21,14 +21,17 @@ namespace SecyrityMail.Vpn.RouteTable
         public int Metric { get; set; } = 35;
 
         public bool IsEmpty =>
-            (DestinationNet == null) || (DestinationMask == null) || (GatewayIP == null) || (InterfaceIP == null) || (InterfaceIndex < 0);
+            (DestinationNet == null) || (DestinationMask == null) || (InterfaceIndex < 0);
+
+        public bool IsGwEmpty =>
+            IsEmpty || (GatewayIP == null) || (InterfaceIP == null);
 
         public NetRouteEntry SwapGw() {
             IPAddress a = InterfaceIP;
             InterfaceIP = GatewayIP;
             GatewayIP = a; return this;
         }
-        public NetRouteEntry SetMetric(int x = -1) {
+        public NetRouteEntry SetMetric(int x = 0) {
             Metric = x; return this;
         }
         public NetRouteEntry Clone() {
