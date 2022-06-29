@@ -6,7 +6,7 @@ docs_dir: docs
 
 nav:
     - Home: index.md
-    - About: about.md
+    - About: About.md
 
 theme: bootstrap386
 
