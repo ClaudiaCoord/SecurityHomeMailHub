@@ -176,6 +176,11 @@ namespace HomeMailHub.Gui
                     (IsMultiSelect || a.MouseEvent.Flags.HasFlag(MouseFlags.ButtonCtrl) || a.MouseEvent.Flags.HasFlag(MouseFlags.ButtonAlt))) {
                     a.Handled = dataTable.Multiselected.MouseMultiSelect(tableView, a);
                 }
+                if (((a.MouseEvent.Flags == MouseFlags.Button1DoubleClicked) && IsMultiSelect) ||
+                    (a.MouseEvent.Flags == MouseFlags.Button2DoubleClicked)) {
+                    if (IsMultiSelect) IsMultiSelect = false;
+                    a.Handled = dataTable.Multiselected.MouseMultiSelectReset(tableView, a);
+                }
             };
             dataTable = new MessagesDataTable(selectedName, tableView);
             Add(tableView);

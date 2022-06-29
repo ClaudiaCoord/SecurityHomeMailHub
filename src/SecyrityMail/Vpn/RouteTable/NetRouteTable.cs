@@ -114,7 +114,9 @@ namespace SecyrityMail.Vpn.RouteTable
                             try {
                                 if (a != null) {
                                     int x = RouteActions(a, true);
-                                    Global.Instance.Log.Add(GetAction(true), GetMessage(a, x));
+                                    a.IsDuplicate = x == (int)RouteError.ObjectAlreadyExists;
+                                    if (!a.IsDuplicate)
+                                        Global.Instance.Log.Add(GetAction(true), GetMessage(a, x));
                                 }
                             } catch (Exception ex) { Global.Instance.Log.Add(nameof(CreateRoute), ex); }
                         }
@@ -237,7 +239,7 @@ namespace SecyrityMail.Vpn.RouteTable
         private void DeleteRouting() {
             foreach (NetRouteEntry a in RouteEntrys) {
                 try {
-                    if (a != null) {
+                    if ((a != null) && !a.IsDuplicate) {
                         int x = RouteActions(a.Clone().SetMetric(), false);
                         Global.Instance.Log.Add(GetAction(false), GetMessage(a, x));
                     }

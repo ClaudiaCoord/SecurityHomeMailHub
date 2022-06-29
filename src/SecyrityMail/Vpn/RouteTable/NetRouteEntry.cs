@@ -19,6 +19,7 @@ namespace SecyrityMail.Vpn.RouteTable
         public int ForwardProtocol { get; set; } = 3;
         public int ForwardAge { get; set; } = 0;
         public int Metric { get; set; } = 35;
+        public bool IsDuplicate { get; set; } = false;
 
         public bool IsEmpty =>
             (DestinationNet == null) || (DestinationMask == null) || (InterfaceIndex < 0);
