@@ -319,4 +319,12 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>IF " $(Configuration) " == " Release " (
+echo "*** Clean release directory: $(SolutionDir)bin\$(Platform)\$(Configuration)\ ***"
+cmd /c rmdir /S /Q "$(SolutionDir)bin\$(Platform)\$(Configuration)\net48"
+cmd /c rmdir /S /Q "$(SolutionDir)bin\$(Platform)\$(Configuration)\net472"
+cmd /c del /S /Q "$(SolutionDir)bin\$(Platform)\$(Configuration)\*.pdb"
+)</PostBuildEvent>
+  </PropertyGroup>
 </Project>
