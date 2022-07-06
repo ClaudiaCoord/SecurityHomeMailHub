@@ -4,7 +4,6 @@
  * License MIT.
  */
 
-
 using System;
 using Renci.SshNet;
 using Renci.SshNet.Common;
@@ -42,7 +41,7 @@ namespace SecyrityMail.Proxy.SshProxy
             Global.Instance.Log.Add(nameof(ProxySshSocks5), e.Exception);
 
         private void PortFw_RequestReceived(object sender, PortForwardEventArgs e) =>
-            Global.Instance.Log.Add(nameof(ProxySshSocks5), $"call: {Client.ConnectionInfo.Username} -> {e.OriginatorHost}:{e.OriginatorPort}");
+            Global.Instance.Log.Add(nameof(ProxySshSocks5), $"call: {Client.ConnectionInfo.Host} -> {e.OriginatorHost}:{e.OriginatorPort}");
 
         private void Client_HostKeyReceived(object sender, HostKeyEventArgs e) => e.CanTrust = true;
 

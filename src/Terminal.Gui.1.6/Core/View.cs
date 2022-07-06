@@ -197,9 +197,8 @@ namespace Terminal.Gui {
 		public Key Shortcut {
 			get => shortcutHelper.Shortcut;
 			set {
-				if (shortcutHelper.Shortcut != value && (ShortcutHelper.PostShortcutValidation (value) || value == Key.Null)) {
+				if (shortcutHelper.Shortcut != value && (ShortcutHelper.PostShortcutValidation (value) || value == Key.Null))
 					shortcutHelper.Shortcut = value;
-				}
 			}
 		}
 
@@ -496,9 +495,7 @@ namespace Terminal.Gui {
 		/// </remarks>
 		public Rect Bounds {
 			get => new Rect (Point.Empty, Frame.Size);
-			set {
-				Frame = new Rect (frame.Location, value.Size);
-			}
+			set => Frame = new Rect (frame.Location, value.Size);
 		}
 
 		Pos x, y;
@@ -1619,24 +1616,19 @@ namespace Terminal.Gui {
 		public event Action<KeyEventEventArgs> KeyPress;
 
 		/// <inheritdoc/>
-		public override bool ProcessKey (KeyEvent keyEvent)
-		{
-			if (!Enabled) {
-				return false;
-			}
+		public override bool ProcessKey (KeyEvent keyEvent) {
+
+			if (!Enabled) return false;
 
 			KeyEventEventArgs args = new KeyEventEventArgs (keyEvent);
 			KeyPress?.Invoke (args);
-			if (args.Handled)
-				return true;
+			if (args.Handled) return true;
 			if (Focused?.Enabled == true) {
 				Focused?.KeyPress?.Invoke (args);
-				if (args.Handled)
-					return true;
+				if (args.Handled) return true;
 			}
 			if (Focused?.Enabled == true && Focused?.ProcessKey (keyEvent) == true)
 				return true;
-
 			return false;
 		}
 
@@ -1650,13 +1642,11 @@ namespace Terminal.Gui {
 			if (KeyBindings.ContainsKey (keyEvent.Key)) {
 				var command = KeyBindings [keyEvent.Key];
 
-				if (!CommandImplementations.ContainsKey (command)) {
-					throw new NotSupportedException ($"A KeyBinding was set up for the command {command} ({keyEvent.Key}) but that command is not supported by this View ({GetType ().Name})");
-				}
-
+				if (!CommandImplementations.ContainsKey (command))
+					throw new NotSupportedException (
+						$"A KeyBinding was set up for the command {command} ({keyEvent.Key}) but that command is not supported by this View ({GetType ().Name})");
 				return CommandImplementations [command] ();
 			}
-
 			return null;
 		}
 
@@ -1758,67 +1748,61 @@ namespace Terminal.Gui {
 		/// Returns all commands that are supported by this <see cref="View"/>
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<Command> GetSupportedCommands ()
-		{
-			return CommandImplementations.Keys;
-		}
+		public IEnumerable<Command> GetSupportedCommands () =>
+            CommandImplementations.Keys;
 
 		/// <summary>
 		/// Gets the key used by a command.
 		/// </summary>
 		/// <param name="command">The command to search.</param>
 		/// <returns>The <see cref="Key"/> used by a <see cref="Command"/></returns>
-		public Key GetKeyFromCommand (Command command)
-		{
-			return KeyBindings.First (x => x.Value == command).Key;
-		}
+		public Key GetKeyFromCommand (Command command) =>
+			KeyBindings.First (x => x.Value == command).Key;
 
 		/// <inheritdoc/>
 		public override bool ProcessHotKey (KeyEvent keyEvent)
 		{
-			if (!Enabled) {
-				return false;
-			}
-
-			KeyEventEventArgs args = new KeyEventEventArgs (keyEvent);
-			if (MostFocused?.Enabled == true) {
-				MostFocused?.KeyPress?.Invoke (args);
-				if (args.Handled)
-					return true;
-			}
-			if (MostFocused?.Enabled == true && MostFocused?.ProcessKey (keyEvent) == true)
-				return true;
-			if (subviews == null || subviews.Count == 0)
-				return false;
-			foreach (var view in subviews)
-				if (view.Enabled && view.ProcessHotKey (keyEvent))
-					return true;
-			return false;
+            if (!Enabled) return false;
+            if ((MostFocused != null) && MostFocused.Enabled) {
+                if (MostFocused.KeyPress != null) {
+                    KeyEventEventArgs args = new(keyEvent);
+                    MostFocused?.KeyPress?.Invoke(args);
+                    if (args.Handled) return true;
+                }
+                if (MostFocused.ProcessKey(keyEvent))
+                    return true;
+            }
+            if (subviews != null && subviews.Count > 0) {
+                foreach (var view in subviews)
+                    if (view.Enabled && view.ProcessHotKey(keyEvent))
+                        return true;
+            }
+            return false;
 		}
 
 		/// <inheritdoc/>
 		public override bool ProcessColdKey (KeyEvent keyEvent)
 		{
-			if (!Enabled) {
-				return false;
-			}
-
-			KeyEventEventArgs args = new KeyEventEventArgs (keyEvent);
-			KeyPress?.Invoke (args);
-			if (args.Handled)
-				return true;
-			if (MostFocused?.Enabled == true) {
-				MostFocused?.KeyPress?.Invoke (args);
-				if (args.Handled)
-					return true;
-			}
-			if (MostFocused?.Enabled == true && MostFocused?.ProcessKey (keyEvent) == true)
-				return true;
-			if (subviews == null || subviews.Count == 0)
-				return false;
-			foreach (var view in subviews)
-				if (view.Enabled && view.ProcessColdKey (keyEvent))
-					return true;
+			if (!Enabled) return false;
+			if (KeyPress != null) {
+                KeyEventEventArgs args = new (keyEvent);
+                KeyPress?.Invoke(args);
+                if (args.Handled) return true;
+            }
+            if ((MostFocused != null) && MostFocused.Enabled) {
+                if (MostFocused.KeyPress != null) {
+                    KeyEventEventArgs args = new(keyEvent);
+                    MostFocused?.KeyPress?.Invoke(args);
+                    if (args.Handled) return true;
+                }
+                if (MostFocused.ProcessKey(keyEvent))
+                    return true;
+            }
+            if (subviews != null && subviews.Count > 0) {
+                foreach (var view in subviews)
+                    if (view.Enabled && view.ProcessColdKey(keyEvent))
+                        return true;
+            }
 			return false;
 		}
 
@@ -1830,19 +1814,14 @@ namespace Terminal.Gui {
 		/// <inheritdoc/>
 		public override bool OnKeyDown (KeyEvent keyEvent)
 		{
-			if (!Enabled) {
-				return false;
-			}
-
-			KeyEventEventArgs args = new KeyEventEventArgs (keyEvent);
-			KeyDown?.Invoke (args);
-			if (args.Handled) {
+			if (!Enabled ) return false;
+            if (KeyDown != null) {
+                KeyEventEventArgs args = new(keyEvent);
+                KeyDown?.Invoke(args);
+                if (args.Handled) return true;
+            }
+            if ((Focused != null) && Focused.Enabled && Focused.OnKeyDown(keyEvent))
 				return true;
-			}
-			if (Focused?.Enabled == true && Focused?.OnKeyDown (keyEvent) == true) {
-				return true;
-			}
-
 			return false;
 		}
 
@@ -1854,20 +1833,15 @@ namespace Terminal.Gui {
 		/// <inheritdoc/>
 		public override bool OnKeyUp (KeyEvent keyEvent)
 		{
-			if (!Enabled) {
-				return false;
-			}
-
-			KeyEventEventArgs args = new KeyEventEventArgs (keyEvent);
-			KeyUp?.Invoke (args);
-			if (args.Handled) {
+            if (!Enabled) return false;
+            if (KeyUp != null) {
+                KeyEventEventArgs args = new(keyEvent);
+                KeyUp?.Invoke(args);
+                if (args.Handled) return true;
+            }
+            if ((Focused != null) && Focused.Enabled && Focused.OnKeyUp(keyEvent))
 				return true;
-			}
-			if (Focused?.Enabled == true && Focused?.OnKeyUp (keyEvent) == true) {
-				return true;
-			}
-
-			return false;
+            return false;
 		}
 
 		/// <summary>

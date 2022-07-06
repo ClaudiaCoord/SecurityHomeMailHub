@@ -1,0 +1,9 @@
+﻿
+A + Alt | a + Alt: Attach add
+R + Alt | r + Alt: Send message
+W + Alt | w + Alt: Toggle warnings
+C + Alt | c + Alt | Cursor Left + Alt | Esc: Close window
+
+T + Alt | t + Alt: 'To' set focus
+B + Alt | b + Alt: 'Body' set focus
+S + Alt | s + Alt: 'Subject' set focus

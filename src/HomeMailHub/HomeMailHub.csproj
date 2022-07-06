@@ -289,6 +289,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="HomeMailHub.ico" />
+    <Content Include="Resources\GuiMessageReadWindowHotKeys.txt" />
+    <Content Include="Resources\GuiMessagesListWindowHotKeys.txt" />
+    <Content Include="Resources\GuiMessageWriteWindowHotKeys.txt" />
     <Content Include="Resources\GuiServicesSettingsWindowClientsHelp.txt" />
     <Content Include="Resources\GuiServicesSettingsWindowPgpHelp.txt" />
     <Content Include="Resources\GuiServicesSettingsWindowPop3Help.txt" />
@@ -296,6 +299,9 @@
     <Content Include="Resources\GuiServicesSettingsWindowSmtpHelp.txt" />
     <Content Include="Resources\GuiSshAccountWindowHelp.txt" />
     <Content Include="Resources\GuiVpnAccountWindowHelp.txt" />
+    <Content Include="Resources\ru\GuiMessageReadWindowHotKeys.txt" />
+    <Content Include="Resources\ru\GuiMessagesListWindowHotKeys.txt" />
+    <Content Include="Resources\ru\GuiMessageWriteWindowHotKeys.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowClientsHelp.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowPgpHelp.txt" />
     <Content Include="Resources\ru\GuiServicesSettingsWindowPop3Help.txt" />
@@ -325,6 +331,7 @@ echo "*** Clean release directory: $(SolutionDir)bin\$(Platform)\$(Configuration
 cmd /c rmdir /S /Q "$(SolutionDir)bin\$(Platform)\$(Configuration)\net48"
 cmd /c rmdir /S /Q "$(SolutionDir)bin\$(Platform)\$(Configuration)\net472"
 cmd /c del /S /Q "$(SolutionDir)bin\$(Platform)\$(Configuration)\*.pdb"
+cmd /c del /S /Q "$(SolutionDir)bin\$(Platform)\$(Configuration)\*.xml"
 )</PostBuildEvent>
   </PropertyGroup>
 </Project>

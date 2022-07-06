@@ -411,31 +411,24 @@ namespace Terminal.Gui {
 
 		static void ProcessKeyEvent (KeyEvent ke)
 		{
-			if (RootKeyEvent?.Invoke (ke) ?? false) {
+			if (RootKeyEvent?.Invoke (ke) ?? false)
 				return;
-			}
 
 			var chain = toplevels.ToList ();
 			foreach (var topLevel in chain) {
-				if (topLevel.ProcessHotKey (ke))
-					return;
-				if (topLevel.Modal)
-					break;
+				if (topLevel.ProcessHotKey (ke)) return;
+				if (topLevel.Modal) break;
 			}
 
 			foreach (var topLevel in chain) {
-				if (topLevel.ProcessKey (ke))
-					return;
-				if (topLevel.Modal)
-					break;
+				if (topLevel.ProcessKey (ke)) return;
+				if (topLevel.Modal) break;
 			}
 
 			foreach (var topLevel in chain) {
 				// Process the key normally
-				if (topLevel.ProcessColdKey (ke))
-					return;
-				if (topLevel.Modal)
-					break;
+				if (topLevel.ProcessColdKey (ke)) return;
+				if (topLevel.Modal) break;
 			}
 		}
 
@@ -443,22 +436,17 @@ namespace Terminal.Gui {
 		{
 			var chain = toplevels.ToList ();
 			foreach (var topLevel in chain) {
-				if (topLevel.OnKeyDown (ke))
-					return;
-				if (topLevel.Modal)
-					break;
+				if (topLevel.OnKeyDown (ke)) return;
+				if (topLevel.Modal) break;
 			}
 		}
-
 
 		static void ProcessKeyUpEvent (KeyEvent ke)
 		{
 			var chain = toplevels.ToList ();
 			foreach (var topLevel in chain) {
-				if (topLevel.OnKeyUp (ke))
-					return;
-				if (topLevel.Modal)
-					break;
+				if (topLevel.OnKeyUp (ke)) return;
+				if (topLevel.Modal) break;
 			}
 		}
 

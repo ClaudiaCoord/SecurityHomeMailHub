@@ -30,7 +30,7 @@ namespace HomeMailHub.Gui.ListSources
                 for (int i = 0, n = sel.Origin.Y; i < sel.Rect.Height; i++, n++)
                     list.Add(n);
             if (list.Count > 0)
-                selected.AddRange(list);
+                selected.AddRange(list.Distinct().Reverse());
             return !IsEmpty;
         }
 

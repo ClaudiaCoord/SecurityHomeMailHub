@@ -425,8 +425,8 @@ namespace Terminal.Gui {
 		public override bool ProcessHotKey (KeyEvent keyEvent)
 		{
 			if (keyEvent.IsAlt && keyEvent.Key == Key.AltMask) {
-				OnKeyDown (keyEvent);
-				return true;
+                OnKeyDown(keyEvent);
+                return true;
 			}
 
 			return false;

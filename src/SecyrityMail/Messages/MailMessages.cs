@@ -189,90 +189,89 @@ namespace SecyrityMail.Messages
         {
             if (runOnce.IsRunning || (list == null) || (list.Count <= 1))
                 return false;
+
             return await Task.Run(async () => {
-                Tuple<MimeMessage, string> ti =
-                    default(Tuple<MimeMessage, string>);
+                List<Tuple<MailMessage, MimeMessage, string>> listMsgs = new();
 
                 try {
                     MailMessage msg = Find(list[0]);
                     if (msg == null) return false;
-                    ti = await msg.MimeMessageToText()
-                                  .ConfigureAwait(false);
-                    if ((ti == null) || (ti.Item1 == null) || string.IsNullOrWhiteSpace(ti.Item2))
+                    Tuple<MailMessage, MimeMessage, string> primary = await msg.MimeMessageToText()
+                                                                               .ConfigureAwait(false);
+                    if ((primary == null) || (primary.Item2 == null) || string.IsNullOrWhiteSpace(primary.Item3))
                         return false;
 
                     (Global.DirectoryPlace place, string rootdir, DateTimeOffset dt) = Global.GetFolderInfo(msg.FilePath);
                     if ((place == Global.DirectoryPlace.None) || string.IsNullOrWhiteSpace(rootdir) || (dt == default))
                         return false;
+                    listMsgs.Add(primary);
 
                     DirectoryInfo attachdir = Directory.CreateDirectory(
                         Global.AppendPartDirectory(Global.GetUserDirectory(rootdir), Global.DirectoryPlace.Attach, dt));
 
                     BodyBuilder builder = new();
-                    builder.TextBody = ti.Item2;
-                    MailMessage.CopyAttachments(builder, ti.Item1.Attachments);
+                    builder.TextBody = primary.Item3;
+                    MailMessage.CopyAttachments(builder, primary.Item2.Attachments);
 
                     for (int i = 1; i < list.Count; i++) {
-                        MailMessage pmsg =
-                            default(MailMessage);
-                        Tuple<MimeMessage, string> tp =
-                            default(Tuple<MimeMessage, string>);
-                        bool isAdded = false;
-
                         try {
-                            pmsg = Find(list[i]);
-                            tp = await pmsg.MimeMessageToText()
-                                          .ConfigureAwait(false);
-                            if ((tp == null) || (tp.Item1 == null) || string.IsNullOrWhiteSpace(tp.Item2))
+                            MailMessage mmsg = Find(list[i]);
+                            if (mmsg == null) continue;
+
+                            Tuple<MailMessage, MimeMessage, string> secondary = await mmsg.MimeMessageToText()
+                                                                                          .ConfigureAwait(false);
+                            if ((secondary == null) || (secondary.Item2 == null) || string.IsNullOrWhiteSpace(secondary.Item3))
                                 continue;
 
-                            builder.TextBody += tp.Item2;
-                            IEnumerable<MimeEntity> attachs = tp.Item1.Attachments;
-                            if (attachs != null)
+                            listMsgs.Add(secondary);
+                            builder.TextBody += secondary.Item3;
+                            var attachs = secondary.Item2.Attachments;
+                            if (attachs != null) {
+                                MailMessage.CopyAttachments(builder, attachs);
                                 foreach (var a in attachs) {
-                                    try { builder.Attachments.Add(a); } catch { }
                                     try {
                                         string name = MailMessage.GetMimeEntryName(a);
                                         if (string.IsNullOrWhiteSpace(name))
                                             continue;
 
-                                        (Global.DirectoryPlace pplace, string prootdir, DateTimeOffset pdt) = Global.GetFolderInfo(pmsg.FilePath);
+                                        (Global.DirectoryPlace pplace, string prootdir, DateTimeOffset pdt) = Global.GetFolderInfo(secondary.Item1.FilePath);
                                         if ((pplace == Global.DirectoryPlace.None) || string.IsNullOrWhiteSpace(prootdir) || (pdt == default))
                                             continue;
 
-                                        FileInfo f = new (MailMessage.GetAttachFilePath(
+                                        FileInfo f = new(MailMessage.GetAttachFilePath(
                                             Global.AppendPartDirectory(Global.GetUserDirectory(rootdir), Global.DirectoryPlace.Attach, dt),
-                                            pmsg.MsgId, name));
+                                            secondary.Item1.MsgId, name));
                                         if ((f == null) || !f.Exists || f.IsReadOnly)
                                             continue;
                                         f.MoveTo(
                                             MailMessage.GetAttachFilePath(
                                                 attachdir.FullName,
-                                                pmsg.MsgId, name));
-                                    } catch { }
+                                                primary.Item1.MsgId, name));
+
+                                    } catch (Exception ex) { Global.Instance.Log.Add(nameof(CombineMessages), ex); }
                                 }
-                            isAdded = true;
-                        }
-                        catch (Exception ex) { Global.Instance.Log.Add(nameof(CombineMessages), ex); }
-                        finally {
-                            if ((tp != null) && (tp.Item1 != null))
-                                tp.Item1.Dispose();
-                            if (isAdded && (pmsg != null)) {
-                                Global.Instance.Log.Add(
-                                    nameof(CombineMessages),
-                                    $"Combine and remove: {pmsg.Id}/{pmsg.MsgId}");
-                                Delete(pmsg);
                             }
-                        }
+                        } catch (Exception ex) { Global.Instance.Log.Add(nameof(CombineMessages), ex); }
                     }
-                    ti.Item1.Body = builder.ToMessageBody();
-                    await ti.Item1.WriteToAsync(msg.FilePath).ConfigureAwait(false);
+                    primary.Item2.Body = builder.ToMessageBody();
+                    await primary.Item2.WriteToAsync(msg.FilePath).ConfigureAwait(false);
                     return true;
                 }
                 catch (Exception ex) { Global.Instance.Log.Add(nameof(CombineMessages), ex); }
                 finally {
-                    if ((ti != null) && (ti.Item1 != null))
-                        ti.Item1.Dispose();
+                    for (int i = 0; i < listMsgs.Count; i++) {
+                        Tuple<MailMessage, MimeMessage, string> msg = listMsgs[i];
+                        if ((msg != null) && (msg.Item1 != null)) {
+                            Global.Instance.Log.Add(
+                                nameof(CombineMessages),
+                                string.Format("Combine {0}: {1} + {2}/{3}",
+                                    (i == 0) ? "as primary" : "and remove",
+                                    listMsgs[0].Item1.Id, msg.Item1.Id, msg.Item1.MsgId));
+                            if (i > 0) Delete(msg.Item1);
+                            if (msg.Item2 != null)
+                                msg.Item2.Dispose();
+                        }
+                    }
                 }
                 return false;
             });

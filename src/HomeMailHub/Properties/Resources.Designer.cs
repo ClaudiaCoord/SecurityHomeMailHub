@@ -818,6 +818,58 @@ namespace HomeMailHub.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на 
+        ///F + Alt | f + Alt: Forward message
+        ///R + Alt | r + Alt: Reply to message
+        ///O + Alt | o + Alt: Open message in external application
+        ///S + Alt | s + Alt: Toggle view mode - source/message
+        ///Q + Alt | C + Alt | c + Alt: Close window
+        ///.
+        /// </summary>
+        internal static string GuiMessageReadWindowHotKeys {
+            get {
+                return ResourceManager.GetString("GuiMessageReadWindowHotKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на 
+        ///R + Alt | r + Alt: Reply to message
+        ///U + Alt | u + Alt: Toggle read/unread status to message
+        ///D + Alt | d + Alt | Del + Alt: Delete message
+        ///O + Alt | o + Alt | Cursor Right + Alt | Enter: Open message
+        ///Q + Alt | C + Alt | Cursor Left + Alt | c + Alt: Close window
+        ///
+        ///Cursor Right | Cursor Left | Home | End: scroll and expand messages table
+        ///Cursor Up | Cursor Down: scroll Up or Down messages table
+        ///Cursor Page Up | Cursor Page Down: region scroll Up or Down messages table
+        ///.
+        /// </summary>
+        internal static string GuiMessagesListWindowHotKeys {
+            get {
+                return ResourceManager.GetString("GuiMessagesListWindowHotKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на 
+        ///A + Alt | a + Alt: Attach add
+        ///R + Alt | r + Alt: Send message
+        ///W + Alt | w + Alt: Toggle warnings
+        ///Q + Alt | C + Alt | c + Alt: Close window
+        ///
+        ///T + Alt | t + Alt: &apos;To&apos; set focus
+        ///B + Alt | b + Alt: &apos;Body&apos; set focus
+        ///S + Alt | s + Alt: &apos;Subject&apos; set focus
+        ///.
+        /// </summary>
+        internal static string GuiMessageWriteWindowHotKeys {
+            get {
+                return ResourceManager.GetString("GuiMessageWriteWindowHotKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Proxy list {0} downloaded {1} hosts.
         /// </summary>
         internal static string GUIPROXY_FMT1 {
@@ -1428,6 +1480,15 @@ namespace HomeMailHub.Properties {
         internal static string MENU_GPGEXPORT {
             get {
                 return ResourceManager.GetString("MENU_GPGEXPORT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на _Hot Keys.
+        /// </summary>
+        internal static string MENU_HOTKEYS {
+            get {
+                return ResourceManager.GetString("MENU_HOTKEYS", resourceCulture);
             }
         }
         

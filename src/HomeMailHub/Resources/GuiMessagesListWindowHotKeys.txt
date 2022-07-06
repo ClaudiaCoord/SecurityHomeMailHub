@@ -1,0 +1,10 @@
+﻿
+R + Alt | r + Alt: Reply to message
+U + Alt | u + Alt: Toggle read/unread status to message
+D + Alt | d + Alt | Del + Alt: Delete message
+O + Alt | o + Alt | Cursor Right + Alt | Enter: Open message
+C + Alt | c + Alt | Cursor Left + Alt | Esc: Close window
+
+Cursor Right | Cursor Left | Home | End: scroll and expand messages table
+Cursor Up | Cursor Down: scroll Up or Down messages table
+Cursor Page Up | Cursor Page Down: region scroll Up or Down messages table

@@ -4,7 +4,6 @@
  * License MIT.
  */
 
-
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -52,7 +51,7 @@ namespace SecyrityMail.Clients
                                 if (sshacc.IsEmpty || sshacc.IsExpired)
                                     continue;
                                 _ = await accs.SelectAccount(i).ConfigureAwait(false);
-                                Global.Instance.Log.Add(nameof(InitClient), $"select next SSH proxy: {sshacc.Name}");
+                                Global.Instance.Log.Add(nameof(InitClient), $"select next SSH proxy: {sshacc.Host}");
                                 return await CreateClient(create, account, current, default, rootpath, token).ConfigureAwait(false);
                             } catch (Exception ex) { Global.Instance.Log.Add(nameof(InitClient), ex); }
                         }

@@ -75,11 +75,13 @@ namespace HomeMailHub.Gui
         private ColorScheme colorBageGreen { get; set; } = default;
         private ColorScheme colorBageDisable { get; set; } = default;
 
+        private bool IsMenuOpen { get; set; } = false;
         private bool [] sendWarning = new bool[] { false, false, false };
         private string selectedPath { get; set; } = string.Empty;
         private string selectedFrom { get; set; } = string.Empty;
         private SendReturn sendStatus { get; set; } = SendReturn.None;
         private GuiRunOnce runOnce = new();
+        private GuiRunOnce keyOnce = new();
         private List<string> fromList = new();
         private List<string> attachList = new();
         private GuiLinearLayot linearLayot { get; } = new();
@@ -90,6 +92,14 @@ namespace HomeMailHub.Gui
 
         public Toplevel GetTop => GuiToplevel;
 
+        #region Commands
+        Action CommandAttach = delegate { };
+        Action CommandWarning = delegate { };
+        Action CommandSend = delegate { };
+        Action CommandClose = delegate { };
+        #endregion
+
+        #region Constructor
         public GuiMessageWriteWindow() : base(RES.GUIMAILWRITE_TITLE1, 0) {
 
             X = 0;
@@ -118,14 +128,37 @@ namespace HomeMailHub.Gui
 
             colorBageDisable = new ColorScheme() { Normal = cdisable, Focus = cdisable, HotFocus = cdisable, HotNormal = cdisable, Disabled = cdisable };
             colorBageGreen = new ColorScheme() { Normal = cgreen, Focus = cgreen, HotFocus = cgreen, HotNormal = cgreen, Disabled = cgreen };
-        }
-        ~GuiMessageWriteWindow() => Dispose();
 
+            CommandAttach = delegate {
+                GuiOpenDialog d = RES.GUIMAILWRITE_TEXT1.GuiOpenDialogs(true);
+                Application.Run(d);
+                if (!d.Canceled) {
+                    try {
+                        string[] ss = d.GuiReturnDialog();
+                        if (ss.Length > 0) {
+                            attachList.AddRange(ss);
+                            attachList = attachList.Distinct().ToList();
+                            BuildAttachMenu();
+                        }
+                    } catch (Exception ex) { ex.StatusBarError(); }
+                }
+            };
+            CommandWarning = delegate {
+                warningBox.Checked = GuiApp.IsSendNoWarning = !warningBox.Checked;
+            };
+            CommandSend = async () => await Send_().ConfigureAwait(false);
+            CommandClose = delegate { Application.RequestStop(); };
+        }
+        #endregion
+
+        #region Dispose
         public new void Dispose() {
 
+            this.KeyUp -= Window_KeyUp;
             this.GetType().IDisposableObject(this);
             base.Dispose();
         }
+        #endregion
 
         #region Init
         public GuiMessageWriteWindow Init(string s)
@@ -281,26 +314,9 @@ namespace HomeMailHub.Gui
                 Y = layout[idx].Y + addrow,
                 AutoSize = layout[idx++].AutoSize
             });
-            buttonClose.Clicked += () => {
-                Application.RequestStop();
-            };
-            buttonAttach.Clicked += () => {
-                GuiOpenDialog d = RES.GUIMAILWRITE_TEXT1.GuiOpenDialogs(true);
-                Application.Run(d);
-                if (!d.Canceled) {
-                    try {
-                        string[] ss = d.GuiReturnDialog();
-                        if (ss.Length > 0) {
-                            attachList.AddRange(ss);
-                            attachList = attachList.Distinct().ToList();
-                            BuildAttachMenu();
-                        }
-                    } catch (Exception ex) { ex.StatusBarError(); }
-                }
-            };
-            buttonSend.Clicked += async () => {
-                await Send_().ConfigureAwait(false);
-            };
+            buttonClose.Clicked += CommandClose;
+            buttonAttach.Clicked += CommandAttach;
+            buttonSend.Clicked += CommandSend;
             signLabel.Clicked += () => SetPgpAction(MailMessageCrypt.Actions.Sign);
             cryptLabel.Clicked += () => SetPgpAction(MailMessageCrypt.Actions.Encrypt);
 
@@ -350,6 +366,8 @@ namespace HomeMailHub.Gui
             frameMsg.Add(msgText);
             Add(frameMsg);
 
+            this.KeyUp += Window_KeyUp;
+
             attachItemsMenu = new MenuItem[] {
                 new MenuItem(
                         RES.MENU_ADDATTACH, "", () => AddAttachFile())
@@ -357,16 +375,15 @@ namespace HomeMailHub.Gui
             attachMenu = new MenuBarItem($"_{RES.TAG_ATTACH}", attachItemsMenu);
             GuiMenu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
-                    new MenuItem (RES.MENU_SEND, "", async () => {
-                        await Send_().ConfigureAwait(false);
-                    },
-                    null, null, Key.AltMask | Key.S),
+                    new MenuItem (RES.MENU_SEND, "", CommandSend, null, null, Key.AltMask | Key.R),
                     null,
-                    new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.Q)
+                    new MenuItem (RES.MENU_CLOSE, "", CommandClose, null, null, Key.AltMask | Key.CursorLeft)
                 }),
-                attachMenu
+                attachMenu,
+                typeof(GuiMessageWriteWindow).LoadMenuHotKeys()
             });
 
+            GuiMenu.MenuOpened += (_) => IsMenuOpen = true;
             GuiToplevel.Add(GuiMenu, this);
             return this;
         }
@@ -397,6 +414,36 @@ namespace HomeMailHub.Gui
 
         private void WarningBox_Toggled(bool b) =>
             GuiApp.IsSendNoWarning = b;
+
+        #region Window key event
+        private void Window_KeyUp(KeyEventEventArgs a) {
+            if (!keyOnce.Begin()) return;
+            try {
+                if (a != null) {
+                    if (a.KeyEvent.IsAlt)
+                        switch (a.KeyEvent.ParseKeyEvent()) {
+                            case Key.T: toText.SetFocus(); break;
+                            case Key.B: msgText.SetFocus(); break;
+                            case Key.S: subjText.SetFocus(); break;
+                            case Key.C: CommandClose.Invoke(); break;
+                            case Key.A: CommandAttach.Invoke(); break;
+                            case Key.W: CommandWarning.Invoke(); break;
+                            default: return;
+                        }
+                    else
+                        switch (a.KeyEvent.Key) {
+                            case Key.Esc: {
+                                    if (!IsMenuOpen) CommandClose.Invoke();
+                                    IsMenuOpen = false;
+                                    break;
+                                }
+                            default: return;
+                        }
+                    a.Handled = true;
+                }
+            } finally { keyOnce.End(); }
+        }
+        #endregion
 
         #region Load
         public async void Load() => _ = await Load_().ConfigureAwait(false);

@@ -1,0 +1,6 @@
+﻿
+F + Alt | f + Alt: Forward message
+R + Alt | r + Alt: Reply to message
+O + Alt | o + Alt: Open message in external application
+S + Alt | s + Alt: Toggle view mode - source/message
+C + Alt | c + Alt | Cursor Left + Alt | Esc: Close window

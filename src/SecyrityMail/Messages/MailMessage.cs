@@ -479,13 +479,13 @@ namespace SecyrityMail.Messages
         #endregion
 
         #region MimeMessage to text
-        public async Task<Tuple<MimeMessage, string>> MimeMessageToText() =>
+        public async Task<Tuple<MailMessage, MimeMessage, string>> MimeMessageToText() =>
             await Task.Run(async () => {
                 try {
                     MimeMessage mmsg = await MimeMessage.LoadAsync(FilePath)
                                                         .ConfigureAwait(false);
                     if (mmsg == null)
-                        return new Tuple<MimeMessage, string>(default, string.Empty);
+                        return new Tuple<MailMessage, MimeMessage, string>(this, default, string.Empty);
 
                     StringBuilder sb = new();
                     sb.AppendLine($"{Environment.NewLine}{Date} - {From}{Environment.NewLine}{Subj}");
@@ -494,9 +494,9 @@ namespace SecyrityMail.Messages
                         sb.AppendLine(mmsg.TextBody);
                     else if (!string.IsNullOrWhiteSpace(mmsg.HtmlBody))
                         sb.AppendLine(new ConverterHtmlToHtml().ConvertT(mmsg.HtmlBody));
-                    return new Tuple<MimeMessage, string>(mmsg, sb.ToString());
+                    return new Tuple<MailMessage, MimeMessage, string>(this, mmsg, sb.ToString());
                 } catch { }
-                return new Tuple<MimeMessage, string>(default, string.Empty);
+                return new Tuple<MailMessage, MimeMessage, string>(this, default, string.Empty);
             });
         #endregion
 

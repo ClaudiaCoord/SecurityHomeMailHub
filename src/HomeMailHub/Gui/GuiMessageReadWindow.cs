@@ -63,13 +63,24 @@ namespace HomeMailHub.Gui
         private ColorScheme colorBageGreen { get; set; } = default;
         private ColorScheme colorBageWarning { get; set; } = default;
 
+        private bool IsMenuOpen { get; set; } = false;
         private bool IsViewSource { get; set; } = false;
         private string[] messageBody = new string[2] { string.Empty, string.Empty };
         private string selectedPath { get; set; } = string.Empty;
+        private GuiRunOnce keyOnce = new();
         private GuiLinearLayot linearLayot { get; } = new();
 
         public Toplevel GetTop => GuiToplevel;
 
+        #region Commands
+        Action CommandReplay = delegate { };
+        Action CommandForward = delegate { };
+        Action CommandOpen = delegate { };
+        Action CommandSource = delegate { };
+        Action CommandClose = delegate { };
+        #endregion
+
+        #region Constructor
         public GuiMessageReadWindow() : base(RES.GUIMAILREAD_TITLE1, 0)
         {
             X = 0;
@@ -113,14 +124,41 @@ namespace HomeMailHub.Gui
             colorBageWarning = new ColorScheme() { Normal = cwarn, Focus = cwarn, HotFocus = cwarn, HotNormal = cwarn, Disabled = cwarn };
             colorBageGreen = new ColorScheme() { Normal = cgreen, Focus = cgreen, HotFocus = cgreen, HotNormal = cgreen, Disabled = cgreen };
             colorBageRed = new ColorScheme() { Normal = cred, Focus = cred, HotFocus = cred, HotNormal = cred, Disabled = cred };
-        }
-        ~GuiMessageReadWindow() => Dispose();
 
+            CommandReplay = delegate {
+                msgText.SetFocus();
+                GuiApp.Get.LoadWindow(typeof(GuiMessageWriteWindow), selectedPath);
+            };
+            CommandForward = delegate {
+                GuiMessageForwardsDialog dlg = new GuiMessageForwardsDialog().Load(selectedPath);
+                Application.Run(dlg);
+                dlg.Dispose();
+            };
+            CommandSource = delegate {
+                if (string.IsNullOrEmpty(selectedPath))
+                    return;
+                IsViewSource = !IsViewSource;
+                if (IsViewSource) {
+                    msgText.Text = messageBody[1];
+                    buttonSource.Text = RES.TAG_BODY;
+                } else {
+                    msgText.Text = messageBody[0];
+                    buttonSource.Text = RES.BTN_SOURCE;
+                }
+            };
+            CommandOpen = delegate { selectedPath.BrowseFile(); };
+            CommandClose = delegate { Application.RequestStop(); };
+        }
+        #endregion
+
+        #region Dispose
         public new void Dispose() {
 
+            this.KeyUp -= Window_KeyUp;
             this.GetType().IDisposableObject(this);
             base.Dispose();
         }
+        #endregion
 
         #region Init
         public GuiMessageReadWindow Init(string s)
@@ -325,41 +363,22 @@ namespace HomeMailHub.Gui
             Add(frameMsg);
             #endregion
 
-            buttonClose.Clicked += () => Application.RequestStop();
-            buttonSource.Clicked += () =>
-            {
-                if (string.IsNullOrEmpty(selectedPath))
-                    return;
-                IsViewSource = !IsViewSource;
-                if (IsViewSource)
-                {
-                    msgText.Text = messageBody[1];
-                    buttonSource.Text = RES.TAG_BODY;
-                }
-                else
-                {
-                    msgText.Text = messageBody[0];
-                    buttonSource.Text = RES.BTN_SOURCE;
-                }
-            };
+            this.KeyUp += Window_KeyUp;
+
+            buttonClose.Clicked += CommandClose;
+            buttonSource.Clicked += CommandSource;
 
             GuiMenu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
-                    new MenuItem (RES.BTN_REPLAY, "", () => {
-                        msgText.SetFocus();
-                        GuiApp.Get.LoadWindow(typeof(GuiMessageWriteWindow), selectedPath);
-                    }, null, null, Key.AltMask | Key.R),
-                    new MenuItem (RES.MENU_MSGFORWARDS, "", () => {
-                        GuiMessageForwardsDialog dlg = new GuiMessageForwardsDialog().Load(selectedPath);
-                        Application.Run(dlg);
-                        dlg.Dispose();
-                    }, null, null, Key.AltMask | Key.F),
-                    new MenuItem (RES.MENU_OPENMSGFROM, "", () => selectedPath.BrowseFile(), null, null, Key.AltMask | Key.O),
+                    new MenuItem (RES.BTN_REPLAY, "", CommandReplay, null, null, Key.AltMask | Key.R),
+                    new MenuItem (RES.MENU_MSGFORWARDS, "", CommandForward, null, null, Key.AltMask | Key.F),
+                    new MenuItem (RES.MENU_OPENMSGFROM, "", CommandOpen, null, null, Key.AltMask | Key.O),
                     null,
-                    new MenuItem (RES.MENU_CLOSE, "", () => Application.RequestStop(), null, null, Key.AltMask | Key.Q)
+                    new MenuItem (RES.MENU_CLOSE, "", CommandClose, null, null, Key.AltMask | Key.CursorLeft)
                 })
             });
 
+            GuiMenu.MenuOpened += (_) => IsMenuOpen = true;
             GuiToplevel.Add(GuiMenu, this);
             return this;
         }
@@ -603,6 +622,8 @@ namespace HomeMailHub.Gui
                             }, () => msgText.IsSelecting)
                         };
                         msgText.AddContextMenu(items);
+                        AddMenu();
+
                     } catch (Exception ex) { ex.StatusBarError(); }
                 }
                 catch (Exception ex) { ex.StatusBarError(); }
@@ -611,11 +632,50 @@ namespace HomeMailHub.Gui
             });
         #endregion
 
+        #region Window key event
+        private void Window_KeyUp(KeyEventEventArgs a) {
+            if (!keyOnce.Begin()) return;
+            try {
+                if (a != null) {
+                    if (a.KeyEvent.IsAlt)
+                        switch (a.KeyEvent.ParseKeyEvent()) {
+                            case Key.F: CommandForward.Invoke(); break;
+                            case Key.O: CommandOpen.Invoke(); break;
+                            case Key.C: CommandClose.Invoke(); break;
+                            case Key.R: CommandReplay.Invoke(); break;
+                            case Key.S: CommandSource.Invoke(); break;
+                            default: return;
+                        }
+                    else
+                        switch (a.KeyEvent.Key) {
+                            case Key.Esc: {
+                                    if (!IsMenuOpen) CommandClose.Invoke();
+                                    IsMenuOpen = false;
+                                    break;
+                                }
+                            default: return;
+                        }
+                    a.Handled = true;
+                }
+            } finally { keyOnce.End(); }
+        }
+        #endregion
+
         private void AddAddresses(InternetAddressList addr, List<MailboxAddress> list, int start = 0) {
             if ((addr != null) || addr.Count == 0)
                 return;
             for (int i = start; i < addr.Count; i++)
                 if (addr[i] is MailboxAddress ma) list.Add(ma);
+        }
+
+        private void AddMenu() {
+            MenuBarItem[] list = new MenuBarItem[GuiMenu.Menus.Length + 1];
+            GuiMenu.Menus.CopyTo(list, 0);
+            list[list.Length - 1] = typeof(GuiMessageReadWindow).LoadMenuHotKeys();
+            Application.MainLoop.Invoke(() => {
+                GuiMenu.Menus = list;
+                GuiMenu.SetNeedsDisplay();
+            });
         }
 
         private void AddMenu(string tag, MenuItem[] items) {
@@ -635,8 +695,7 @@ namespace HomeMailHub.Gui
                 for (int i = 0; i < list.Count; i++)
                     if (list[i] is MailboxAddress addr)
                         items[n++] = new MenuItem(addr.ToString(), "", () => { });
-                if (n > 0)
-                    AddMenu(tag, items);
+                if (n > 0) AddMenu(tag, items);
             }
         }
 

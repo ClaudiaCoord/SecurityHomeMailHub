@@ -82,6 +82,15 @@ namespace HomeMailHub.Gui
                 return default;
             });
 
+
+        public static string GetHotKeysText(this Type t) =>
+            RES.ResourceManager.GetString($"{t.Name}HotKeys");
+
+        public static MenuBarItem LoadMenuHotKeys(this Type t) =>
+            new(RES.MENU_HOTKEYS, "", () => {
+                MessageBox.Query(100, 15, RES.MENU_HOTKEYS.ClearText(), t.GetHotKeysText(), TextAlignment.Left, RES.TAG_OK);
+            });
+
         public static async Task<ReadMessageData> ReadMessage(this string s) =>
             await Task<ReadMessageData>.Run(async () => {
                 try {

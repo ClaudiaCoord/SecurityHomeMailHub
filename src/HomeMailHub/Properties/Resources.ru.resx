@@ -352,6 +352,15 @@
   <data name="GUIMAIL_TITLE1" xml:space="preserve">
     <value>Почтовые аккаунты</value>
   </data>
+  <data name="GuiMessageReadWindowHotKeys" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiMessageReadWindowHotKeys.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="GuiMessagesListWindowHotKeys" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiMessagesListWindowHotKeys.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="GuiMessageWriteWindowHotKeys" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ru\GuiMessageWriteWindowHotKeys.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GUIMESSAGE_FMT1" xml:space="preserve">
     <value>{0} сообщений</value>
   </data>
@@ -552,6 +561,9 @@
   </data>
   <data name="MENU_GPGEXPORT" xml:space="preserve">
     <value>_Экспортировать все учетные записи для GnuPG</value>
+  </data>
+  <data name="MENU_HOTKEYS" xml:space="preserve">
+    <value>_Горячие клавиши</value>
   </data>
   <data name="MENU_LIGHTTEXT" xml:space="preserve">
     <value>_Более яркий текст в формах</value>

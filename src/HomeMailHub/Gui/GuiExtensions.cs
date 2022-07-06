@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using HomeMailHub.Gui.Dialogs;
 using Terminal.Gui;
+using static Terminal.Gui.View;
 using RES = HomeMailHub.Properties.Resources;
 
 namespace HomeMailHub.Gui
@@ -77,6 +78,66 @@ namespace HomeMailHub.Gui
 				Width = Dim.Fill (),
 				Height = Dim.Fill ()
 			};
+
+		public static Key ParseKeyEvent(this KeyEvent a) {
+
+            if ((a != null) && a.IsAlt) {
+
+                Key key = a.Key switch {
+                    Key.a | Key.AltMask => Key.A,
+                    Key.A | Key.AltMask => Key.A,
+                    Key.b | Key.AltMask => Key.B,
+                    Key.B | Key.AltMask => Key.B,
+                    Key.c | Key.AltMask => Key.C,
+                    Key.C | Key.AltMask => Key.C,
+                    Key.d | Key.AltMask => Key.D,
+                    Key.D | Key.AltMask => Key.D,
+                    Key.f | Key.AltMask => Key.F,
+                    Key.F | Key.AltMask => Key.F,
+                    Key.r | Key.AltMask => Key.R,
+                    Key.R | Key.AltMask => Key.R,
+                    Key.u | Key.AltMask => Key.U,
+                    Key.U | Key.AltMask => Key.U,
+                    Key.o | Key.AltMask => Key.O,
+                    Key.O | Key.AltMask => Key.O,
+                    Key.s | Key.AltMask => Key.S,
+                    Key.S | Key.AltMask => Key.S,
+                    Key.t | Key.AltMask => Key.T,
+                    Key.T | Key.AltMask => Key.T,
+                    Key.w | Key.AltMask => Key.W,
+                    Key.W | Key.AltMask => Key.W,
+                    _ => Key.Unknown
+                };
+                if (key == Key.Unknown)
+                    key = (uint)a.Key switch {
+                        2147484708 => Key.A,
+                        2147484740 => Key.A,
+                        2147484696 => Key.B,
+                        2147484728 => Key.B,
+                        2147484705 => Key.C,
+                        2147484737 => Key.C,
+                        2147484690 => Key.D,
+                        2147484722 => Key.D,
+                        2147484688 => Key.F,
+                        2147484720 => Key.F,
+                        2147484698 => Key.R,
+                        2147484730 => Key.R,
+                        2147484691 => Key.U,
+                        2147484723 => Key.U,
+                        2147484713 => Key.O,
+                        2147484745 => Key.O,
+                        2147484715 => Key.S,
+                        2147484747 => Key.S,
+                        2147484693 => Key.T,
+                        2147484725 => Key.T,
+                        2147484710 => Key.W,
+                        2147484742 => Key.W,
+                        _ => Key.Unknown
+                    };
+                return key;
+            }
+            return Key.Unknown;
+        }
 
         public static void SetLinearLayout(this Button btn, GuiLinearData data, Pos x, Pos y) {
             btn.X = x + data.X;

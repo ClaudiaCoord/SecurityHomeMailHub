@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using HomeMailHub.Gui.Dialogs;
 using HomeMailHub.Gui.ListSources;
@@ -80,7 +79,8 @@ namespace HomeMailHub.Gui
         private string selectedPath { get; set; } = string.Empty;
         private MessagesDataTable dataTable { get; set; } = default;
         private GuiLinearLayot linearLayot { get; } = new();
-        private GuiRunOnce runOnce { get; } = new();
+        private GuiRunOnce runOnce = new();
+        private GuiRunOnce keyOnce = new();
 
         public Toplevel GetTop => GuiToplevel;
 
@@ -95,6 +95,16 @@ namespace HomeMailHub.Gui
             }
         }
 
+        #region Commands
+        Action CommandUnread = delegate { };
+        Action CommandDelete = delegate { };
+        Action CommandReplay = delegate { };
+        Action CommandLoad = delegate { };
+        Action CommandOpen = delegate { };
+        Action CommandClose = delegate { };
+        #endregion
+
+        #region Constructor
         public GuiMessagesListWindow() : base(RES.GUIMESSAGE_TITLE1, 0) {
             X = 0;
             Y = 1;
@@ -124,15 +134,39 @@ namespace HomeMailHub.Gui
                 new GuiLinearData(89, 4, true),
                 new GuiLinearData(102, 4, true)
             });
-        }
 
+            CommandDelete = delegate {
+                if (dataTable.IsEmpty) return;
+                DeleteDialog();
+            };
+            CommandReplay = delegate {
+                if (dataTable.IsEmpty || string.IsNullOrEmpty(selectedPath)) return;
+                LocalLauncher<GuiMessageWriteWindow>();
+            };
+            CommandOpen = delegate {
+                if (dataTable.IsEmpty || string.IsNullOrEmpty(selectedPath)) return;
+                LocalLauncher<GuiMessageReadWindow>();
+            };
+            CommandLoad = async () => {
+                dataTable.ScrollToStart();
+                _ = await Load_().ConfigureAwait(false);
+            };
+            CommandUnread = delegate {
+                readingBox.Checked = !readingBox.Checked;
+                ReadingBox_Toggled(readingBox.Checked);
+            };
+            CommandClose = delegate { CloseDialog(); Application.RequestStop(); };
+        }
+        #endregion
+
+        #region Dispose
         public new void Dispose() {
 
-            if (tableView != null)
-                tableView.KeyUp -= TableView_KeyUp;
+            this.KeyUp -= Window_KeyUp;
             this.GetType().IDisposableObject(this);
             base.Dispose();
         }
+        #endregion
 
         #region Init
         public GuiMessagesListWindow Init(string s)
@@ -159,7 +193,6 @@ namespace HomeMailHub.Gui
             };
             tableView.CellActivated += TableView_CellActivated;
             tableView.SelectedCellChanged += TableView_SelectedCellChanged;
-            tableView.KeyUp += TableView_KeyUp;
             tableView.MouseClick += (a) => {
                 if (a.MouseEvent.Flags == MouseFlags.Button3Clicked) {
                     a.Handled = true;
@@ -409,27 +442,16 @@ namespace HomeMailHub.Gui
             Add(frameInfo);
             #endregion
 
-            buttonClose.Clicked += () => {
-                CloseDialog();
-                Application.RequestStop();
-            };
-            buttonDelete.Clicked += () => {
-                if (dataTable.IsEmpty) return;
-                DeleteDialog();
-            };
-            buttonReply.Clicked += () => {
-                if (dataTable.IsEmpty || string.IsNullOrEmpty(selectedPath))
-                    return;
-                LocalLauncher<GuiMessageWriteWindow>();
-            };
-            buttonOpen.Clicked += () => {
-                if (dataTable.IsEmpty || string.IsNullOrEmpty(selectedPath))
-                    return;
-                LocalLauncher<GuiMessageReadWindow>();
-            };
+            buttonClose.Clicked += CommandClose;
+            buttonDelete.Clicked += CommandDelete;
+            buttonReply.Clicked += CommandReplay;
+            buttonOpen.Clicked += CommandOpen;
+
             sortTitle.SelectedItemChanged += SortTitle_SelectedItemChanged;
             readingBox.Toggled += ReadingBox_Toggled;
             Add(frameMsg);
+
+            this.KeyUp += Window_KeyUp;
 
             multiSelectMenu = RES.MENU_SUB_MULTISELECT.CreateCheckedMenuItem((b) => {
                 if (b) IsMultiSelect = !IsMultiSelect;
@@ -469,9 +491,9 @@ namespace HomeMailHub.Gui
                     async () => await CombineMessages().ConfigureAwait(false),
                     () => MessagesCombineEnable()),
                 null,
-                new MenuItem(RES.MENU_SUB_OPEN, "", () => buttonOpen.OnClicked(), () => MessagesOptionsOneEnable()),
-                new MenuItem(RES.MENU_SUB_REPLAY, "", () => buttonReply.OnClicked(), () => MessagesOptionsOneEnable()),
-                new MenuItem(RES.MENU_SUB_DELETE, "", () => buttonDelete.OnClicked(), () => MessagesOptionsEnable()),
+                new MenuItem(RES.MENU_SUB_OPEN, "", CommandOpen, () => MessagesOptionsOneEnable()),
+                new MenuItem(RES.MENU_SUB_REPLAY, "", CommandReplay, () => MessagesOptionsOneEnable()),
+                new MenuItem(RES.MENU_SUB_DELETE, "", CommandDelete, () => MessagesOptionsEnable()),
                 new MenuBarItem (RES.MENU_EXPORT_FORMAT, new MenuItem [] {
                     new MenuItem("*.eml", "", () => ExportDialog(ExportType.Eml), () => MessagesOptionsEnable()),
                     new MenuItem("*.msg", "", () => ExportDialog(ExportType.Msg), () => MessagesOptionsEnable())
@@ -489,24 +511,16 @@ namespace HomeMailHub.Gui
             contextMenu = new ContextMenu(0, 0, new MenuBarItem("", messagesMenu));
             undeleteMenu = new MenuBarItem(RES.MENU_DELETEMENU, new MenuItem[] {
                 new MenuItem (
-                    RES.MENU_DELETEALL, "", () => DeleteAllDialog(),
-                    () => !dataTable.IsEmpty)
+                    RES.MENU_DELETEALL, "", () => DeleteAllDialog(), () => !dataTable.IsEmpty)
             });
 
             GuiMenu = new MenuBar(new MenuBarItem[] {
                 new MenuBarItem (RES.MENU_MENU, new MenuItem [] {
-                    new MenuItem (RES.BTN_OPEN, "", () =>
-                        buttonOpen.OnClicked(), () => runOnce.IsValidId(),
+                    new MenuItem (RES.BTN_OPEN, "", CommandOpen, () => runOnce.IsValidId(),
                         null, Key.AltMask | Key.CursorRight),
-                    new MenuItem (RES.MENU_RELOAD, "", async () => {
-                        dataTable.ScrollToStart();
-                        _ = await Load_().ConfigureAwait(false);
-                    }, null, null, Key.AltMask | Key.R),
+                    new MenuItem (RES.MENU_RELOAD, "", CommandLoad, null, null, Key.AltMask | Key.R),
                     null,
-                    new MenuItem (RES.MENU_CLOSE, "", () => {
-                        CloseDialog();
-                        Application.RequestStop();
-                    }, null, null, Key.AltMask | Key.CursorLeft)
+                    new MenuItem (RES.MENU_CLOSE, "", CommandClose, null, null, Key.AltMask | Key.CursorLeft)
                 }),
                 new MenuBarItem (RES.MENU_MESSAGES, messagesMenu),
                 undeleteMenu,
@@ -543,12 +557,42 @@ namespace HomeMailHub.Gui
                     new MenuItem (
                         $"{RES.TAG_FOLDER} _{Global.DirectoryPlace.Bounced}", "", async () => await SelectFolder(Global.DirectoryPlace.Bounced).ConfigureAwait(false),
                         () => FolderEnable(Global.DirectoryPlace.Bounced))
-                })
+                }),
+                typeof(GuiMessagesListWindow).LoadMenuHotKeys()
             });
 
             GuiMenu.MenuOpened += (_) => IsMenuOpen = true;
             GuiToplevel.Add(GuiMenu, this);
             return this;
+        }
+        #endregion
+
+        #region Window key event
+        private void Window_KeyUp(KeyEventEventArgs a) {
+            if (!keyOnce.Begin()) return;
+            try {
+                if (a != null) {
+                    if (a.KeyEvent.IsAlt)
+                        switch (a.KeyEvent.ParseKeyEvent()) {
+                            case Key.C: CommandClose.Invoke(); break;
+                            case Key.O: CommandOpen.Invoke(); break;
+                            case Key.D: CommandDelete.Invoke(); break;
+                            case Key.R: CommandReplay.Invoke(); break;
+                            case Key.U: CommandUnread.Invoke(); break;
+                            default: return;
+                        }
+                    else
+                        switch (a.KeyEvent.Key) {
+                            case Key.Esc: {
+                                    if (!IsMenuOpen) CommandClose.Invoke();
+                                    IsMenuOpen = false;
+                                    break;
+                                }
+                            default: return;
+                        }
+                    a.Handled = true;
+                }
+            } finally { keyOnce.End(); }
         }
         #endregion
 
@@ -641,8 +685,7 @@ namespace HomeMailHub.Gui
                 MailMessage msg = dataTable.Get(obj.Row);
                 if (msg == null) return;
                 Update(msg, obj.Row);
-                if (!string.IsNullOrEmpty(selectedPath))
-                    LocalLauncher<GuiMessageReadWindow>();
+                CommandOpen.Invoke();
             }
         }
 
@@ -653,24 +696,6 @@ namespace HomeMailHub.Gui
                 MailMessage msg = dataTable.Get(obj.NewRow);
                 if (msg == null) return;
                 Update(msg, obj.NewRow);
-            }
-        }
-
-        private void TableView_KeyUp(KeyEventEventArgs obj) {
-            if (obj != null) {
-                switch (obj.KeyEvent.Key) {
-                    case Key.Enter: {
-                            if (!string.IsNullOrEmpty(selectedPath))
-                                LocalLauncher<GuiMessageReadWindow>();
-                            break;
-                        }
-                    case Key.Esc: {
-                            if (!IsMenuOpen)
-                                buttonClose.OnClicked();
-                            IsMenuOpen = false;
-                            break;
-                        }
-                }
             }
         }
 
@@ -968,12 +993,15 @@ namespace HomeMailHub.Gui
 
         #region LocalLauncher
         private void LocalLauncher<T>() {
+            this.KeyUp -= Window_KeyUp;
+
             Type type = typeof(T);
-            tableView.KeyUp -= TableView_KeyUp;
             GuiApp.Get.LoadWindow(type, selectedPath);
+
             if (type == typeof(GuiMessageReadWindow))
                 ReadingBox_Toggled(true);
-            tableView.KeyUp += TableView_KeyUp;
+
+            this.KeyUp += Window_KeyUp;
         }
         #endregion
     }
