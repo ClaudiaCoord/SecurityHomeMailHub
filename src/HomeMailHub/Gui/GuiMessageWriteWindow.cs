@@ -517,7 +517,7 @@ namespace HomeMailHub.Gui
         private async Task<SendReturn> Send__() =>
             await Task.Run(async () => {
                 MimeMessage mmsg = default(MimeMessage);
-                CancellationTokenSafe safe = new(TimeSpan.FromSeconds(12.0));
+                CancellationTokenSafe safe = new(TimeSpan.FromSeconds(20.0));
                 try {
                     InternetAddressList fromlist, tolist;
                     sendWarning[0] = GuiApp.IsSendNoWarning;

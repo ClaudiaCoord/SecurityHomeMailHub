@@ -13,11 +13,13 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MimeKit;
 using MimeKit.Cryptography;
+using Org.BouncyCastle.Utilities;
 using SecyrityMail;
 using SecyrityMail.GnuPG;
 using SecyrityMail.Messages;
 using SecyrityMail.Utils;
 using Terminal.Gui;
+using static Terminal.Gui.TabView;
 using GuiAttribute = Terminal.Gui.Attribute;
 using RES = HomeMailHub.Properties.Resources;
 
@@ -389,247 +391,303 @@ namespace HomeMailHub.Gui
 
         private async Task<bool> Load_() =>
             await Task.Run(async () => {
-                try {
-                    ReadMessageData rdata = await selectedPath.ReadMessage().ConfigureAwait(false);
-                    if (rdata.IsEmpty) {
-                        Application.RequestStop();
-                        return false;
-                    }
+            try {
+                ReadMessageData rdata = await selectedPath.ReadMessage().ConfigureAwait(false);
+                if (rdata.IsEmpty) {
+                    Application.RequestStop();
+                    return false;
+                }
 
-                    string folder = string.Empty,
-                           accfolder = string.Empty;
-                    DateTimeOffset msgdt = default;
-                    Global.DirectoryPlace placed;
-                    MimeMessage mmsg = rdata.Message;
+                string folder = string.Empty,
+                       accfolder = string.Empty;
+                DateTimeOffset msgdt = default;
+                Global.DirectoryPlace placed;
+                MimeMessage mmsg = rdata.Message;
 
+                List<MailboxAddress> ccList = new();
+                List<MailboxAddress> bccList = new();
+                List<MenuItem> attachList = new();
+
+
+                try
+                {
+                    (placed, accfolder, msgdt) = Global.GetFolderInfo(rdata.Info.DirectoryName);
+                    folder = placed.ToString();
+                } catch { }
+
+                bool iscrypt = false,
+                     isdecrypt = false;
+
+                if (mmsg.Body is MultipartEncrypted) {
+                    iscrypt = true;
                     try {
-                        (placed, accfolder, msgdt) = Global.GetFolderInfo(rdata.Info.DirectoryName);
-                        folder = placed.ToString();
-                    } catch { }
-
-                    bool iscrypt = false,
-                         isdecrypt = false;
-
-                    if (mmsg.Body is MultipartEncrypted) {
-                        iscrypt = true;
-                        try {
-                            if (CryptGpgContext.CheckInstalled()) {
-                                MailMessageCrypt crypt = new();
-                                isdecrypt = await crypt.Decrypt(mmsg, (ex) => ex.StatusBarError());
-                            }
-                        } catch (Exception ex) {
-                            Global.Instance.Log.Add(nameof(MailMessageCrypt.Decrypt), ex);
-                        }
-                    }
-
-                    bool[] b = new bool[] {
-                        !string.IsNullOrWhiteSpace(mmsg.TextBody),
-                        !string.IsNullOrWhiteSpace(mmsg.HtmlBody)
-                    };
-                    if (b[0])
-                        messageBody[0] = mmsg.TextBody;
-                    else if (b[1])
-                        messageBody[0] = new ConverterHtmlToHtml().ConvertT(mmsg.HtmlBody);
-                    else
-                        messageBody[0] = mmsg.ToString();
-
-                    string subj = mmsg.Subject;
-                    if (!string.IsNullOrWhiteSpace(subj))
-                        subj = Regex.Replace(subj, @"\p{C}+", string.Empty);
-
-                    Application.MainLoop.Invoke(() => {
-
-                        subjText.Text = subj;
-                        dateText.Text = mmsg.Date.ToString("dddd, dd MMMM yyyy");
-                        sizeText.Text = rdata.Info.Length.Humanize();
-                        msgIdText.Text = mmsg.MessageId;
-                        fromText.Text = mmsg.From.ToString();
-                        frameHeader.Title = $"{RES.TAG_FOLDER} {folder} - {RES.TAG_TO} {mmsg.To}";
-
-                        textLabel.ColorScheme = b[0] ? colorEnable : colorDisable;
-                        htmlLabel.ColorScheme = b[1] ? colorEnable : colorDisable;
-                        textLabel.Redraw(textLabel.Bounds);
-                        htmlLabel.Redraw(htmlLabel.Bounds);
-
-                        msgText.Text = messageBody[0];
-                    });
-                    try {
-
-                        if (((iscrypt && isdecrypt) || !iscrypt) &&
-                            (mmsg.Attachments != null) && (mmsg.Attachments.Count() > 0) &&
-                            (msgdt != default) && !string.IsNullOrWhiteSpace(accfolder)) {
-
-                            int n = 0;
-                            string path = Global.AppendPartDirectory(
-                                Global.GetUserDirectory(accfolder), Global.DirectoryPlace.Attach, msgdt);
-                            MenuItem[] items = new MenuItem[mmsg.Attachments.Count()];
-                            for (int i = 0; i < mmsg.Attachments.Count(); i++) {
-
-                                string name = MailMessage.GetMimeEntryName(mmsg.Attachments.ElementAt(i));
-                                if (!string.IsNullOrWhiteSpace(name))
-                                    items[n++] = new MenuItem(
-                                            name.Replace('_', ' '), "",
-                                            () => BrowseAttachFile(path, mmsg.MessageId, name));
-                            }
-                            if (n > 0) {
-                                Application.MainLoop.Invoke(() => {
-                                    attachLabel.Visible = attachText.Visible = true;
-                                    attachText.Text = n.ToString();
-                                });
-                                AddMenu($"_{RES.TAG_ATTACH}", items);
-                            }
-                        }
-                    } catch { }
-                    try {
-                        List<MailboxAddress> ccList = new();
-                        AddAddresses(mmsg.Cc, ccList);
-                        AddAddresses(mmsg.ResentCc, ccList);
-                        AddAddresses(mmsg.ResentTo, ccList);
-                        AddAddresses(mmsg.To, ccList, 1);
-                        AddMenu("_Cc", ccList);
-
-                        List<MailboxAddress> bccList = new();
-                        AddAddresses(mmsg.Bcc, bccList);
-                        AddAddresses(mmsg.ResentBcc, bccList);
-                        AddMenu("_Bcc", bccList);
-
-                        int idx = 
-                            ((ccList.Count > 0) ? 10 : 0) +
-                            ((bccList.Count > 0) ? 30 : 0) +
-                            ((rdata.Info.Length > 100000) ? 50 : 0) +
-                            (iscrypt ? 100 : 0);
-
-                        List<GuiLinearData> layout = default;
-                        if (idx > 0)
-                            layout = linearLayot.GetDefault();
-
-                        if (iscrypt)
-                            pgpLabel.ColorScheme = isdecrypt ? colorBageGreen : colorBageRed;
-
-                        switch (idx) {
-                            case 10: {
-                                    ccLabel.X = layout[3].X + 6;
-                                    ccLabel.Visible = true;
-                                    break;
-                                }
-                            case 30: {
-                                    bccLabel.Visible = true;
-                                    break;
-                                }
-                            case 40: {
-                                    ccLabel.Visible = bccLabel.Visible = true;
-                                    break;
-                                }
-                            case 50: {
-                                    oversizeLabel.X = layout[2].X + 5 + 6;
-                                    oversizeLabel.Visible = true;
-                                    break;
-                                }
-                            case 60: {
-                                    ccLabel.X = layout[3].X + 6;
-                                    oversizeLabel.X = layout[2].X + 6;
-                                    ccLabel.Visible = oversizeLabel.Visible = true;
-                                    break;
-                                }
-                            case 80: {
-                                    oversizeLabel.X = layout[2].X + 5;
-                                    bccLabel.Visible = oversizeLabel.Visible = true;
-                                    break;
-                                }
-                            case 90: {
-                                    ccLabel.Visible = bccLabel.Visible = oversizeLabel.Visible = true;
-                                    break;
-                                }
-                            case 100: {
-                                    pgpLabel.X = layout[1].X + 19;
-                                    pgpLabel.Visible = true;
-                                    break;
-                                }
-                            case 110: {
-                                    ccLabel.X = layout[3].X + 6;
-                                    pgpLabel.X = layout[1].X + 8 + 6;
-                                    ccLabel.Visible = pgpLabel.Visible = true;
-                                    break;
-                                }
-                            case 130: {
-                                    pgpLabel.X = layout[1].X + 8 + 5;
-                                    bccLabel.Visible = pgpLabel.Visible = true;
-                                    break;
-                                }
-                            case 140: {
-                                    pgpLabel.X = layout[1].X + 8;
-                                    ccLabel.Visible = bccLabel.Visible = pgpLabel.Visible = true;
-                                    break;
-                                }
-                            case 150: {
-                                    oversizeLabel.X = layout[2].X + 5 + 6;
-                                    pgpLabel.X = layout[1].X + 5 + 6;
-                                    oversizeLabel.Visible = pgpLabel.Visible = true;
-                                    break;
-                                }
-                            case 160: {
-                                    ccLabel.X = layout[3].X + 6;
-                                    oversizeLabel.X = layout[2].X + 6;
-                                    pgpLabel.X = layout[1].X + 6;
-                                    ccLabel.Visible = oversizeLabel.Visible = pgpLabel.Visible = true;
-                                    break;
-                                }
-                            case 180: {
-                                    oversizeLabel.X = layout[2].X + 5;
-                                    pgpLabel.X = layout[1].X + 5;
-                                    bccLabel.Visible = oversizeLabel.Visible = pgpLabel.Visible = true;
-                                    break;
-                                }
-                            case 190: {
-                                    ccLabel.Visible = bccLabel.Visible = oversizeLabel.Visible = pgpLabel.Visible = true;
-                                    break;
-                                }
-                            default: break;
-                        }
-                    } catch { }
-
-                    try {
-                        using FileStream fs = new FileStream(rdata.Info.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                        long size = (rdata.Info.Length > 100000) ? 100000 : rdata.Info.Length;
-                        byte[] buffer = new byte[size];
-                        fs.Seek(0, SeekOrigin.Begin);
-                        int idx = await fs.ReadAsync(buffer, 0, (int)size).ConfigureAwait(false);
-                        if (idx > 0) {
-                            messageBody[1] = Encoding.UTF8.GetString(buffer, 0, idx);
-                            int x = messageBody[1].IndexOf("\r\n\r\n");
-                            if (x > 0)
-                                infoText.Text = messageBody[1].Substring(0, x);
+                        if (CryptGpgContext.CheckInstalled()) {
+                            MailMessageCrypt crypt = new();
+                            isdecrypt = await crypt.Decrypt(mmsg, (ex) => ex.StatusBarError());
                         }
                     } catch (Exception ex) {
-                        ex.StatusBarError();
-                        Global.Instance.Log.Add("Read Raw Message", ex);
+                        Global.Instance.Log.Add(nameof(MailMessageCrypt.Decrypt), ex);
                     }
-                    try {
-                        MenuItem[] items = new MenuItem[] {
-                            null,
-                            new MenuItem (RES.BTN_REPLAY, "", () =>
-                                GuiApp.Get.LoadWindow(typeof(GuiMessageWriteWindow), selectedPath)
-                            ),
-                            new MenuItem(RES.MENU_OPENURI, "", () => {
-                                try {
-                                    if (!msgText.IsSelecting)
-                                        return;
-                                    msgText.Copy();
-                                    if (!Clipboard.Contents.IsEmpty)
-                                        Clipboard.Contents.ToString().BrowseFile();
-
-                                } catch (Exception ex) { ex.StatusBarError(); }
-                            }, () => msgText.IsSelecting)
-                        };
-                        msgText.AddContextMenu(items);
-                        AddMenu();
-
-                    } catch (Exception ex) { ex.StatusBarError(); }
                 }
-                catch (Exception ex) { ex.StatusBarError(); }
-                finally { Application.MainLoop.Invoke(() => buttonClose.SetFocus()); }
-                return true;
-            });
+
+                bool[] b = new bool[] {
+                    !string.IsNullOrWhiteSpace(mmsg.TextBody),
+                    !string.IsNullOrWhiteSpace(mmsg.HtmlBody)
+                };
+                if (b[0])
+                    messageBody[0] = mmsg.TextBody;
+                else if (b[1])
+                    messageBody[0] = new ConverterHtmlToHtml().ConvertT(mmsg.HtmlBody);
+                else
+                    messageBody[0] = mmsg.ToString();
+
+                string subj = mmsg.Subject;
+                if (!string.IsNullOrWhiteSpace(subj))
+                    subj = Regex.Replace(subj, @"\p{C}+", string.Empty);
+
+                Application.MainLoop.Invoke(() => {
+
+                    subjText.Text = subj;
+                    dateText.Text = mmsg.Date.ToString("dddd, dd MMMM yyyy");
+                    sizeText.Text = rdata.Info.Length.Humanize();
+                    msgIdText.Text = mmsg.MessageId;
+                    fromText.Text = mmsg.From.ToString();
+                    frameHeader.Title = $"{RES.TAG_FOLDER} {folder} - {RES.TAG_TO} {mmsg.To}";
+
+                    textLabel.ColorScheme = b[0] ? colorEnable : colorDisable;
+                    htmlLabel.ColorScheme = b[1] ? colorEnable : colorDisable;
+                    textLabel.Redraw(textLabel.Bounds);
+                    htmlLabel.Redraw(htmlLabel.Bounds);
+
+                    msgText.Text = messageBody[0];
+                });
+
+                try {
+                    #region Attach to list
+                    if (((iscrypt && isdecrypt) || !iscrypt) &&
+                        (mmsg.Attachments != null) && (mmsg.Attachments.Count() > 0) &&
+                        (msgdt != default) && !string.IsNullOrWhiteSpace(accfolder)) {
+
+                        string path = Global.AppendPartDirectory(
+                            Global.GetUserDirectory(accfolder), Global.DirectoryPlace.Attach, msgdt);
+
+                        for (int i = 0; i < mmsg.Attachments.Count(); i++) {
+                            string name = MailMessage.GetMimeEntryName(mmsg.Attachments.ElementAt(i));
+                            if (!string.IsNullOrWhiteSpace(name))
+                                attachList.Add(new MenuItem(
+                                        name.Replace('_', ' '), "",
+                                        () => BrowseAttachFile(path, mmsg.MessageId, name)));
+                        }
+                    }
+                    #endregion
+
+                } catch (Exception ex) { ex.StatusBarError(); }
+
+                    try {
+                    #region CC, Bcc add to list
+                    AddAddresses(mmsg.Cc, ccList);
+                    AddAddresses(mmsg.ResentCc, ccList);
+                    AddAddresses(mmsg.ResentTo, ccList);
+                    AddAddresses(mmsg.To, ccList, 1);
+                    AddAddresses(mmsg.Bcc, bccList);
+                    AddAddresses(mmsg.ResentBcc, bccList);
+                    #endregion
+
+                } catch (Exception ex) { ex.StatusBarError(); }
+
+                try {
+                    #region Icon switcher
+                    int idx =
+                        ((ccList.Count > 0) ? 10 : 0) +
+                        ((bccList.Count > 0) ? 30 : 0) +
+                        ((rdata.Info.Length > 100000) ? 50 : 0) +
+                        (iscrypt ? 100 : 0);
+
+                    List<GuiLinearData> layout = default;
+                    if (idx > 0)
+                        layout = linearLayot.GetDefault();
+
+                    if (iscrypt)
+                        pgpLabel.ColorScheme = isdecrypt ? colorBageGreen : colorBageRed;
+
+                    switch (idx)
+                    {
+                        case 10:
+                            {
+                                ccLabel.X = layout[3].X + 6;
+                                ccLabel.Visible = true;
+                                break;
+                            }
+                        case 30:
+                            {
+                                bccLabel.Visible = true;
+                                break;
+                            }
+                        case 40:
+                            {
+                                ccLabel.Visible = bccLabel.Visible = true;
+                                break;
+                            }
+                        case 50:
+                            {
+                                oversizeLabel.X = layout[2].X + 5 + 6;
+                                oversizeLabel.Visible = true;
+                                break;
+                            }
+                        case 60:
+                            {
+                                ccLabel.X = layout[3].X + 6;
+                                oversizeLabel.X = layout[2].X + 6;
+                                ccLabel.Visible = oversizeLabel.Visible = true;
+                                break;
+                            }
+                        case 80:
+                            {
+                                oversizeLabel.X = layout[2].X + 5;
+                                bccLabel.Visible = oversizeLabel.Visible = true;
+                                break;
+                            }
+                        case 90:
+                            {
+                                ccLabel.Visible = bccLabel.Visible = oversizeLabel.Visible = true;
+                                break;
+                            }
+                        case 100:
+                            {
+                                pgpLabel.X = layout[1].X + 19;
+                                pgpLabel.Visible = true;
+                                break;
+                            }
+                        case 110:
+                            {
+                                ccLabel.X = layout[3].X + 6;
+                                pgpLabel.X = layout[1].X + 8 + 6;
+                                ccLabel.Visible = pgpLabel.Visible = true;
+                                break;
+                            }
+                        case 130:
+                            {
+                                pgpLabel.X = layout[1].X + 8 + 5;
+                                bccLabel.Visible = pgpLabel.Visible = true;
+                                break;
+                            }
+                        case 140:
+                            {
+                                pgpLabel.X = layout[1].X + 8;
+                                ccLabel.Visible = bccLabel.Visible = pgpLabel.Visible = true;
+                                break;
+                            }
+                        case 150:
+                            {
+                                oversizeLabel.X = layout[2].X + 5 + 6;
+                                pgpLabel.X = layout[1].X + 5 + 6;
+                                oversizeLabel.Visible = pgpLabel.Visible = true;
+                                break;
+                            }
+                        case 160:
+                            {
+                                ccLabel.X = layout[3].X + 6;
+                                oversizeLabel.X = layout[2].X + 6;
+                                pgpLabel.X = layout[1].X + 6;
+                                ccLabel.Visible = oversizeLabel.Visible = pgpLabel.Visible = true;
+                                break;
+                            }
+                        case 180:
+                            {
+                                oversizeLabel.X = layout[2].X + 5;
+                                pgpLabel.X = layout[1].X + 5;
+                                bccLabel.Visible = oversizeLabel.Visible = pgpLabel.Visible = true;
+                                break;
+                            }
+                        case 190:
+                            {
+                                ccLabel.Visible = bccLabel.Visible = oversizeLabel.Visible = pgpLabel.Visible = true;
+                                break;
+                            }
+                        default: break;
+                    }
+                    #endregion
+
+                } catch (Exception ex) { ex.StatusBarError(); }
+
+                try {
+                    #region Source message load
+                    using FileStream fs = new FileStream(rdata.Info.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    long size = (rdata.Info.Length > 100000) ? 100000 : rdata.Info.Length;
+                    byte[] buffer = new byte[size];
+                    fs.Seek(0, SeekOrigin.Begin);
+                    int idx = await fs.ReadAsync(buffer, 0, (int)size).ConfigureAwait(false);
+                    if (idx > 0) {
+                        messageBody[1] = Encoding.UTF8.GetString(buffer, 0, idx);
+                        int x = messageBody[1].IndexOf("\r\n\r\n");
+                        if (x > 0)
+                            infoText.Text = messageBody[1].Substring(0, x);
+                    }
+                    #endregion
+
+                } catch (Exception ex) {
+                    ex.StatusBarError();
+                    Global.Instance.Log.Add("Read Raw Message", ex);
+                }
+
+                try {
+                    #region Context menu append
+                    MenuItem[] items = new MenuItem[] {
+                        null,
+                        new MenuItem(RES.BTN_REPLAY, "", CommandReplay),
+                        new MenuItem(RES.MENU_MSGFORWARDS, "", CommandForward),
+                        new MenuItem(RES.MENU_OPENURI, "", () => {
+                            try {
+                                if (!msgText.IsSelecting) return;
+                                msgText.Copy();
+                                if (!Clipboard.Contents.IsEmpty)
+                                    Clipboard.Contents.ToString().BrowseFile();
+
+                            } catch (Exception ex) { ex.StatusBarError(); }
+                        }, () => msgText.IsSelecting)
+                    };
+                    msgText.AddContextMenu(items);
+                    #endregion
+
+                } catch (Exception ex) { ex.StatusBarError(); }
+
+                try {
+                    #region top bar menu append
+                    MenuBarItem[] list = new MenuBarItem[GuiMenu.Menus.Length];
+                    GuiMenu.Menus.CopyTo(list, 0);
+                    List<MenuBarItem> mainMenu = new(list);
+
+                    if (bccList.Count > 0) {
+                        MenuItem[] items = AddMenu(bccList);
+                        if ((items != default) && (items.Length > 0))
+                            mainMenu.Add(new MenuBarItem("_Bcc", items));
+                    }
+                    if (ccList.Count > 0) {
+                        MenuItem[] items = AddMenu(ccList);
+                        if ((items != default) && (items.Length > 0))
+                            mainMenu.Add(new MenuBarItem("_Cc", items));
+                    }
+                    if (attachList.Count > 0)
+                        mainMenu.Add(new MenuBarItem($"_{RES.TAG_ATTACH}", attachList.ToArray()));
+
+                    mainMenu.Add(typeof(GuiMessageReadWindow).LoadMenuHotKeys());
+
+                    Application.MainLoop.Invoke(() => {
+                        GuiMenu.Menus = mainMenu.ToArray();
+                        GuiMenu.SetNeedsDisplay();
+                        if (attachList.Count > 0) {
+                            attachLabel.Visible = attachText.Visible = true;
+                            attachText.Text = attachList.Count.ToString();
+                        }
+                    });
+                    #endregion
+
+                } catch (Exception ex) { ex.StatusBarError(); }
+            }
+            catch (Exception ex) { ex.StatusBarError(); }
+            finally { Application.MainLoop.Invoke(() => buttonClose.SetFocus()); }
+            return true;
+        });
         #endregion
 
         #region Window key event
@@ -668,35 +726,16 @@ namespace HomeMailHub.Gui
                 if (addr[i] is MailboxAddress ma) list.Add(ma);
         }
 
-        private void AddMenu() {
-            MenuBarItem[] list = new MenuBarItem[GuiMenu.Menus.Length + 1];
-            GuiMenu.Menus.CopyTo(list, 0);
-            list[list.Length - 1] = typeof(GuiMessageReadWindow).LoadMenuHotKeys();
-            Application.MainLoop.Invoke(() => {
-                GuiMenu.Menus = list;
-                GuiMenu.SetNeedsDisplay();
-            });
-        }
-
-        private void AddMenu(string tag, MenuItem[] items) {
-            MenuBarItem[] list = new MenuBarItem[GuiMenu.Menus.Length + 1];
-            GuiMenu.Menus.CopyTo(list, 0);
-            list[list.Length - 1] = new MenuBarItem(tag, items);
-            Application.MainLoop.Invoke(() => {
-                GuiMenu.Menus = list;
-                GuiMenu.SetNeedsDisplay();
-            });
-        }
-
-        private void AddMenu(string tag, List<MailboxAddress> list) {
+        private MenuItem[] AddMenu(List<MailboxAddress> list) {
             if (list.Count > 0) {
                 int n = 0;
                 MenuItem[] items = new MenuItem[list.Count];
                 for (int i = 0; i < list.Count; i++)
                     if (list[i] is MailboxAddress addr)
                         items[n++] = new MenuItem(addr.ToString(), "", () => { });
-                if (n > 0) AddMenu(tag, items);
+                if (n > 0) return items;
             }
+            return default;
         }
 
         private void BrowseAttachFile(string path, string id, string name) {
